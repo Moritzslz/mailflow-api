@@ -54,6 +54,13 @@ public class User {
 
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = ZonedDateTime.now(ZoneId.of("Europe/Berlin"));
+        ZoneId berlinZone = ZoneId.of("Europe/Berlin");
+        updatedAt = ZonedDateTime.now(berlinZone);
+        if (tokenExpiresAt != null) {
+            tokenExpiresAt = tokenExpiresAt.withZoneSameInstant(berlinZone);
+        }
+        if (lastLoginAt != null) {
+            lastLoginAt = lastLoginAt.withZoneSameInstant(berlinZone);
+        }
     }
 }
