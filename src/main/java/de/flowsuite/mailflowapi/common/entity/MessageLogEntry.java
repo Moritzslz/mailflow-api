@@ -1,4 +1,4 @@
-package de.flowsuite.mailflowapi.entity;
+package de.flowsuite.mailflowapi.common.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;

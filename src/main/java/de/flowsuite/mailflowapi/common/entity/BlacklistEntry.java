@@ -1,6 +1,7 @@
-package de.flowsuite.mailflowapi.entity;
+package de.flowsuite.mailflowapi.common.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 import lombok.AllArgsConstructor;
@@ -9,12 +10,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "rag_urls")
+@Table(name = "blacklist")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RagUrl {
+public class BlacklistEntry {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,6 +25,5 @@ public class RagUrl {
     @JoinColumn(name = "customer_id")
     private Customer customer;
 
-    @NotBlank private String url;
-    private boolean isLastCrawlSuccessful;
+    @Email @NotBlank private String blacklistedEmailAddress;
 }
