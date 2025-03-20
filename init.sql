@@ -76,7 +76,7 @@ CREATE INDEX idx_message_categories_customer_id ON message_categories(customer_i
 
 CREATE TABLE message_log (
     id BIGSERIAL PRIMARY KEY,
-    customer_id INTEGER REFERENCES customers(id) ON DELETE CASCADE NOT NULL ,
+    customer_id INTEGER REFERENCES customers(id) ON DELETE CASCADE NOT NULL,
     category VARCHAR(64) NOT NULL,
     language VARCHAR(64) NOT NULL,
     from_email_address VARCHAR(256),
