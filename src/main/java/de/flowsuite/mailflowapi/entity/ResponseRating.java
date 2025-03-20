@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,14 +30,11 @@ public class ResponseRating {
     @JoinColumn(name = "customer_id")
     private Customer customer;
 
-    @Min(0)
-    @Max(5)
-    private int rating;
+    @Min(0) @Max(5) private int rating;
 
     private String feedback;
 
-    @NotNull
-    private ZonedDateTime createdAt;
+    @NotNull private ZonedDateTime createdAt;
 
     @PrePersist
     protected void onCreate() {
