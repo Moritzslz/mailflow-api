@@ -48,8 +48,10 @@ public class User {
 
     @PrePersist
     protected void onCreate() {
-        createdAt = ZonedDateTime.now(ZoneId.of("Europe/Berlin"));
+        ZoneId berlinZone = ZoneId.of("Europe/Berlin");
+        createdAt = ZonedDateTime.now(berlinZone);
         updatedAt = createdAt;
+        tokenExpiresAt = createdAt.plusMinutes(30);
     }
 
     @PreUpdate
