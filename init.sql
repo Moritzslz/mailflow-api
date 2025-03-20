@@ -35,7 +35,7 @@ CREATE TABLE customer_settings (
     is_execution_enabled BOOLEAN NOT NULL,
     is_auto_reply_enabled BOOLEAN DEFAULT FALSE NOT NULL,
     support_agent_name VARCHAR(64) NOT NULL,
-    crawl_frequency_in_hours INTEGER NOT NULL,
+    crawl_frequency_in_hours INTEGER DEFAULT 168 NOT NULL,
     last_crawl_at TIMESTAMP WITH TIME ZONE,
     next_crawl_at TIMESTAMP WITH TIME ZONE,
     email_html_template TEXT,
