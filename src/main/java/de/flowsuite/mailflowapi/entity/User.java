@@ -42,7 +42,7 @@ public class User {
     private boolean isSubscribedToNewsletter;
     @NotBlank private String verificationToken;
     @NotNull private ZonedDateTime tokenExpiresAt;
-    @NotNull private ZonedDateTime lastLoginAt;
+    private ZonedDateTime lastLoginAt;
     @NotNull private ZonedDateTime createdAt;
     @NotNull private ZonedDateTime updatedAt;
 
