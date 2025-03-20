@@ -9,5 +9,4 @@ public class MailFlowApiApplication {
     public static void main(String[] args) {
         SpringApplication.run(MailFlowApiApplication.class, args);
     }
-
 }
