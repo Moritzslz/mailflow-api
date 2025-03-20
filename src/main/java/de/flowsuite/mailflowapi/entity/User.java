@@ -35,7 +35,7 @@ public class User {
     @NotBlank private String passwordHash;
     private String phoneNumber;
 
-    @NotNull private String role = "USER";
+    @NotNull private String role;
 
     private boolean isAccountLocked;
     private boolean isAccountEnabled;
