@@ -23,7 +23,6 @@ public class ResponseRating {
 
     @Id
     @OneToOne(optional = false)
-    @Column(name = "id")
     private MessageLogEntry messageLogEntry;
 
     @ManyToOne(optional = false)
