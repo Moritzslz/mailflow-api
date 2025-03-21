@@ -17,7 +17,7 @@ class CustomerResource {
 
     private final CustomerService customerService;
 
-    public CustomerResource(CustomerService customerService) {
+    CustomerResource(CustomerService customerService) {
         this.customerService = customerService;
     }
 
