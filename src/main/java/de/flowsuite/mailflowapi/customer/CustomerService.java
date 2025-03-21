@@ -4,6 +4,8 @@ import de.flowsuite.mailflowapi.common.entity.Customer;
 
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 class CustomerService {
 
@@ -15,6 +17,10 @@ class CustomerService {
 
     Customer createCustomer(Customer customer) {
         return customerRepository.save(customer);
+    }
+
+    List<Customer> getAllCustomers() {
+        return (List<Customer>) customerRepository.findAll();
     }
 
     Customer getCustomerById(long id) {
