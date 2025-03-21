@@ -20,7 +20,8 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @NotBlank private String company;
+    @NotBlank(message = "Company must not be blank.") private String company;
+
     private String sourceOfContact;
     private String websiteUrl;
     private String privacyPolicyUrl;
