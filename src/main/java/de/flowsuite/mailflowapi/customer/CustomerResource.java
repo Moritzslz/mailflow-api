@@ -1,6 +1,7 @@
 package de.flowsuite.mailflowapi.customer;
 
 import de.flowsuite.mailflowapi.common.entity.Customer;
+import de.flowsuite.mailflowapi.common.exception.CustomerNotFoundException;
 import de.flowsuite.mailflowapi.common.exception.IdMismatchException;
 
 import jakarta.validation.Valid;
