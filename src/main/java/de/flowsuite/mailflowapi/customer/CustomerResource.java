@@ -8,6 +8,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/customers")
 class CustomerResource {
@@ -23,8 +25,13 @@ class CustomerResource {
         return ResponseEntity.ok(customerService.createCustomer(customer));
     }
 
+    @GetMapping()
+    ResponseEntity<List<Customer>> getAllCustomers() {
+        return ResponseEntity.ok(customerService.getAllCustomers());
+    }
+
     @GetMapping("/{id}")
-    ResponseEntity<Customer> getCustomer(@PathVariable long id) {
+    ResponseEntity<Customer> getCustomerById(@PathVariable long id) {
         Customer customer = customerService.getCustomerById(id);
         if (customer == null) {
             throw new CustomerNotFoundException(id);
