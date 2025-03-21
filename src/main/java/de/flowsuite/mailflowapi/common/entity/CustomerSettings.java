@@ -21,7 +21,6 @@ public class CustomerSettings {
 
     @Id
     @OneToOne(optional = false)
-    @Column(name = "id")
     private Customer customer;
 
     private boolean isExecutionEnabled;
