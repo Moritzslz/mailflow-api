@@ -7,6 +7,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class IdMismatchException extends RuntimeException {
 
     public IdMismatchException(long pathId, long bodyId) {
-        super("Path ID " + pathId + " does not match body ID " + bodyId);
+        super("The path Id " + pathId + " does not match body Id " + bodyId);
     }
 }

@@ -3,6 +3,10 @@ SET timezone = 'Europe/Berlin';
 CREATE TABLE customers (
     id BIGSERIAL PRIMARY KEY,
     company VARCHAR(64) NOT NULL,
+    street VARCHAR(64) NOT NULL,
+    house_number VARCHAR(64) NOT NULL,
+    postal_code VARCHAR(64) NOT NULL,
+    city VARCHAR(64) NOT NULL,
     source_of_contact VARCHAR(64),
     website_url TEXT,
     privacy_policy_url TEXT,
@@ -31,14 +35,14 @@ CREATE INDEX idx_users_customer_id ON users(customer_id);
 CREATE INDEX idx_users_email_address ON users(email_address);
 
 CREATE TABLE customer_settings (
-    id BIGSERIAL PRIMARY KEY REFERENCES customers(id) ON DELETE CASCADE,
+    customer_id BIGSERIAL PRIMARY KEY REFERENCES customers(id) ON DELETE CASCADE,
     is_execution_enabled BOOLEAN NOT NULL,
     is_auto_reply_enabled BOOLEAN DEFAULT FALSE NOT NULL,
+    is_response_rating_enabled BOOLEAN DEFAULT TRUE NOT NULL,
     support_agent_name VARCHAR(64) NOT NULL,
     crawl_frequency_in_hours INTEGER DEFAULT 168 NOT NULL,
     last_crawl_at TIMESTAMP WITH TIME ZONE,
     next_crawl_at TIMESTAMP WITH TIME ZONE,
-    email_html_template TEXT,
     mailbox_email_address VARCHAR(256) NOT NULL,
     mailbox_password_hash TEXT NOT NULL,
     imap_host VARCHAR(64) NOT NULL,
@@ -96,7 +100,7 @@ CREATE INDEX idx_message_log_processed_at ON message_log(processed_at);
 CREATE INDEX idx_message_log_processing_time_in_seconds ON message_log(processing_time_in_seconds);
 
 CREATE TABLE response_ratings (
-    id BIGSERIAL PRIMARY KEY REFERENCES message_log(id) ON DELETE CASCADE,
+    message_log_id BIGSERIAL PRIMARY KEY REFERENCES message_log(id) ON DELETE CASCADE,
     customer_id INTEGER REFERENCES customers(id) ON DELETE CASCADE NOT NULL,
     rating INTEGER CHECK (rating BETWEEN 1 AND 5) NOT NULL,
     feedback TEXT,

@@ -32,7 +32,10 @@ public class User {
     @NotBlank private String firstName;
     @NotBlank private String lastName;
     @Email @NotBlank private String emailAddress;
-    @NotBlank private String passwordHash;
+
+    @Column(name = "password_hash")
+    @NotBlank private String password;
+
     private String phoneNumber;
 
     @NotNull private String role;
