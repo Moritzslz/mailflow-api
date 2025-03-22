@@ -1,6 +1,8 @@
 package de.flowsuite.mailflowapi.common.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 
 import lombok.AllArgsConstructor;
@@ -26,7 +28,7 @@ public class CustomerSettings {
     private boolean isExecutionEnabled;
     private boolean isAutoReplyEnabled;
     @NotBlank private String supportAgentName;
-    private int crawlFrequencyInHours;
+    @Min(168) @Max(744) private int crawlFrequencyInHours;
     private ZonedDateTime lastCrawlAt;
     private ZonedDateTime nextCrawlAt;
     private String emailHtmlTemplate;
