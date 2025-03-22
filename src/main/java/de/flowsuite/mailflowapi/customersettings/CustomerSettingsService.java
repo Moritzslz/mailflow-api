@@ -25,14 +25,6 @@ class CustomerSettingsService {
     CustomerSettings getCustomerSettingsByCustomerId(long customerId) {
         return customerSettingsRepository
                 .findById(customerId)
-                .map(
-                        customerSettings -> {
-                            customerSettings.setMailboxPassword(
-                                    RsaUtil.decrypt(
-                                            customerSettings.getMailboxPassword(),
-                                            RsaUtil.getPrivateKey()));
-                            return customerSettings;
-                        })
                 .orElseThrow(
                         () -> new EntityNotFoundException(CustomerSettings.class.getSimpleName()));
     }
