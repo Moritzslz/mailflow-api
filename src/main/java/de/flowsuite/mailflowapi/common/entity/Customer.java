@@ -21,6 +21,10 @@ public class Customer {
     private long id;
 
     @NotBlank private String company;
+    @NotBlank private String street;
+    @NotBlank private String houseNumber;
+    @NotBlank private String postalCode;
+    @NotBlank private String city;
 
     private String sourceOfContact;
     private String websiteUrl;
