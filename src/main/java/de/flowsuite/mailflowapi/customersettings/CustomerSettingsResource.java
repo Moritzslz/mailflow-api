@@ -1,8 +1,6 @@
 package de.flowsuite.mailflowapi.customersettings;
 
 import de.flowsuite.mailflowapi.common.entity.CustomerSettings;
-import de.flowsuite.mailflowapi.common.exception.IdMismatchException;
-import de.flowsuite.mailflowapi.common.exception.NotFoundException;
 
 import jakarta.validation.Valid;
 
@@ -28,20 +26,14 @@ class CustomerSettingsResource {
     @GetMapping("/{customerId}")
     ResponseEntity<CustomerSettings> getCustomerSettingsByCustomerId(
             @PathVariable long customerId) {
-        return customerSettingsService
-                .getCustomerSettingsByCustomerId(customerId)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new NotFoundException(CustomerSettings.class.getSimpleName()));
+        return ResponseEntity.ok(
+                customerSettingsService.getCustomerSettingsByCustomerId(customerId));
     }
 
     @PutMapping("/{customerId}")
     ResponseEntity<CustomerSettings> updateCustomerSettings(
             @PathVariable long customerId, @RequestBody @Valid CustomerSettings customerSettings) {
-        if (customerId != customerSettings.getCustomerId()) {
-            throw new IdMismatchException(customerId, customerSettings.getCustomerId());
-        } else {
-            return ResponseEntity.ok(
-                    customerSettingsService.updateCustomerSettings(customerSettings));
-        }
+        return ResponseEntity.ok(
+                customerSettingsService.updateCustomerSettings(customerId, customerSettings));
     }
 }
