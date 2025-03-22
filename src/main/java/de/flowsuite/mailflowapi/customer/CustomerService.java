@@ -5,6 +5,7 @@ import de.flowsuite.mailflowapi.common.entity.Customer;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 class CustomerService {
@@ -23,8 +24,8 @@ class CustomerService {
         return (List<Customer>) customerRepository.findAll();
     }
 
-    Customer getCustomerById(long id) {
-        return customerRepository.findById(id).orElse(null);
+    Optional<Customer> getCustomerById(long id) {
+        return customerRepository.findById(id);
     }
 
     Customer updateCustomer(Customer customer) {

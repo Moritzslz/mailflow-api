@@ -1,8 +1,8 @@
 package de.flowsuite.mailflowapi.customer;
 
 import de.flowsuite.mailflowapi.common.entity.Customer;
-import de.flowsuite.mailflowapi.common.exception.NotFoundException;
 import de.flowsuite.mailflowapi.common.exception.IdMismatchException;
+import de.flowsuite.mailflowapi.common.exception.NotFoundException;
 
 import jakarta.validation.Valid;
 
@@ -33,12 +33,10 @@ class CustomerResource {
 
     @GetMapping("/{id}")
     ResponseEntity<Customer> getCustomerById(@PathVariable long id) {
-        Customer customer = customerService.getCustomerById(id);
-        if (customer == null) {
-            throw new NotFoundException(Customer.class.getSimpleName());
-        } else {
-            return ResponseEntity.ok(customer);
-        }
+        return customerService
+                .getCustomerById(id)
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new NotFoundException(Customer.class.getSimpleName()));
     }
 
     @PutMapping("/{id}")
