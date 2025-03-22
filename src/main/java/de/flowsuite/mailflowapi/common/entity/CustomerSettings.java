@@ -1,6 +1,7 @@
 package de.flowsuite.mailflowapi.common.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -32,7 +33,7 @@ public class CustomerSettings {
     private ZonedDateTime lastCrawlAt;
     private ZonedDateTime nextCrawlAt;
     private String emailHtmlTemplate;
-    @NotBlank private String mailboxEmailAddress;
+    @Email @NotBlank private String mailboxEmailAddress;
     @NotBlank private String mailboxPasswordHash;
     @NotBlank private String imapHost;
     @NotBlank private String smtpHost;
