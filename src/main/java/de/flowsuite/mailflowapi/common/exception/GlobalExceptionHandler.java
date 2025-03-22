@@ -1,4 +1,4 @@
-package de.flowsuite.mailflowapi.common;
+package de.flowsuite.mailflowapi.common.exception;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpStatus;
