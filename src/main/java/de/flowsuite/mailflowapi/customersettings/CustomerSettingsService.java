@@ -1,9 +1,9 @@
 package de.flowsuite.mailflowapi.customersettings;
 
 import de.flowsuite.mailflowapi.common.entity.CustomerSettings;
-import de.flowsuite.mailflowapi.common.exception.IdMismatchException;
-import de.flowsuite.mailflowapi.common.exception.NotFoundException;
-import de.flowsuite.mailflowapi.common.util.CryptoUtil;
+import de.flowsuite.mailflowapi.common.exception.EntityNotFoundException;
+import de.flowsuite.mailflowapi.common.exception.IdConflictException;
+import de.flowsuite.mailflowapi.common.util.RsaUtil;
 
 import org.springframework.stereotype.Service;
 
@@ -18,19 +18,28 @@ class CustomerSettingsService {
 
     CustomerSettings createCustomerSettings(CustomerSettings customerSettings) {
         customerSettings.setMailboxPassword(
-                CryptoUtil.encrypt(customerSettings.getMailboxPassword()));
+                RsaUtil.encrypt(customerSettings.getMailboxPassword(), RsaUtil.getPublicKey()));
         return customerSettingsRepository.save(customerSettings);
     }
 
     CustomerSettings getCustomerSettingsByCustomerId(long customerId) {
         return customerSettingsRepository
                 .findById(customerId)
-                .orElseThrow(() -> new NotFoundException(CustomerSettings.class.getSimpleName()));
+                .map(
+                        customerSettings -> {
+                            customerSettings.setMailboxPassword(
+                                    RsaUtil.decrypt(
+                                            customerSettings.getMailboxPassword(),
+                                            RsaUtil.getPrivateKey()));
+                            return customerSettings;
+                        })
+                .orElseThrow(
+                        () -> new EntityNotFoundException(CustomerSettings.class.getSimpleName()));
     }
 
     CustomerSettings updateCustomerSettings(long customerId, CustomerSettings customerSettings) {
         if (customerId != customerSettings.getCustomerId()) {
-            throw new IdMismatchException(customerId, customerSettings.getCustomerId());
+            throw new IdConflictException();
         } else {
             return customerSettingsRepository.save(customerSettings);
         }
