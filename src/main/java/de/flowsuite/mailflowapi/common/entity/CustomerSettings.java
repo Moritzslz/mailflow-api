@@ -21,10 +21,7 @@ import java.time.ZonedDateTime;
 @Builder
 public class CustomerSettings {
 
-    @Id
-    @OneToOne(optional = false)
-    private Customer customer;
-
+    @Id private long customerId;
     private boolean isExecutionEnabled;
     private boolean isAutoReplyEnabled;
     private boolean isResponseRatingEnabled;

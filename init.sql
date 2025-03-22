@@ -31,7 +31,7 @@ CREATE INDEX idx_users_customer_id ON users(customer_id);
 CREATE INDEX idx_users_email_address ON users(email_address);
 
 CREATE TABLE customer_settings (
-    id BIGSERIAL PRIMARY KEY REFERENCES customers(id) ON DELETE CASCADE,
+    customer_id BIGSERIAL PRIMARY KEY REFERENCES customers(id) ON DELETE CASCADE,
     is_execution_enabled BOOLEAN NOT NULL,
     is_auto_reply_enabled BOOLEAN DEFAULT FALSE NOT NULL,
     is_response_rating_enabled BOOLEAN DEFAULT TRUE NOT NULL,
@@ -97,7 +97,7 @@ CREATE INDEX idx_message_log_processed_at ON message_log(processed_at);
 CREATE INDEX idx_message_log_processing_time_in_seconds ON message_log(processing_time_in_seconds);
 
 CREATE TABLE response_ratings (
-    id BIGSERIAL PRIMARY KEY REFERENCES message_log(id) ON DELETE CASCADE,
+    message_log_id BIGSERIAL PRIMARY KEY REFERENCES message_log(id) ON DELETE CASCADE,
     customer_id INTEGER REFERENCES customers(id) ON DELETE CASCADE NOT NULL,
     rating INTEGER CHECK (rating BETWEEN 1 AND 5) NOT NULL,
     feedback TEXT,

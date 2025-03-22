@@ -37,8 +37,8 @@ class CustomerSettingsResource {
     @PutMapping("/{customerId}")
     ResponseEntity<CustomerSettings> updateCustomerSettings(
             @PathVariable long customerId, @RequestBody @Valid CustomerSettings customerSettings) {
-        if (customerId != customerSettings.getCustomer().getId()) {
-            throw new IdMismatchException(customerId, customerSettings.getCustomer().getId());
+        if (customerId != customerSettings.getCustomerId()) {
+            throw new IdMismatchException(customerId, customerSettings.getCustomerId());
         } else {
             return ResponseEntity.ok(
                     customerSettingsService.updateCustomerSettings(customerSettings));
