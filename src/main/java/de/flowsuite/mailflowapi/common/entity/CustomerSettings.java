@@ -32,8 +32,8 @@ public class CustomerSettings {
     private ZonedDateTime lastCrawlAt;
     private ZonedDateTime nextCrawlAt;
     private String emailHtmlTemplate;
-    @NotBlank private String mailbox_email_address;
-    @NotBlank private String mailbox_password_hash;
+    @NotBlank private String mailboxEmailAddress;
+    @NotBlank private String mailboxPasswordHash;
     @NotBlank private String imapHost;
     @NotBlank private String smtpHost;
     private int imapPort;
