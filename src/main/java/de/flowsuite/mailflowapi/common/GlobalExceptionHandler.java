@@ -13,6 +13,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -20,19 +21,18 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Object> handleValidationException(
             MethodArgumentNotValidException ex, WebRequest request) {
-        String errorMessageTemplate = "Field %s %s";
-        StringBuilder errorMessage = new StringBuilder();
-        ex.getBindingResult()
-                .getFieldErrors()
-                .forEach(
-                        error ->
-                                errorMessage.append(
+        String errorMessageTemplate = "Field '%s' %s";
+        String errorMessage =
+                ex.getBindingResult().getFieldErrors().stream()
+                        .map(
+                                error ->
                                         String.format(
                                                 errorMessageTemplate,
                                                 error.getField(),
-                                                error.getDefaultMessage())));
+                                                error.getDefaultMessage()))
+                        .collect(Collectors.joining(". "));
 
-        return buildErrorResponse(HttpStatus.BAD_REQUEST, errorMessage.toString(), request);
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, errorMessage, request);
     }
 
     @ExceptionHandler(Exception.class)
