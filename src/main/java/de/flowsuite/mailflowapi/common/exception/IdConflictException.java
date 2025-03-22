@@ -4,9 +4,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(code = HttpStatus.BAD_REQUEST)
-public class IdMismatchException extends RuntimeException {
+public class IdConflictException extends RuntimeException {
 
-    public IdMismatchException(long pathId, long bodyId) {
-        super("The path Id " + pathId + " does not match body Id " + bodyId);
+    public IdConflictException() {
+        super("The path Id does not match the body Id");
     }
 }

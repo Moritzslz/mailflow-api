@@ -1,8 +1,8 @@
 package de.flowsuite.mailflowapi.customer;
 
 import de.flowsuite.mailflowapi.common.entity.Customer;
-import de.flowsuite.mailflowapi.common.exception.IdMismatchException;
-import de.flowsuite.mailflowapi.common.exception.NotFoundException;
+import de.flowsuite.mailflowapi.common.exception.EntityNotFoundException;
+import de.flowsuite.mailflowapi.common.exception.IdConflictException;
 
 import org.springframework.stereotype.Service;
 
@@ -28,12 +28,12 @@ class CustomerService {
     Customer getCustomerById(long id) {
         return customerRepository
                 .findById(id)
-                .orElseThrow(() -> new NotFoundException(Customer.class.getSimpleName()));
+                .orElseThrow(() -> new EntityNotFoundException(Customer.class.getSimpleName()));
     }
 
     Customer updateCustomer(long id, Customer customer) {
         if (id != customer.getId()) {
-            throw new IdMismatchException(id, customer.getId());
+            throw new IdConflictException();
         } else {
             return customerRepository.save(customer);
         }
