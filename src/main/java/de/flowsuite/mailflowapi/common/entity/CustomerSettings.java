@@ -29,7 +29,9 @@ public class CustomerSettings {
     private boolean isAutoReplyEnabled;
     private boolean isResponseRatingEnabled;
     @NotBlank private String supportAgentName;
+
     @Min(168) @Max(744) private int crawlFrequencyInHours;
+
     private ZonedDateTime lastCrawlAt;
     private ZonedDateTime nextCrawlAt;
     private String emailHtmlTemplate;
