@@ -33,7 +33,10 @@ public class CustomerSettings {
     private ZonedDateTime lastCrawlAt;
     private ZonedDateTime nextCrawlAt;
     @Email @NotBlank private String mailboxEmailAddress;
-    @NotBlank private String mailboxPasswordHash;
+
+    @Column(name = "mailbox_password_hash")
+    @NotBlank private String mailboxPassword;
+
     @NotBlank private String imapHost;
     @NotBlank private String smtpHost;
     private int imapPort;
