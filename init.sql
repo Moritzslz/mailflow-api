@@ -3,6 +3,10 @@ SET timezone = 'Europe/Berlin';
 CREATE TABLE customers (
     id BIGSERIAL PRIMARY KEY,
     company VARCHAR(64) NOT NULL,
+    street VARCHAR(64) NOT NULL,
+    house_number VARCHAR(64) NOT NULL,
+    postal_code VARCHAR(64) NOT NULL,
+    city VARCHAR(64) NOT NULL,
     source_of_contact VARCHAR(64),
     website_url TEXT,
     privacy_policy_url TEXT,
@@ -39,7 +43,6 @@ CREATE TABLE customer_settings (
     crawl_frequency_in_hours INTEGER DEFAULT 168 NOT NULL,
     last_crawl_at TIMESTAMP WITH TIME ZONE,
     next_crawl_at TIMESTAMP WITH TIME ZONE,
-    email_html_template TEXT,
     mailbox_email_address VARCHAR(256) NOT NULL,
     mailbox_password_hash TEXT NOT NULL,
     imap_host VARCHAR(64) NOT NULL,
