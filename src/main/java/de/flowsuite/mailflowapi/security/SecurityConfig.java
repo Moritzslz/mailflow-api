@@ -7,7 +7,7 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 
-import de.flowsuite.mailflowapi.common.util.RsaUtil;
+import de.flowsuite.mailflowapi.common.util.rsa.RsaUtil;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -36,6 +36,8 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 class SecurityConfig {
+
+    static final String RECAPTCHA_HEADER = "reCAPTCHA";
 
     SecurityConfig(
             @Value("${rsa.b64-public-key}") String b64PublicKey,
@@ -76,7 +78,7 @@ class SecurityConfig {
                         "http://*.flow-suite.de",
                         "https://*.flow-suite.de"));
         configuration.setAllowedHeaders(
-                List.of(HttpHeaders.AUTHORIZATION, HttpHeaders.CONTENT_TYPE));
+                List.of(HttpHeaders.AUTHORIZATION, HttpHeaders.CONTENT_TYPE, RECAPTCHA_HEADER));
         configuration.setAllowedMethods(
                 Arrays.asList(
                         HttpMethod.POST.name(),
