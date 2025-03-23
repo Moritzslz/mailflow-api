@@ -3,7 +3,7 @@ package de.flowsuite.mailflowapi.customersettings;
 import de.flowsuite.mailflowapi.common.entity.CustomerSettings;
 import de.flowsuite.mailflowapi.common.exception.EntityNotFoundException;
 import de.flowsuite.mailflowapi.common.exception.IdConflictException;
-import de.flowsuite.mailflowapi.common.util.RsaUtil;
+import de.flowsuite.mailflowapi.common.util.rsa.RsaUtil;
 
 import org.springframework.stereotype.Service;
 

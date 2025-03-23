@@ -1,6 +1,4 @@
-package de.flowsuite.mailflowapi.common.util;
-
-import de.flowsuite.mailflowapi.common.exception.RsaKeyNotSetException;
+package de.flowsuite.mailflowapi.common.util.rsa;
 
 import org.springframework.stereotype.Component;
 
@@ -20,14 +18,14 @@ public class RsaUtil {
     private static RSAPublicKey publicKey = null;
     private static RSAPrivateKey privateKey = null;
 
-    private static String decodeRsaKey(String b64Key) {
+    private static String base64DecodeRsaKey(String b64Key) {
         byte[] decodedKey = Base64.getDecoder().decode(b64Key);
         return new String(decodedKey, StandardCharsets.UTF_8);
     }
 
     public static void setPrivateKey(String b64PrivateKey) {
         try {
-            String key = decodeRsaKey(b64PrivateKey);
+            String key = base64DecodeRsaKey(b64PrivateKey);
             key =
                     key.replace("-----BEGIN PRIVATE KEY-----", "")
                             .replace("-----END PRIVATE KEY-----", "")
@@ -44,7 +42,7 @@ public class RsaUtil {
 
     public static void setPublicKey(String b64PublicKey) {
         try {
-            String key = decodeRsaKey(b64PublicKey);
+            String key = base64DecodeRsaKey(b64PublicKey);
             key =
                     key.replace("-----BEGIN PUBLIC KEY-----", "")
                             .replace("-----END PUBLIC KEY-----", "")
