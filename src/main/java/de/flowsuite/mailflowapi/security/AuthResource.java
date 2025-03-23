@@ -4,7 +4,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,9 +26,7 @@ class AuthResource {
     }
 
     @PostMapping("/user/token")
-    ResponseEntity<String> getTokenForUser(
-            Authentication authentication,
-            @RequestHeader(value = "reCAPTCHA") String reCaptchaToken) {
+    ResponseEntity<String> getTokenForUser(Authentication authentication) {
         String subject = authentication.getName();
         String scope =
                 authentication.getAuthorities().stream()
@@ -38,7 +35,7 @@ class AuthResource {
         return ResponseEntity.ok(jwtService.generateToken(subject, scope));
     }
 
-    @PostMapping("/service/token") //TODO
+    @PostMapping("/service/token") // TODO
     ResponseEntity<String> getTokenForService(Map<String, String> request) {
         String clientId = request.get("client_id");
         String clientSecret = request.get("client_secret");
