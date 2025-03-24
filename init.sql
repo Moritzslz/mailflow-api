@@ -7,6 +7,7 @@ CREATE TABLE customers (
     house_number VARCHAR(64) NOT NULL,
     postal_code VARCHAR(64) NOT NULL,
     city VARCHAR(64) NOT NULL,
+    openai_api_key_hash TEXT NOT NULL,
     source_of_contact VARCHAR(64),
     website_url TEXT,
     privacy_policy_url TEXT,
