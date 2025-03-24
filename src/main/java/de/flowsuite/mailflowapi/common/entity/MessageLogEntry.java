@@ -23,11 +23,9 @@ public class MessageLogEntry {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    @NotNull private Long id;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "customer_id")
-    private Customer customer;
+    @NotNull private Long customerId;
 
     @NotBlank private String category;
     @NotBlank private String language;
@@ -35,11 +33,11 @@ public class MessageLogEntry {
     private String subject;
     @NotNull private ZonedDateTime receivedAt;
     @NotNull private ZonedDateTime processedAt;
-    private int processingTimeInSeconds;
+    @NotNull private Integer processingTimeInSeconds;
     @NotBlank private String llmUsed;
-    private int inputTokens;
-    private int outputTokens;
-    private int totalTokens;
+    @NotNull private Integer inputTokens;
+    @NotNull private Integer outputTokens;
+    @NotNull private Integer totalTokens;
 
     @PrePersist
     @PreUpdate

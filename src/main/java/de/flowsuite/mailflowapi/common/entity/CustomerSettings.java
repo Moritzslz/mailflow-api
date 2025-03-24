@@ -1,10 +1,7 @@
 package de.flowsuite.mailflowapi.common.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.*;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,10 +19,10 @@ import java.time.ZonedDateTime;
 @Builder
 public class CustomerSettings {
 
-    @Id private long customerId;
-    private boolean isExecutionEnabled;
-    private boolean isAutoReplyEnabled;
-    private boolean isResponseRatingEnabled;
+    @Id @NotNull private Long customerId;
+    @NotNull private Boolean isExecutionEnabled;
+    @NotNull private Boolean isAutoReplyEnabled;
+    @NotNull private Boolean isResponseRatingEnabled;
     @NotBlank private String supportAgentName;
 
     @Min(168) @Max(744) private int crawlFrequencyInHours;
@@ -39,8 +36,8 @@ public class CustomerSettings {
 
     @NotBlank private String imapHost;
     @NotBlank private String smtpHost;
-    private int imapPort;
-    private int smtpPort;
+    @NotNull private Integer imapPort;
+    @NotNull private Integer smtpPort;
 
     @PrePersist
     @PreUpdate

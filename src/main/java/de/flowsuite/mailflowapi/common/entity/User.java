@@ -23,11 +23,9 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    @NotNull private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "customer_id")
-    private Customer customer;
+    @NotNull private Long customerId;
 
     @NotBlank private String firstName;
     @NotBlank private String lastName;
@@ -40,9 +38,9 @@ public class User {
 
     @NotNull private String role;
 
-    private boolean isAccountLocked;
-    private boolean isAccountEnabled;
-    private boolean isSubscribedToNewsletter;
+    @NotNull private Boolean isAccountLocked;
+    @NotNull private Boolean isAccountEnabled;
+    @NotNull private Boolean isSubscribedToNewsletter;
     @NotBlank private String verificationToken;
     @NotNull private ZonedDateTime tokenExpiresAt;
     private ZonedDateTime lastLoginAt;
