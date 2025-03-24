@@ -46,4 +46,15 @@ class MessageLogResource {
         messageLogService.deleteMessageLogEntry(messageLogEntry);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("{customerId}/message-log/analytics")
+    ResponseEntity<?> getMessageLogAnalytics(
+            @PathVariable long customerId,
+            @RequestParam(required = false) String start_date,
+            @RequestParam(required = false) String end_date,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String timeframe) {
+        return ResponseEntity.ok(
+                messageLogService.getMessageLogAnalytics(customerId, start_date, end_date, category, timeframe));
+    }
 }
