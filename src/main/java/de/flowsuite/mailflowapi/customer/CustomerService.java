@@ -21,7 +21,7 @@ class CustomerService {
 
     Customer createCustomer(CustomerResource.CreateCustomerRequest createCustomerRequest) {
         Customer customer = createCustomerRequest.customer();
-        customer.setOpenAiApiKey(AesUtil.encrypt(createCustomerRequest.openAiApiKey()));
+        customer.setOpenaiApiKey(AesUtil.encrypt(createCustomerRequest.openAiApiKey()));
         return customerRepository.save(customer);
     }
 
@@ -51,7 +51,7 @@ class CustomerService {
                                     () ->
                                             new EntityNotFoundException(
                                                     Customer.class.getSimpleName()));
-            updatedCustomer.setOpenAiApiKey(customer.getOpenAiApiKey());
+            updatedCustomer.setOpenaiApiKey(customer.getOpenaiApiKey());
             return customerRepository.save(updatedCustomer);
         }
     }
