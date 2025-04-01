@@ -21,8 +21,8 @@ public class AuthorisationUtil {
         String scope = jwt.getClaim("scope");
         long jwtUserId = jwt.getClaim("userId");
 
-        LOG.debug("Scope, {}", scope);
-        LOG.debug("UserId, {}", userId);
+        LOG.debug("Scope: {}", scope);
+        LOG.debug("UserId: {}", userId);
 
         if (scope.contains(Authorities.ADMIN.getAuthority())
                 || scope.contains(Authorities.CLIENT.getAuthority())) {
@@ -40,8 +40,8 @@ public class AuthorisationUtil {
         String scope = jwt.getClaim("scope");
         long jwtCustomerId = jwt.getClaim("customerId");
 
-        LOG.debug("Scope, {}", scope);
-        LOG.debug("CustomerId, {}", customerId);
+        LOG.debug("Scope: {}", scope);
+        LOG.debug("CustomerId: {}", customerId);
 
         if (scope.contains(Authorities.ADMIN.getAuthority())
                 || scope.contains(Authorities.CLIENT.getAuthority())) {
