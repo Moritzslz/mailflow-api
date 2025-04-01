@@ -101,7 +101,8 @@ public class User implements UserDetails {
         authorities.add(
                 new SimpleGrantedAuthority(Authorities.MESSAGE_CATEGORIES_WRITE.getAuthority()));
         authorities.add(new SimpleGrantedAuthority(Authorities.MESSAGE_LOG_LIST.getAuthority()));
-        authorities.add(new SimpleGrantedAuthority(Authorities.MESSAGE_LOG_LIST.getAuthority()));
+        authorities.add(
+                new SimpleGrantedAuthority(Authorities.RESPONSE_RATINGS_LIST.getAuthority()));
 
         return authorities;
     }
