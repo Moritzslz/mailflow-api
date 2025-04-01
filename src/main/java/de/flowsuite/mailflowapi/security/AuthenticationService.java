@@ -102,7 +102,7 @@ class AuthenticationService {
                         .collect(Collectors.joining(" "));
         String accessToken =
                 generateAccessToken(
-                        user.getEmailAddress(), scope, user.getId(), user.getCustomer().getId());
+                        user.getEmailAddress(), scope, user.getId(), user.getCustomerId());
         return new AuthenticationResource.TokenResponse(accessToken, refreshToken);
     }
 }

@@ -21,7 +21,7 @@ class SettingsService {
         AuthorisationUtil.checkCustomerAllowed(customerId);
         AuthorisationUtil.checkUserAllowed(userId);
 
-        if (userId != settings.getUserId() || customerId != settings.getCustomer().getId()) {
+        if (userId != settings.getUserId() || customerId != settings.getCustomerId()) {
             throw new IdConflictException();
         } else {
             settings.setMailboxPassword(AesUtil.encrypt(settings.getMailboxPassword()));
@@ -38,7 +38,7 @@ class SettingsService {
                         .findById(userId)
                         .orElseThrow(
                                 () -> new EntityNotFoundException(Settings.class.getSimpleName()));
-        if (customerId != settings.getCustomer().getId()) {
+        if (customerId != settings.getCustomerId()) {
             throw new IdConflictException();
         } else {
             return settings;
@@ -49,7 +49,7 @@ class SettingsService {
         AuthorisationUtil.checkCustomerAllowed(customerId);
         AuthorisationUtil.checkUserAllowed(userId);
 
-        if (userId != settings.getUserId() || customerId != settings.getCustomer().getId()) {
+        if (userId != settings.getUserId() || customerId != settings.getCustomerId()) {
             throw new IdConflictException();
         } else {
             return settingsRepository.save(settings);
