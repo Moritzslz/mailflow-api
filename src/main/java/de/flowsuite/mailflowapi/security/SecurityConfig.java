@@ -29,11 +29,15 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -41,6 +45,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 @Configuration
 @EnableWebSecurity
@@ -166,30 +171,37 @@ class SecurityConfig {
         return new ProviderManager(authenticationProvider);
     }
 
-    /* @Bean
+    @Bean
     public RegisteredClientRepository registeredClientRepository() {
-        RegisteredClient userClient =
+        RegisteredClient mailBoxClient =
                 RegisteredClient.withId(UUID.randomUUID().toString())
-                        .clientId("frontend-client")
-                        .clientSecret("{noop}frontend-secret") // No encoding for simplicity
-                        .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                        .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                        .redirectUri("http://localhost:3000/login/callback")
-                        .scope("openid")
-                        .scope("profile")
-                        .build();
-
-        RegisteredClient serviceClient =
-                RegisteredClient.withId(UUID.randomUUID().toString())
-                        .clientId("microservice-client")
-                        .clientSecret("{noop}microservice-secret") // No encoding for simplicity
+                        .clientId("mailflow-mailbox-client")
+                        .clientSecret("{noop}mailflow-mailbox-client-secret") // No encoding for simplicity
                         .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
                         .scope("read:customers")
                         .scope("write:customers")
                         .build();
 
-        return new InMemoryRegisteredClientRepository(userClient, serviceClient);
-    }*/
+        RegisteredClient aiCompletionClient =
+                RegisteredClient.withId(UUID.randomUUID().toString())
+                        .clientId("mailflow-ai-completion-client")
+                        .clientSecret("{noop}mailflow-ai-completion-client-secret") // No encoding for simplicity
+                        .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                        .scope("read:customers")
+                        .scope("write:customers")
+                        .build();
+
+        RegisteredClient ragClient =
+                RegisteredClient.withId(UUID.randomUUID().toString())
+                        .clientId("mailflow-rag-client")
+                        .clientSecret("{noop}mailflow-rag-client-secret") // No encoding for simplicity
+                        .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                        .scope("read:customers")
+                        .scope("write:customers")
+                        .build();
+
+        return new InMemoryRegisteredClientRepository(mailBoxClient, aiCompletionClient, ragClient);
+    }
 
     @Bean
     FilterRegistrationBean<ReCaptchaFilter> reCaptchaFilterRegistration() {
