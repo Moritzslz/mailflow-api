@@ -3,8 +3,8 @@ package de.flowsuite.mailflowapi.customer;
 import de.flowsuite.mailflowapi.common.entity.Customer;
 import de.flowsuite.mailflowapi.common.exception.EntityNotFoundException;
 import de.flowsuite.mailflowapi.common.exception.IdConflictException;
+import de.flowsuite.mailflowapi.common.util.security.AesUtil;
 import de.flowsuite.mailflowapi.common.util.security.AuthorisationUtil;
-import de.flowsuite.mailflowapi.common.util.security.RsaUtil;
 
 import org.springframework.stereotype.Service;
 
@@ -21,8 +21,7 @@ class CustomerService {
 
     Customer createCustomer(CustomerResource.CreateCustomerRequest createCustomerRequest) {
         Customer customer = createCustomerRequest.customer();
-        customer.setOpenAiApiKey(
-                RsaUtil.encrypt(createCustomerRequest.openAiApiKey(), RsaUtil.getPublicKey()));
+        customer.setOpenAiApiKey(AesUtil.encrypt(createCustomerRequest.openAiApiKey()));
         return customerRepository.save(customer);
     }
 

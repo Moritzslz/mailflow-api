@@ -3,8 +3,8 @@ package de.flowsuite.mailflowapi.settings;
 import de.flowsuite.mailflowapi.common.entity.Settings;
 import de.flowsuite.mailflowapi.common.exception.EntityNotFoundException;
 import de.flowsuite.mailflowapi.common.exception.IdConflictException;
+import de.flowsuite.mailflowapi.common.util.security.AesUtil;
 import de.flowsuite.mailflowapi.common.util.security.AuthorisationUtil;
-import de.flowsuite.mailflowapi.common.util.security.RsaUtil;
 
 import org.springframework.stereotype.Service;
 
@@ -24,8 +24,7 @@ class SettingsService {
         if (userId != settings.getUserId() || customerId != settings.getCustomer().getId()) {
             throw new IdConflictException();
         } else {
-            settings.setMailboxPassword(
-                    RsaUtil.encrypt(settings.getMailboxPassword(), RsaUtil.getPublicKey()));
+            settings.setMailboxPassword(AesUtil.encrypt(settings.getMailboxPassword()));
             return settingsRepository.save(settings);
         }
     }
