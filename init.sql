@@ -35,16 +35,6 @@ CREATE TABLE users (
 CREATE INDEX idx_users_customer_id ON users(customer_id);
 CREATE INDEX idx_users_email_address ON users(email_address);
 
-CREATE TABLE clients (
-    id BIGSERIAL PRIMARY KEY,
-    clientId varchar(256) NOT NULL,
-    clientSecret TEXT DEFAULT NULL,
-    authenticationMethod TEXT NOT NULL,
-    authorizationGrantTypes TEXT NOT NULL,
-    scopes TEXT NOT NULL,
-    tokenSettings TEXT NOT NULL
-);
-
 CREATE TABLE settings (
     user_id BIGSERIAL PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
     customer_id INTEGER REFERENCES customers(id) ON DELETE CASCADE NOT NULL,
@@ -104,6 +94,7 @@ CREATE TABLE message_log (
     output_tokens INTEGER NOT NULL,
     total_tokens INTEGER NOT NULL
 );
+CREATE INDEX idx_message_log_user_id ON message_log(user_id);
 CREATE INDEX idx_message_log_customer_id ON message_log(customer_id);
 CREATE INDEX idx_message_log_category ON message_log(category);
 CREATE INDEX idx_message_log_received_at ON message_log(received_at);
@@ -117,6 +108,7 @@ CREATE TABLE response_ratings (
     feedback TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
+CREATE INDEX idx_response_ratings_user_id ON response_ratings(user_id);
 CREATE INDEX idx_response_ratings_rating ON response_ratings(rating);
 CREATE INDEX idx_response_ratings_rated_at ON response_ratings(created_at);
 
