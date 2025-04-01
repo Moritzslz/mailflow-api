@@ -11,7 +11,6 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 
 import de.flowsuite.mailflowapi.common.entity.Authorities;
-import de.flowsuite.mailflowapi.common.util.security.RsaUtil;
 import de.flowsuite.mailflowapi.user.UserService;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +19,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -29,15 +29,15 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
-import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
-import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -51,21 +51,23 @@ import java.util.UUID;
 @EnableWebSecurity
 class SecurityConfig {
 
-    private final String basePath;
+    private final String mailboxClientSecret;
+    private final String aiCompletionClientSecret;
+    private final String ragClientSecret;
     private final String reCaptchaHttpHeader;
     private final ReCaptchaFilter reCaptchaFilter;
     private final UserService userService;
 
     SecurityConfig(
-            @Value("${rsa.b64-public-key}") String b64PublicKey,
-            @Value("${rsa.b64-private-key}") String b64PrivateKey,
-            @Value("${server.servlet.context-path}") String basePath,
-            @Value("${recaptcha.http-header}") String reCaptchaHttpHeader,
+            @Value("${client.mailbox.secret}") String mailboxClientSecret,
+            @Value("${client.ai-completion.secret}") String aiCompletionClientSecret,
+            @Value("${client.rag.secret}") String ragClientSecret,
+            @Value("${google.recaptcha.http-header}") String reCaptchaHttpHeader,
             ReCaptchaService reCaptchaService,
             UserService userService) {
-        RsaUtil.setPublicKey(b64PublicKey);
-        RsaUtil.setPrivateKey(b64PrivateKey);
-        this.basePath = basePath;
+        this.mailboxClientSecret = mailboxClientSecret;
+        this.aiCompletionClientSecret = aiCompletionClientSecret;
+        this.ragClientSecret = ragClientSecret;
         this.reCaptchaHttpHeader = reCaptchaHttpHeader;
         this.reCaptchaFilter = new ReCaptchaFilter(reCaptchaHttpHeader, reCaptchaService);
         this.userService = userService;
@@ -150,57 +152,74 @@ class SecurityConfig {
 
     @Bean
     JwtDecoder jwtDecoder() {
-        return NimbusJwtDecoder.withPublicKey(RsaUtil.getPublicKey()).build();
+        return NimbusJwtDecoder.withPublicKey(RsaUtil.publicKey).build();
     }
 
     @Bean
     JwtEncoder jwtEncoder() {
-        JWK jwk =
-                new RSAKey.Builder(RsaUtil.getPublicKey())
-                        .privateKey(RsaUtil.getPrivateKey())
-                        .build();
-        JWKSource<SecurityContext> jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
-        return new NimbusJwtEncoder(jwks);
+        JWK jwk = new RSAKey.Builder(RsaUtil.publicKey).privateKey(RsaUtil.privateKey).build();
+        JWKSource<SecurityContext> jwkSource = new ImmutableJWKSet<>(new JWKSet(jwk));
+        return new NimbusJwtEncoder(jwkSource);
+    }
+
+    @Bean
+    PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
     AuthenticationManager authenticationManager() {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
         authenticationProvider.setUserDetailsService(userService);
-        authenticationProvider.setPasswordEncoder(new BCryptPasswordEncoder());
+        authenticationProvider.setPasswordEncoder(passwordEncoder());
         return new ProviderManager(authenticationProvider);
     }
 
     @Bean
-    public RegisteredClientRepository registeredClientRepository() {
-        RegisteredClient mailBoxClient =
+    public JdbcRegisteredClientRepository registeredClientRepository(JdbcTemplate jdbcTemplate) {
+        RegisteredClient mailboxClient =
                 RegisteredClient.withId(UUID.randomUUID().toString())
                         .clientId("mailflow-mailbox-client")
-                        .clientSecret("{noop}mailflow-mailbox-client-secret") // No encoding for simplicity
+                        .clientSecret(passwordEncoder().encode(mailboxClientSecret))
+                        .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                         .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                        .scope("read:customers")
-                        .scope("write:customers")
+                        .scope(Authorities.CLIENT.getAuthority())
+                        .scope(Authorities.CUSTOMERS_LIST.getAuthority())
+                        .scope(Authorities.CUSTOMERS_READ.getAuthority())
+                        .scope(Authorities.USERS_LIST.getAuthority())
+                        .scope(Authorities.USERS_READ.getAuthority())
+                        .scope(Authorities.SETTINGS_READ.getAuthority())
+                        .scope(Authorities.BLACKLIST_LIST.getAuthority())
                         .build();
 
         RegisteredClient aiCompletionClient =
                 RegisteredClient.withId(UUID.randomUUID().toString())
                         .clientId("mailflow-ai-completion-client")
-                        .clientSecret("{noop}mailflow-ai-completion-client-secret") // No encoding for simplicity
+                        .clientSecret(passwordEncoder().encode(aiCompletionClientSecret))
                         .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                        .scope("read:customers")
-                        .scope("write:customers")
+                        .scope(Authorities.CLIENT.getAuthority())
+                        .scope(Authorities.SETTINGS_READ.getAuthority())
+                        .scope(Authorities.MESSAGE_CATEGORIES_LIST.getAuthority())
+                        .scope(Authorities.MESSAGE_LOG_WRITE.getAuthority())
                         .build();
 
         RegisteredClient ragClient =
                 RegisteredClient.withId(UUID.randomUUID().toString())
                         .clientId("mailflow-rag-client")
-                        .clientSecret("{noop}mailflow-rag-client-secret") // No encoding for simplicity
+                        .clientSecret(passwordEncoder().encode(ragClientSecret))
                         .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                        .scope("read:customers")
-                        .scope("write:customers")
+                        .scope(Authorities.CLIENT.getAuthority())
+                        .scope(Authorities.RAG_URLS_LIST.getAuthority())
+                        .scope(Authorities.RAG_URLS_WRITE.getAuthority())
                         .build();
 
-        return new InMemoryRegisteredClientRepository(mailBoxClient, aiCompletionClient, ragClient);
+        JdbcRegisteredClientRepository registeredClientRepository =
+                new JdbcRegisteredClientRepository(jdbcTemplate);
+        registeredClientRepository.save(mailboxClient);
+        registeredClientRepository.save(aiCompletionClient);
+        registeredClientRepository.save(ragClient);
+
+        return registeredClientRepository;
     }
 
     @Bean
