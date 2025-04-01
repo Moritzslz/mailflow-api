@@ -21,21 +21,14 @@ import java.time.ZonedDateTime;
 @Builder
 public class ResponseRating {
 
-    @Id private Long messageLogId;
+    @Id @NotNull private Long messageLogId;
+    @NotNull private Long userID;
 
-    @OneToOne
-    @MapsId
-    @JoinColumn(name = "message_log_id")
-    private MessageLogEntry messageLogEntry;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    boolean isSatisfied;
 
     @Min(0) @Max(5) private int rating;
 
     private String feedback;
-
     @NotNull private ZonedDateTime createdAt;
 
     @PrePersist

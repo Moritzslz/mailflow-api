@@ -19,18 +19,8 @@ import java.time.ZonedDateTime;
 @Builder
 public class Settings {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
-
-    @OneToOne
-    @MapsId
-    @JoinColumn(name = "user_id")
-    private User user;
-
-    @ManyToOne
-    @JoinColumn(name = "customer_id")
-    private Customer customer;
+    @Id @NotNull private Long userId;
+    @NotNull private Long customerId;
 
     private boolean isExecutionEnabled;
     private boolean isAutoReplyEnabled;
@@ -40,10 +30,7 @@ public class Settings {
 
     private ZonedDateTime lastCrawlAt;
     private ZonedDateTime nextCrawlAt;
-
-    @Column(name = "mailbox_password_hash")
     @NotBlank private String mailboxPassword;
-
     private String imapHost;
     private String smtpHost;
     private Integer imapPort;

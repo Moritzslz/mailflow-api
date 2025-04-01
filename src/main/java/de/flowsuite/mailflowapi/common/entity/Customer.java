@@ -18,17 +18,14 @@ public class Customer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @NotBlank private String company;
     @NotBlank private String street;
     @NotBlank private String houseNumber;
     @NotBlank private String postalCode;
     @NotBlank private String city;
-
-    @Column(name = "openai_api_key_hash")
     private String openAiApiKey;
-
     private String sourceOfContact;
     private String websiteUrl;
     private String privacyPolicyUrl;

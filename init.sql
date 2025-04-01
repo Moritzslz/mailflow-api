@@ -7,7 +7,7 @@ CREATE TABLE customers (
     house_number VARCHAR(64) NOT NULL,
     postal_code VARCHAR(64) NOT NULL,
     city VARCHAR(64) NOT NULL,
-    openai_api_key_hash TEXT NOT NULL,
+    openai_api_key TEXT NOT NULL,
     source_of_contact VARCHAR(64),
     website_url TEXT,
     privacy_policy_url TEXT,
@@ -44,7 +44,7 @@ CREATE TABLE settings (
     crawl_frequency_in_hours INTEGER DEFAULT 168 NOT NULL,
     last_crawl_at TIMESTAMP WITH TIME ZONE,
     next_crawl_at TIMESTAMP WITH TIME ZONE,
-    mailbox_password_hash TEXT NOT NULL,
+    mailbox_password TEXT NOT NULL,
     imap_host VARCHAR(64),
     smtp_host VARCHAR(64),
     imap_port INTEGER,
@@ -104,6 +104,7 @@ CREATE INDEX idx_message_log_processing_time_in_seconds ON message_log(processin
 CREATE TABLE response_ratings (
     message_log_id BIGSERIAL PRIMARY KEY REFERENCES message_log(id) ON DELETE CASCADE,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+    isSatisfied BOOLEAN NULL,
     rating INTEGER CHECK (rating BETWEEN 1 AND 5) NOT NULL,
     feedback TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
@@ -112,10 +113,10 @@ CREATE INDEX idx_response_ratings_user_id ON response_ratings(user_id);
 CREATE INDEX idx_response_ratings_rating ON response_ratings(rating);
 CREATE INDEX idx_response_ratings_rated_at ON response_ratings(created_at);
 
-INSERT INTO customers (company, street, house_number, postal_code, city, openai_api_key_hash)
+INSERT INTO customers (company, street, house_number, postal_code, city, openai_api_key)
 VALUES ('FlowSuite', 'Straße', '69', '1337', 'München', 'apikey');
 
-INSERT INTO customers (company, street, house_number, postal_code, city, openai_api_key_hash)
+INSERT INTO customers (company, street, house_number, postal_code, city, openai_api_key)
 VALUES ('Company', 'Street', '69', '1337', 'City', 'apikey');
 
 INSERT INTO users (customer_id, first_name, last_name, email_address, password_hash, role, is_account_locked, is_account_enabled, is_subscribed_to_newsletter, verification_token, token_expires_at)
@@ -124,8 +125,8 @@ VALUES (1, 'Moritz', 'Schultz', 'moritz@flow-suite.de', '$2a$10$OTGphs2A9kBq/JCc
 INSERT INTO users (customer_id, first_name, last_name, email_address, password_hash, role, is_account_locked, is_account_enabled, is_subscribed_to_newsletter, verification_token, token_expires_at)
 VALUES (2, 'User', 'User', 'user', '$2a$10$OTGphs2A9kBq/JCce5np.uZaIfGb1exhMRuJ4pBBOOoLWuoxlO72.', 'USER', false, true, true, 'verif_token_2', NOW() + INTERVAL '30 minutes');
 
-INSERT INTO settings (user_id, customer_id, is_execution_enabled, is_auto_reply_enabled, is_response_rating_enabled, crawl_frequency_in_hours, mailbox_password_hash, imap_host, smtp_host, imap_port, smtp_port)
-VALUES (1, 1,true, false, true, 168, 'hashed_mailbox_password', 'imap.ionos.de', 'smtp.ionos.com', 993, 465);
+INSERT INTO settings (user_id, customer_id, is_execution_enabled, is_auto_reply_enabled, is_response_rating_enabled, crawl_frequency_in_hours, mailbox_password, imap_host, smtp_host, imap_port, smtp_port)
+VALUES (1, 1,true, false, true, 168, 'encrypted_mailbox_password', 'imap.ionos.de', 'smtp.ionos.com', 993, 465);
 
 INSERT INTO rag_urls (customer_id, url, is_last_crawl_successful)
 VALUES (1, 'https://flow-suite.de', NULL);

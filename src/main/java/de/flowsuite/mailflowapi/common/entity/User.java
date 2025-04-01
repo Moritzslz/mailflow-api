@@ -32,10 +32,7 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @ManyToOne
-    @JoinColumn(name = "customer_id")
-    private Customer customer;
-
+    @NotNull private Long customerId;
     @NotBlank private String firstName;
     @NotBlank private String lastName;
     @Email @NotBlank private String emailAddress;
@@ -44,9 +41,7 @@ public class User implements UserDetails {
     @NotBlank private String password;
 
     private String phoneNumber;
-
     @NotNull private String role;
-
     @NotNull private Boolean isAccountLocked;
     @NotNull private Boolean isAccountEnabled;
     @NotNull private Boolean isSubscribedToNewsletter;

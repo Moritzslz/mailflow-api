@@ -19,12 +19,9 @@ public class MessageCategory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "customer_id")
-    private Customer customer;
-
+    @NotNull private Long customerId;
     @NotBlank private String category;
     @NotNull private Boolean isReply;
     @NotNull private Boolean isFunctionCall;

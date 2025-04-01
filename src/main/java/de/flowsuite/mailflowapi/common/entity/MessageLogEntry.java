@@ -23,16 +23,10 @@ public class MessageLogEntry {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
-
-    @ManyToOne
-    @JoinColumn(name = "customer_id")
-    private Customer customer;
-
+    @NotNull private Long userId;
+    @NotNull private Long customerID;
     @NotBlank private String category;
     @NotBlank private String language;
     @Email private String fromEmailAddress;
