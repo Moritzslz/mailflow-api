@@ -62,7 +62,7 @@ class AuthenticationService {
                 JwtClaimsSet.builder()
                         .issuer(jwtIssuerLocation)
                         .issuedAt(now.toInstant())
-                        .expiresAt(now.plusDays(7).toInstant())
+                        .expiresAt(now.plusDays(2).toInstant())
                         .subject(subject)
                         .claim("type", "refresh")
                         .build();
