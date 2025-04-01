@@ -6,5 +6,5 @@ openssl pkcs8 -topk8 -inform PEM -outform PEM -nocrypt -in keypair.pem -out priv
 ```
 
 ### Setting RSA keys as .env variables
-- RSA_B64_PUBLIC_KEY 
-- RSA_B64_PRIVATE_KEY
+- RSA_PUBLIC_KEY 
+- RSA_PRIVATE_KEY
