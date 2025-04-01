@@ -23,8 +23,7 @@ public enum Authorities {
     MESSAGE_CATEGORIES_WRITE("message_categories:write"),
     MESSAGE_LOG_LIST("message_log:list"),
     MESSAGE_LOG_WRITE("message_log:write"),
-    RESPONSE_RATINGS_LIST("response_ratings:list"),
-    RESPONSE_RATINGS_WRITE("response_ratings:write");
+    RESPONSE_RATINGS_LIST("response_ratings:list");
 
     private final String authority;
 
