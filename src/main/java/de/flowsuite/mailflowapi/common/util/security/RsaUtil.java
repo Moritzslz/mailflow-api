@@ -1,4 +1,6 @@
-package de.flowsuite.mailflowapi.common.util.rsa;
+package de.flowsuite.mailflowapi.common.util.security;
+
+import de.flowsuite.mailflowapi.common.exception.RsaKeyNotSetException;
 
 import org.springframework.stereotype.Component;
 
@@ -18,14 +20,8 @@ public class RsaUtil {
     private static RSAPublicKey publicKey = null;
     private static RSAPrivateKey privateKey = null;
 
-    private static String base64DecodeRsaKey(String b64Key) {
-        byte[] decodedKey = Base64.getDecoder().decode(b64Key);
-        return new String(decodedKey, StandardCharsets.UTF_8);
-    }
-
-    public static void setPrivateKey(String b64PrivateKey) {
+    public static void setPrivateKey(String key) {
         try {
-            String key = base64DecodeRsaKey(b64PrivateKey);
             key =
                     key.replace("-----BEGIN PRIVATE KEY-----", "")
                             .replace("-----END PRIVATE KEY-----", "")
@@ -40,9 +36,8 @@ public class RsaUtil {
         }
     }
 
-    public static void setPublicKey(String b64PublicKey) {
+    public static void setPublicKey(String key) {
         try {
-            String key = base64DecodeRsaKey(b64PublicKey);
             key =
                     key.replace("-----BEGIN PUBLIC KEY-----", "")
                             .replace("-----END PUBLIC KEY-----", "")
@@ -59,7 +54,7 @@ public class RsaUtil {
 
     public static RSAPublicKey getPublicKey() {
         if (publicKey == null) {
-            throw new RsaKeyNotSetException(RSAPrivateKey.class.getSimpleName());
+            throw new RsaKeyNotSetException(RSAPublicKey.class.getSimpleName());
         } else {
             return publicKey;
         }
@@ -67,7 +62,7 @@ public class RsaUtil {
 
     public static RSAPrivateKey getPrivateKey() {
         if (privateKey == null) {
-            throw new RsaKeyNotSetException(RSAPublicKey.class.getSimpleName());
+            throw new RsaKeyNotSetException(RSAPrivateKey.class.getSimpleName());
         } else {
             return privateKey;
         }

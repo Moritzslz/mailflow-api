@@ -1,5 +1,8 @@
 package de.flowsuite.mailflowapi.security;
 
+import static org.springframework.security.oauth2.core.authorization.OAuth2AuthorizationManagers.hasAnyScope;
+import static org.springframework.security.oauth2.core.authorization.OAuth2AuthorizationManagers.hasScope;
+
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -7,24 +10,30 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 
-import de.flowsuite.mailflowapi.common.util.rsa.RsaUtil;
+import de.flowsuite.mailflowapi.common.entity.Authorities;
+import de.flowsuite.mailflowapi.common.util.security.RsaUtil;
+import de.flowsuite.mailflowapi.user.UserService;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -37,34 +46,77 @@ import java.util.List;
 @EnableWebSecurity
 class SecurityConfig {
 
-    static final String RECAPTCHA_HEADER = "reCAPTCHA";
+    private final String basePath;
+    private final String reCaptchaHttpHeader;
+    private final ReCaptchaFilter reCaptchaFilter;
+    private final UserService userService;
 
     SecurityConfig(
             @Value("${rsa.b64-public-key}") String b64PublicKey,
-            @Value("${rsa.b64-private-key}") String b64PrivateKey) {
+            @Value("${rsa.b64-private-key}") String b64PrivateKey,
+            @Value("${server.servlet.context-path}") String basePath,
+            @Value("${recaptcha.http-header}") String reCaptchaHttpHeader,
+            ReCaptchaService reCaptchaService,
+            UserService userService) {
         RsaUtil.setPublicKey(b64PublicKey);
         RsaUtil.setPrivateKey(b64PrivateKey);
+        this.basePath = basePath;
+        this.reCaptchaHttpHeader = reCaptchaHttpHeader;
+        this.reCaptchaFilter = new ReCaptchaFilter(reCaptchaHttpHeader, reCaptchaService);
+        this.userService = userService;
     }
 
+    // spotless:off
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http.authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
-                .sessionManagement(
-                        session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .httpBasic(Customizer.withDefaults())
+        return http.authorizeHttpRequests(auth -> auth
+                        // Auth Resource
+                        .requestMatchers(HttpMethod.POST, "/auth/**").permitAll()
+                        // Customer Resource
+                        .requestMatchers(HttpMethod.POST, "/customers").access(hasScope(Authorities.ADMIN.getAuthority()))
+                        .requestMatchers(HttpMethod.GET, "/customers").access(hasAnyScope(Authorities.CUSTOMERS_LIST.getAuthority(), Authorities.ADMIN.getAuthority()))
+                        .requestMatchers(HttpMethod.GET, "/customers/{id}").access(hasScope(Authorities.CUSTOMERS_READ.getAuthority()))
+                        .requestMatchers(HttpMethod.PUT, "/customers/{id}").access(hasScope(Authorities.CUSTOMERS_WRITE.getAuthority()))
+                        // User Resource
+                        .requestMatchers(HttpMethod.POST, "/customers/users/register").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/customers/users/enable").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/customers/users/password").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/customers/users/password").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/customers/users").access(hasScope(Authorities.USERS_LIST.getAuthority()))
+                        .requestMatchers(HttpMethod.GET, "/customers/*/users/*").access(hasScope(Authorities.USERS_READ.getAuthority()))
+                        .requestMatchers(HttpMethod.PUT, "/customers/*/users/*").access(hasScope(Authorities.USERS_WRITE.getAuthority()))
+                        // CustomerSettings Resource
+                        .requestMatchers(HttpMethod.POST, "/customers/*/users/*/settings").access(hasScope(Authorities.SETTINGS_WRITE.getAuthority()))
+                        .requestMatchers(HttpMethod.GET, "/customers/*/users/*/settings").access(hasScope(Authorities.SETTINGS_READ.getAuthority()))
+                        .requestMatchers(HttpMethod.PUT, "/customers/*/users/*/settings").access(hasScope(Authorities.SETTINGS_WRITE.getAuthority()))
+                        // RagUrls Resource
+                        .requestMatchers(HttpMethod.POST, "/customers/*/rag-urls").access(hasScope(Authorities.RAG_URLS_WRITE.getAuthority()))
+                        .requestMatchers(HttpMethod.GET, "/customers/*/rag-urls").access(hasScope(Authorities.RAG_URLS_LIST.getAuthority()))
+                        .requestMatchers(HttpMethod.PUT, "/customers/*/rag-urls").access(hasScope(Authorities.RAG_URLS_WRITE.getAuthority()))
+                        // Blacklist Resource
+                        .requestMatchers(HttpMethod.POST, "/customers/*/blacklist").access(hasScope(Authorities.BLACKLIST_WRITE.getAuthority()))
+                        .requestMatchers(HttpMethod.GET, "/customers/*/blacklist").access(hasScope(Authorities.BLACKLIST_LIST.getAuthority()))
+                        .requestMatchers(HttpMethod.DELETE, "/customers/*/blacklist").access(hasScope(Authorities.BLACKLIST_WRITE.getAuthority()))
+                        // MessageCategories Resource
+                        .requestMatchers(HttpMethod.POST, "/customers/*/message-categories").access(hasScope(Authorities.MESSAGE_CATEGORIES_WRITE.getAuthority()))
+                        .requestMatchers(HttpMethod.GET, "/customers/*/message-categories").access(hasScope(Authorities.MESSAGE_CATEGORIES_LIST.getAuthority()))
+                        .requestMatchers(HttpMethod.PUT, "/customers/*/message-categories").access(hasScope(Authorities.MESSAGE_CATEGORIES_WRITE.getAuthority()))
+                        // MessageLog Resource
+                        .requestMatchers(HttpMethod.POST, "/customers/*/users/*/message-log").access(hasScope(Authorities.MESSAGE_LOG_WRITE.getAuthority()))
+                        .requestMatchers(HttpMethod.GET, "/customers/*/users/*/message-log").access(hasScope(Authorities.MESSAGE_LOG_LIST.getAuthority()))
+                        // ResponseRatings Resource
+                        .requestMatchers(HttpMethod.POST, "/customers/users/response-ratings").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/customers/*/users/*/response-ratings").access(hasScope(Authorities.RESPONSE_RATINGS_LIST.getAuthority()))
+                        // Authenticate any request
+                        .anyRequest()
+                        .authenticated())
+                .oauth2ResourceServer(resourceServer -> resourceServer.jwt(Customizer.withDefaults()))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .oauth2ResourceServer(
-                        resourceServer -> resourceServer.jwt(Customizer.withDefaults()))
                 .build();
     }
-
-    // TODO: Intermediate solution; Change when creating user package to proper Impl
-    @Bean
-    InMemoryUserDetailsManager userDetailsManager() {
-        return new InMemoryUserDetailsManager(
-                User.withUsername("admin").password("{noop}password").authorities("read").build());
-    }
+    // spotless:on
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
@@ -78,7 +130,7 @@ class SecurityConfig {
                         "http://*.flow-suite.de",
                         "https://*.flow-suite.de"));
         configuration.setAllowedHeaders(
-                List.of(HttpHeaders.AUTHORIZATION, HttpHeaders.CONTENT_TYPE, RECAPTCHA_HEADER));
+                List.of(HttpHeaders.AUTHORIZATION, HttpHeaders.CONTENT_TYPE, reCaptchaHttpHeader));
         configuration.setAllowedMethods(
                 Arrays.asList(
                         HttpMethod.POST.name(),
@@ -104,5 +156,51 @@ class SecurityConfig {
                         .build();
         JWKSource<SecurityContext> jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
         return new NimbusJwtEncoder(jwks);
+    }
+
+    @Bean
+    AuthenticationManager authenticationManager() {
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(userService);
+        authenticationProvider.setPasswordEncoder(new BCryptPasswordEncoder());
+        return new ProviderManager(authenticationProvider);
+    }
+
+    /* @Bean
+    public RegisteredClientRepository registeredClientRepository() {
+        RegisteredClient userClient =
+                RegisteredClient.withId(UUID.randomUUID().toString())
+                        .clientId("frontend-client")
+                        .clientSecret("{noop}frontend-secret") // No encoding for simplicity
+                        .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                        .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+                        .redirectUri("http://localhost:3000/login/callback")
+                        .scope("openid")
+                        .scope("profile")
+                        .build();
+
+        RegisteredClient serviceClient =
+                RegisteredClient.withId(UUID.randomUUID().toString())
+                        .clientId("microservice-client")
+                        .clientSecret("{noop}microservice-secret") // No encoding for simplicity
+                        .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                        .scope("read:customers")
+                        .scope("write:customers")
+                        .build();
+
+        return new InMemoryRegisteredClientRepository(userClient, serviceClient);
+    }*/
+
+    @Bean
+    FilterRegistrationBean<ReCaptchaFilter> reCaptchaFilterRegistration() {
+        FilterRegistrationBean<ReCaptchaFilter> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(reCaptchaFilter);
+        registrationBean.addUrlPatterns(
+                "/auth/token",
+                "/customers/users/register",
+                "/customers/users/enable",
+                "/customers/users/password",
+                "/customers/users/response-ratings");
+        return registrationBean;
     }
 }

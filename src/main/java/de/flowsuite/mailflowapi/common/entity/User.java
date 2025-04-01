@@ -10,8 +10,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -19,13 +26,15 @@ import java.time.ZonedDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @NotNull private Long id;
+    private long id;
 
-    @NotNull private Long customerId;
+    @ManyToOne
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
 
     @NotBlank private String firstName;
     @NotBlank private String lastName;
@@ -44,8 +53,8 @@ public class User {
     @NotBlank private String verificationToken;
     @NotNull private ZonedDateTime tokenExpiresAt;
     private ZonedDateTime lastLoginAt;
-    @NotNull private ZonedDateTime createdAt;
-    @NotNull private ZonedDateTime updatedAt;
+    private ZonedDateTime createdAt;
+    private ZonedDateTime updatedAt;
 
     @PrePersist
     protected void onCreate() {
@@ -65,5 +74,45 @@ public class User {
         if (lastLoginAt != null) {
             lastLoginAt = lastLoginAt.withZoneSameInstant(berlinZone);
         }
+    }
+
+    @Override
+    public String getUsername() {
+        return emailAddress;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        List<GrantedAuthority> authorities = new ArrayList<>();
+
+        authorities.add(new SimpleGrantedAuthority(role));
+        authorities.add(new SimpleGrantedAuthority(Authorities.CUSTOMERS_READ.getAuthority()));
+        authorities.add(new SimpleGrantedAuthority(Authorities.CUSTOMERS_WRITE.getAuthority()));
+        authorities.add(new SimpleGrantedAuthority(Authorities.USERS_READ.getAuthority()));
+        authorities.add(new SimpleGrantedAuthority(Authorities.USERS_WRITE.getAuthority()));
+        authorities.add(new SimpleGrantedAuthority(Authorities.SETTINGS_READ.getAuthority()));
+        authorities.add(new SimpleGrantedAuthority(Authorities.SETTINGS_WRITE.getAuthority()));
+        authorities.add(new SimpleGrantedAuthority(Authorities.RAG_URLS_LIST.getAuthority()));
+        authorities.add(new SimpleGrantedAuthority(Authorities.RAG_URLS_WRITE.getAuthority()));
+        authorities.add(new SimpleGrantedAuthority(Authorities.BLACKLIST_LIST.getAuthority()));
+        authorities.add(new SimpleGrantedAuthority(Authorities.BLACKLIST_WRITE.getAuthority()));
+        authorities.add(
+                new SimpleGrantedAuthority(Authorities.MESSAGE_CATEGORIES_LIST.getAuthority()));
+        authorities.add(
+                new SimpleGrantedAuthority(Authorities.MESSAGE_CATEGORIES_WRITE.getAuthority()));
+        authorities.add(new SimpleGrantedAuthority(Authorities.MESSAGE_LOG_LIST.getAuthority()));
+        authorities.add(new SimpleGrantedAuthority(Authorities.MESSAGE_LOG_LIST.getAuthority()));
+
+        return authorities;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return !isAccountLocked;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return isAccountEnabled;
     }
 }

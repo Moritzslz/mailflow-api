@@ -3,7 +3,6 @@ package de.flowsuite.mailflowapi.common.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,10 +18,12 @@ public class RagUrl {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @NotNull private Long id;
+    private long id;
 
-    @NotNull private Long customerId;
+    @ManyToOne
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
 
     @NotBlank private String url;
-    private boolean isLastCrawlSuccessful;
+    private Boolean isLastCrawlSuccessful;
 }

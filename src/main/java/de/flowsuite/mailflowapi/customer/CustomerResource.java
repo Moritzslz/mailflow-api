@@ -3,6 +3,7 @@ package de.flowsuite.mailflowapi.customer;
 import de.flowsuite.mailflowapi.common.entity.Customer;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/customers")
+@RequestMapping("/customers")
 class CustomerResource {
 
     private final CustomerService customerService;
@@ -20,8 +21,9 @@ class CustomerResource {
     }
 
     @PostMapping
-    ResponseEntity<Customer> createCustomer(@RequestBody @Valid Customer customer) {
-        return ResponseEntity.ok(customerService.createCustomer(customer));
+    ResponseEntity<Customer> createCustomer(
+            @RequestBody @Valid CreateCustomerRequest createCustomerRequest) {
+        return ResponseEntity.ok(customerService.createCustomer(createCustomerRequest));
     }
 
     @GetMapping()
@@ -30,7 +32,7 @@ class CustomerResource {
     }
 
     @GetMapping("/{id}")
-    ResponseEntity<Customer> getCustomerById(@PathVariable long id) {
+    ResponseEntity<GetCustomerResponse> getCustomerById(@PathVariable long id) {
         return ResponseEntity.ok(customerService.getCustomerById(id));
     }
 
@@ -39,4 +41,17 @@ class CustomerResource {
             @PathVariable long id, @RequestBody @Valid Customer customer) {
         return ResponseEntity.ok(customerService.updateCustomer(id, customer));
     }
+
+    record CreateCustomerRequest(@Valid Customer customer, @NotBlank String openAiApiKey) {}
+
+    record GetCustomerResponse(
+            long id,
+            String company,
+            String street,
+            String houseNumber,
+            String postalCode,
+            String city,
+            String websiteUrl,
+            String privacyPolicyUrl,
+            String ctaUrl) {}
 }

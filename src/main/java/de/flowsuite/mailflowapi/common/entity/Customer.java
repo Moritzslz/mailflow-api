@@ -3,7 +3,6 @@ package de.flowsuite.mailflowapi.common.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,7 +18,7 @@ public class Customer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @NotNull private Long id;
+    private long id;
 
     @NotBlank private String company;
     @NotBlank private String street;
@@ -28,7 +27,7 @@ public class Customer {
     @NotBlank private String city;
 
     @Column(name = "openai_api_key_hash")
-    @NotBlank private String openAiApiKey;
+    private String openAiApiKey;
 
     private String sourceOfContact;
     private String websiteUrl;

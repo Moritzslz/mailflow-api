@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,7 +19,11 @@ public class BlacklistEntry {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @NotNull private Long id;
-    @NotNull private Long customerId;
+    private long id;
+
+    @ManyToOne
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
+
     @Email @NotBlank private String blacklistedEmailAddress;
 }

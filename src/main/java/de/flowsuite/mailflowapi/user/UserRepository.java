@@ -1,0 +1,21 @@
+package de.flowsuite.mailflowapi.user;
+
+import de.flowsuite.mailflowapi.common.entity.User;
+
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+import java.util.Set;
+
+@Repository
+interface UserRepository extends CrudRepository<User, Long> {
+
+    Optional<User> findByEmailAddress(String emailAddress);
+
+    Optional<User> findByVerificationToken(String verificationToken);
+
+    Set<User> findAllByIsSubscribedToNewsletter(Boolean isSubscribedToNewsletter);
+
+    boolean existsByVerificationToken(String verificationToken);
+}

@@ -12,32 +12,42 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 @Entity
-@Table(name = "customer_settings")
+@Table(name = "settings")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CustomerSettings {
+public class Settings {
 
-    @Id @NotNull private Long customerId;
-    @NotNull private Boolean isExecutionEnabled;
-    @NotNull private Boolean isAutoReplyEnabled;
-    @NotNull private Boolean isResponseRatingEnabled;
-    @NotBlank private String supportAgentName;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long userId;
+
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
+
+    private boolean isExecutionEnabled;
+    private boolean isAutoReplyEnabled;
+    private boolean isResponseRatingEnabled;
 
     @Min(168) @Max(744) private int crawlFrequencyInHours;
 
     private ZonedDateTime lastCrawlAt;
     private ZonedDateTime nextCrawlAt;
-    @Email @NotBlank private String mailboxEmailAddress;
 
     @Column(name = "mailbox_password_hash")
     @NotBlank private String mailboxPassword;
 
-    @NotBlank private String imapHost;
-    @NotBlank private String smtpHost;
-    @NotNull private Integer imapPort;
-    @NotNull private Integer smtpPort;
+    private String imapHost;
+    private String smtpHost;
+    private Integer imapPort;
+    private Integer smtpPort;
 
     @PrePersist
     @PreUpdate

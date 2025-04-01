@@ -3,6 +3,8 @@ package de.flowsuite.mailflowapi.customer;
 import de.flowsuite.mailflowapi.common.entity.Customer;
 import de.flowsuite.mailflowapi.common.exception.EntityNotFoundException;
 import de.flowsuite.mailflowapi.common.exception.IdConflictException;
+import de.flowsuite.mailflowapi.common.util.security.AuthorisationUtil;
+import de.flowsuite.mailflowapi.common.util.security.RsaUtil;
 
 import org.springframework.stereotype.Service;
 
@@ -17,7 +19,10 @@ class CustomerService {
         this.customerRepository = customerRepository;
     }
 
-    Customer createCustomer(Customer customer) {
+    Customer createCustomer(CustomerResource.CreateCustomerRequest createCustomerRequest) {
+        Customer customer = createCustomerRequest.customer();
+        customer.setOpenAiApiKey(
+                RsaUtil.encrypt(createCustomerRequest.openAiApiKey(), RsaUtil.getPublicKey()));
         return customerRepository.save(customer);
     }
 
@@ -25,17 +30,43 @@ class CustomerService {
         return (List<Customer>) customerRepository.findAll();
     }
 
-    Customer getCustomerById(long id) {
+    CustomerResource.GetCustomerResponse getCustomerById(long id) {
+        AuthorisationUtil.checkCustomerAllowed(id);
+
         return customerRepository
                 .findById(id)
+                .map(this::mapToGetCustomerResponse)
                 .orElseThrow(() -> new EntityNotFoundException(Customer.class.getSimpleName()));
     }
 
-    Customer updateCustomer(long id, Customer customer) {
-        if (id != customer.getId()) {
+    Customer updateCustomer(long id, Customer updatedCustomer) {
+        AuthorisationUtil.checkCustomerAllowed(id);
+
+        if (id != updatedCustomer.getId()) {
             throw new IdConflictException();
         } else {
-            return customerRepository.save(customer);
+            Customer customer =
+                    customerRepository
+                            .findById(id)
+                            .orElseThrow(
+                                    () ->
+                                            new EntityNotFoundException(
+                                                    Customer.class.getSimpleName()));
+            updatedCustomer.setOpenAiApiKey(customer.getOpenAiApiKey());
+            return customerRepository.save(updatedCustomer);
         }
+    }
+
+    private CustomerResource.GetCustomerResponse mapToGetCustomerResponse(Customer customer) {
+        return new CustomerResource.GetCustomerResponse(
+                customer.getId(),
+                customer.getCompany(),
+                customer.getStreet(),
+                customer.getHouseNumber(),
+                customer.getPostalCode(),
+                customer.getCity(),
+                customer.getWebsiteUrl(),
+                customer.getPrivacyPolicyUrl(),
+                customer.getCtaUrl());
     }
 }

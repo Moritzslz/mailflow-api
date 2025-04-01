@@ -23,9 +23,15 @@ public class MessageLogEntry {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @NotNull private Long id;
+    private long id;
 
-    @NotNull private Long customerId;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
 
     @NotBlank private String category;
     @NotBlank private String language;

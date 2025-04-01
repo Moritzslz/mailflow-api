@@ -1,4 +1,8 @@
-package de.flowsuite.mailflowapi.security.recaptcha;
+package de.flowsuite.mailflowapi.security;
+
+import de.flowsuite.mailflowapi.common.exception.InvalidReCaptchaTokenException;
+import de.flowsuite.mailflowapi.common.exception.MissingReCaptchaTokenException;
+import de.flowsuite.mailflowapi.common.exception.ReCaptchaResponseException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +14,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 @Service
-public class ReCaptchaService {
+class ReCaptchaService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ReCaptchaService.class);
 
@@ -25,11 +29,11 @@ public class ReCaptchaService {
 
     private final RestTemplate restTemplate;
 
-    public ReCaptchaService(RestTemplate restTemplate) {
+    ReCaptchaService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
-    public void verifyToken(String reCaptchaToken) {
+    void verifyToken(String reCaptchaToken) {
         if (reCaptchaToken == null || reCaptchaToken.isBlank()) {
             throw new MissingReCaptchaTokenException();
         }
@@ -52,10 +56,13 @@ public class ReCaptchaService {
             throw new ReCaptchaResponseException();
         }
 
-        LOG.debug(recaptchaResponse.toString());
+        LOG.debug("Google reCAPTCHA response: {}", recaptchaResponse);
 
         if (!recaptchaResponse.success() || recaptchaResponse.score() <= threshold) {
             throw new InvalidReCaptchaTokenException();
         }
     }
+
+    private record ReCaptchaResponse(
+            Boolean success, String hostname, Double score, String action) {}
 }
