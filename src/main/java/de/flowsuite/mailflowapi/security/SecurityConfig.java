@@ -19,7 +19,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -36,8 +35,9 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
-import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -175,8 +175,9 @@ class SecurityConfig {
         return new ProviderManager(authenticationProvider);
     }
 
+    // TODO InMemoryRegisteredClientRepository should only be used for local development
     @Bean
-    public JdbcRegisteredClientRepository registeredClientRepository(JdbcTemplate jdbcTemplate) {
+    public RegisteredClientRepository registeredClientRepository() {
         RegisteredClient mailboxClient =
                 RegisteredClient.withId(UUID.randomUUID().toString())
                         .clientId("mailflow-mailbox-client")
@@ -213,13 +214,7 @@ class SecurityConfig {
                         .scope(Authorities.RAG_URLS_WRITE.getAuthority())
                         .build();
 
-        JdbcRegisteredClientRepository registeredClientRepository =
-                new JdbcRegisteredClientRepository(jdbcTemplate);
-        registeredClientRepository.save(mailboxClient);
-        registeredClientRepository.save(aiCompletionClient);
-        registeredClientRepository.save(ragClient);
-
-        return registeredClientRepository;
+        return new InMemoryRegisteredClientRepository(mailboxClient, aiCompletionClient, ragClient);
     }
 
     @Bean
