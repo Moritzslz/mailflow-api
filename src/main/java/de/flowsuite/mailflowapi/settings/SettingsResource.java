@@ -3,6 +3,10 @@ package de.flowsuite.mailflowapi.settings;
 import de.flowsuite.mailflowapi.common.entity.Settings;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,7 +38,34 @@ class SettingsResource {
     ResponseEntity<Settings> updateSettings(
             @PathVariable long customerId,
             @PathVariable long userId,
-            @RequestBody @Valid Settings settings) {
-        return ResponseEntity.ok(settingsService.updateSettings(customerId, userId, settings));
+            @RequestBody @Valid UpdateSettingsRequest request) {
+        return ResponseEntity.ok(settingsService.updateSettings(customerId, userId, request));
     }
+
+    @PutMapping("/{customerId}/users/{userId}/settings/mailbox-password")
+    ResponseEntity<Settings> updateMailboxPassword(
+            @PathVariable long customerId,
+            @PathVariable long userId,
+            @RequestBody @Valid SettingsResource.UpdateMailboxPasswordRequest request) {
+        return ResponseEntity.ok(
+                settingsService.updateMailboxPassword(customerId, userId, request));
+    }
+
+    record UpdateSettingsRequest(
+            @NotNull Long userId,
+            @NotNull Long customerId,
+            boolean isExecutionEnabled,
+            boolean isAutoReplyEnabled,
+            boolean isResponseRatingEnabled,
+            @Min(168) @Max(744) int crawlFrequencyInHours,
+            String imapHost,
+            String smtpHost,
+            Integer imapPort,
+            Integer smtpPort) {}
+
+    record UpdateMailboxPasswordRequest(
+            @NotNull Long userId,
+            @NotNull Long customerId,
+            @NotBlank String currentPassword,
+            @NotBlank String updatedPassword) {}
 }

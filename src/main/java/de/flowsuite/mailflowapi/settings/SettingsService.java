@@ -41,11 +41,12 @@ class SettingsService {
                 .orElseThrow(() -> new EntityNotFoundException(Settings.class.getSimpleName()));
     }
 
-    Settings updateSettings(long customerId, long userId, Settings updatedSettings) {
+    Settings updateSettings(
+            long customerId, long userId, SettingsResource.UpdateSettingsRequest request) {
         AuthorisationUtil.checkCustomerAllowed(customerId);
         AuthorisationUtil.checkUserAllowed(userId);
 
-        if (userId != updatedSettings.getUserId() || customerId != updatedSettings.getCustomerId()) {
+        if (userId != request.userId() || customerId != request.customerId()) {
             throw new IdConflictException();
         }
 
@@ -55,9 +56,40 @@ class SettingsService {
                         .orElseThrow(
                                 () -> new EntityNotFoundException(Customer.class.getSimpleName()));
 
-        if (!settings.getMailboxPassword().equals(updatedSettings.getMailboxPassword())) {
-            updatedSettings.setMailboxPassword(AesUtil.encrypt(updatedSettings.getMailboxPassword()));
+        settings.setExecutionEnabled(request.isExecutionEnabled());
+        settings.setAutoReplyEnabled(request.isAutoReplyEnabled());
+        settings.setResponseRatingEnabled(request.isResponseRatingEnabled());
+        settings.setCrawlFrequencyInHours(request.crawlFrequencyInHours());
+        settings.setImapHost(request.imapHost());
+        settings.setSmtpHost(request.smtpHost());
+        settings.setImapPort(request.imapPort());
+        settings.setSmtpPort(request.smtpPort());
+
+        return settingsRepository.save(settings);
+    }
+
+    Settings updateMailboxPassword(
+            long customerId, long userId, SettingsResource.UpdateMailboxPasswordRequest request) {
+        AuthorisationUtil.checkCustomerAllowed(customerId);
+        AuthorisationUtil.checkUserAllowed(userId);
+
+        if (userId != request.userId() || customerId != request.customerId()) {
+            throw new IdConflictException();
         }
+
+        Settings settings =
+                settingsRepository
+                        .findById(userId)
+                        .orElseThrow(
+                                () -> new EntityNotFoundException(Customer.class.getSimpleName()));
+
+        String encryptedCurrentPassword = AesUtil.encrypt(request.currentPassword());
+
+        if (!settings.getMailboxPassword().equals(encryptedCurrentPassword)) {
+            throw new InvalidValueException();
+        }
+
+        settings.setMailboxPassword(AesUtil.encrypt(request.updatedPassword()));
 
         return settingsRepository.save(settings);
     }
