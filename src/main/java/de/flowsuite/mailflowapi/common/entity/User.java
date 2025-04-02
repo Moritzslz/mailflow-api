@@ -33,9 +33,9 @@ public class User implements UserDetails {
     private long id;
 
     @NotNull private Long customerId;
-    @NotBlank private String firstName;
-    @NotBlank private String lastName;
-    @Email @NotBlank private String emailAddress;
+    @NotBlank private String firstName; // TODO encrypt using AES
+    @NotBlank private String lastName; // TODO encrypt using AES
+    @Email @NotBlank private String emailAddress; // TODO encrypt using AES
 
     @Column(name = "password_hash")
     @NotBlank private String password;

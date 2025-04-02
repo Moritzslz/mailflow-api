@@ -29,7 +29,7 @@ public class MessageLogEntry {
     @NotNull private Long customerID;
     @NotBlank private String category;
     @NotBlank private String language;
-    @Email private String fromEmailAddress;
+    @Email private String fromEmailAddress; // TODO encrypt using AES
     private String subject;
     @NotNull private ZonedDateTime receivedAt;
     @NotNull private ZonedDateTime processedAt;
