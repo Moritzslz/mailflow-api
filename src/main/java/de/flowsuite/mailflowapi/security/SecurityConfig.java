@@ -95,7 +95,7 @@ class SecurityConfig {
                         // CustomerSettings Resource
                         .requestMatchers(HttpMethod.POST, "/customers/*/users/*/settings").access(hasScope(Authorities.SETTINGS_WRITE.getAuthority()))
                         .requestMatchers(HttpMethod.GET, "/customers/*/users/*/settings").access(hasScope(Authorities.SETTINGS_READ.getAuthority()))
-                        .requestMatchers(HttpMethod.PUT, "/customers/*/users/*/settings").access(hasScope(Authorities.SETTINGS_WRITE.getAuthority()))
+                        .requestMatchers(HttpMethod.PUT, "/customers/*/users/*/settings/*").access(hasScope(Authorities.SETTINGS_WRITE.getAuthority()))
                         // RagUrls Resource
                         .requestMatchers(HttpMethod.POST, "/customers/*/rag-urls").access(hasScope(Authorities.RAG_URLS_WRITE.getAuthority()))
                         .requestMatchers(HttpMethod.GET, "/customers/*/rag-urls").access(hasScope(Authorities.RAG_URLS_LIST.getAuthority()))
