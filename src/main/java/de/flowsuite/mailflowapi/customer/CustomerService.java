@@ -3,6 +3,7 @@ package de.flowsuite.mailflowapi.customer;
 import de.flowsuite.mailflowapi.common.entity.Customer;
 import de.flowsuite.mailflowapi.common.exception.EntityNotFoundException;
 import de.flowsuite.mailflowapi.common.exception.IdConflictException;
+import de.flowsuite.mailflowapi.common.exception.InvalidValueException;
 import de.flowsuite.mailflowapi.common.util.security.AesUtil;
 import de.flowsuite.mailflowapi.common.util.security.AuthorisationUtil;
 
@@ -19,9 +20,8 @@ class CustomerService {
         this.customerRepository = customerRepository;
     }
 
-    Customer createCustomer(CustomerResource.CreateCustomerRequest createCustomerRequest) {
-        Customer customer = createCustomerRequest.customer();
-        customer.setOpenaiApiKey(AesUtil.encrypt(createCustomerRequest.openAiApiKey()));
+    Customer createCustomer(Customer customer) {
+        customer.setOpenaiApiKey(AesUtil.encrypt(customer.getOpenaiApiKey()));
         return customerRepository.save(customer);
     }
 
@@ -29,12 +29,11 @@ class CustomerService {
         return (List<Customer>) customerRepository.findAll();
     }
 
-    CustomerResource.GetCustomerResponse getCustomerById(long id) {
+    Customer getCustomerById(long id) {
         AuthorisationUtil.checkCustomerAllowed(id);
 
         return customerRepository
                 .findById(id)
-                .map(this::mapToGetCustomerResponse)
                 .orElseThrow(() -> new EntityNotFoundException(Customer.class.getSimpleName()));
     }
 
@@ -43,29 +42,18 @@ class CustomerService {
 
         if (id != updatedCustomer.getId()) {
             throw new IdConflictException();
-        } else {
-            Customer customer =
-                    customerRepository
-                            .findById(id)
-                            .orElseThrow(
-                                    () ->
-                                            new EntityNotFoundException(
-                                                    Customer.class.getSimpleName()));
-            updatedCustomer.setOpenaiApiKey(customer.getOpenaiApiKey());
-            return customerRepository.save(updatedCustomer);
         }
-    }
 
-    private CustomerResource.GetCustomerResponse mapToGetCustomerResponse(Customer customer) {
-        return new CustomerResource.GetCustomerResponse(
-                customer.getId(),
-                customer.getCompany(),
-                customer.getStreet(),
-                customer.getHouseNumber(),
-                customer.getPostalCode(),
-                customer.getCity(),
-                customer.getWebsiteUrl(),
-                customer.getPrivacyPolicyUrl(),
-                customer.getCtaUrl());
+        Customer customer =
+                customerRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () -> new EntityNotFoundException(Customer.class.getSimpleName()));
+
+        if (!customer.getOpenaiApiKey().equals(updatedCustomer.getOpenaiApiKey())) {
+            throw new InvalidValueException();
+        }
+
+        return customerRepository.save(updatedCustomer);
     }
 }

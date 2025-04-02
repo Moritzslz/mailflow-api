@@ -1,8 +1,10 @@
 package de.flowsuite.mailflowapi.settings;
 
+import de.flowsuite.mailflowapi.common.entity.Customer;
 import de.flowsuite.mailflowapi.common.entity.Settings;
 import de.flowsuite.mailflowapi.common.exception.EntityNotFoundException;
 import de.flowsuite.mailflowapi.common.exception.IdConflictException;
+import de.flowsuite.mailflowapi.common.exception.InvalidValueException;
 import de.flowsuite.mailflowapi.common.util.security.AesUtil;
 import de.flowsuite.mailflowapi.common.util.security.AuthorisationUtil;
 
@@ -23,36 +25,40 @@ class SettingsService {
 
         if (userId != settings.getUserId() || customerId != settings.getCustomerId()) {
             throw new IdConflictException();
-        } else {
-            settings.setMailboxPassword(AesUtil.encrypt(settings.getMailboxPassword()));
-            return settingsRepository.save(settings);
         }
+
+        settings.setMailboxPassword(AesUtil.encrypt(settings.getMailboxPassword()));
+
+        return settingsRepository.save(settings);
     }
 
     Settings getSettings(long customerId, long userId) {
         AuthorisationUtil.checkCustomerAllowed(customerId);
         AuthorisationUtil.checkUserAllowed(userId);
 
+        return settingsRepository
+                .findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException(Settings.class.getSimpleName()));
+    }
+
+    Settings updateSettings(long customerId, long userId, Settings updatedSettings) {
+        AuthorisationUtil.checkCustomerAllowed(customerId);
+        AuthorisationUtil.checkUserAllowed(userId);
+
+        if (userId != updatedSettings.getUserId() || customerId != updatedSettings.getCustomerId()) {
+            throw new IdConflictException();
+        }
+
         Settings settings =
                 settingsRepository
                         .findById(userId)
                         .orElseThrow(
-                                () -> new EntityNotFoundException(Settings.class.getSimpleName()));
-        if (customerId != settings.getCustomerId()) {
-            throw new IdConflictException();
-        } else {
-            return settings;
-        }
-    }
+                                () -> new EntityNotFoundException(Customer.class.getSimpleName()));
 
-    Settings updateSettings(long customerId, long userId, Settings settings) {
-        AuthorisationUtil.checkCustomerAllowed(customerId);
-        AuthorisationUtil.checkUserAllowed(userId);
-
-        if (userId != settings.getUserId() || customerId != settings.getCustomerId()) {
-            throw new IdConflictException();
-        } else {
-            return settingsRepository.save(settings);
+        if (!settings.getMailboxPassword().equals(updatedSettings.getMailboxPassword())) {
+            updatedSettings.setMailboxPassword(AesUtil.encrypt(updatedSettings.getMailboxPassword()));
         }
+
+        return settingsRepository.save(settings);
     }
 }
