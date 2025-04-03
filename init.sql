@@ -121,3 +121,54 @@ CREATE TABLE response_ratings (
 CREATE INDEX idx_response_ratings_user_id ON response_ratings(user_id);
 CREATE INDEX idx_response_ratings_rating ON response_ratings(rating);
 CREATE INDEX idx_response_ratings_rated_at ON response_ratings(created_at);
+
+INSERT INTO customers (company, street, house_number, postal_code, city, openai_api_key_enc)
+VALUES ('FlowSuite', 'Straße', '69', '1337', 'München', 'R0p2fHYTSBAHIq5YEWzN1Jwnfar/IwvyqnPhw/AGjwliTfNO71WPHw==');
+
+INSERT INTO customers (company, street, house_number, postal_code, city, openai_api_key_enc)
+VALUES ('Company', 'Street', '69', '1337', 'City', 'R0p2fHYTSBAHIq5YEWzN1Jwnfar/IwvyqnPhw/AGjwliTfNO71WPHw==');
+
+INSERT INTO users (customer_id, first_name_enc, last_name_enc, email_address_hash, email_address_enc, password_hash, role, is_account_locked, is_account_enabled, is_subscribed_to_newsletter, verification_token, token_expires_at)
+VALUES (1, 'Uztmz8Fii79yN2SY6wg5md6Ek5RLeBzMGYlNlqYutLyj', 'Uztmz8Fii79yN2SY6wg5md6Ek5RLeBzMGYlNlqYutLyj', 'Cb6R4BLpHhVMebqauEd3TZrhfdkR8hFjvulTHYUfbNM=', 'DMX3vfIVH7vta9jAgOUbwEWGRTa5jFiv2yLi6BMnNv4d7hcfQFdMGnUCRcJPfA==', '$2a$10$t0Olv0N4TdmUfd9yG242i.znX.NN7c.a3AU9DadUg1ro0Xsc8jvom', 'ADMIN', false, true, true, 'token1', NOW() + INTERVAL '30 minutes');
+
+INSERT INTO users (customer_id, first_name_enc, last_name_enc, email_address_hash, email_address_enc, password_hash, role, is_account_locked, is_account_enabled, is_subscribed_to_newsletter, verification_token, token_expires_at)
+VALUES (2, 'RtlBAwPz6EdINA4O51gu8uz0AuZ0UHE5FJPC26Xbquo=', 'RtlBAwPz6EdINA4O51gu8uz0AuZ0UHE5FJPC26Xbquo=', 'U8c45XuAqt5w5/4xkE6/vFfnLE5E3t1uNJJqoywHvUM=', 'g6jxJeir/fXKqxEOwUGuuyLraFFSFnW9Gn8/3QF/J9eS6ka9yyk55iLA5rwgcg==', '$2a$10$t0Olv0N4TdmUfd9yG242i.znX.NN7c.a3AU9DadUg1ro0Xsc8jvom', 'USER', false, true, true, 'token2', NOW() + INTERVAL '30 minutes');
+
+INSERT INTO clients(client_name, client_secret_hash, scope)
+VALUES ('test-client', '$2a$10$WdPzc4aO2o4dkjpk9OXg5OCWAYCkm/G314raW8pkUgi1ctS8VxnpS', 'CLIENT customers:list customers:read settings:read');
+
+INSERT INTO settings (user_id, customer_id, is_execution_enabled, is_auto_reply_enabled, is_response_rating_enabled, crawl_frequency_in_hours, mailbox_password_enc, imap_host, smtp_host, imap_port, smtp_port)
+VALUES (1, 1,true, false, true, 168, '$2a$10$/fXalbMsPDJvqVAVo2YNYeEFWdKl67nIyM4.7DEsoy/ZXdWHkJRHm', 'imap.ionos.de', 'smtp.ionos.com', 993, 465);
+
+INSERT INTO settings (user_id, customer_id, is_execution_enabled, is_auto_reply_enabled, is_response_rating_enabled, crawl_frequency_in_hours, mailbox_password_enc, imap_host, smtp_host, imap_port, smtp_port)
+VALUES (2, 2,true, false, true, 168, '$2a$10$/fXalbMsPDJvqVAVo2YNYeEFWdKl67nIyM4.7DEsoy/ZXdWHkJRHm', 'imap.ionos.de', 'smtp.ionos.com', 993, 465);
+
+INSERT INTO rag_urls (customer_id, url, is_last_crawl_successful)
+VALUES (1, 'https://www.flow-suite.de', NULL);
+
+INSERT INTO rag_urls (customer_id, url, is_last_crawl_successful)
+VALUES (2, 'https://www.flow-suite.de', NULL);
+
+INSERT INTO blacklist (customer_id, blacklisted_email_address_enc)
+VALUES (1, 'ks5Bk+l9E29nDULdti6ihyz8ZFfqwvc8wfxiRL2d0HSvtVOkPJZ8g3zDnnFhJQ==');
+
+INSERT INTO blacklist (customer_id, blacklisted_email_address_enc)
+VALUES (2, 'ks5Bk+l9E29nDULdti6ihyz8ZFfqwvc8wfxiRL2d0HSvtVOkPJZ8g3zDnnFhJQ==');
+
+INSERT INTO message_categories (customer_id, category, is_reply, is_function_call, description)
+VALUES (1, 'Produkt Frage', true, false, 'Allgemeine Fragen zum Produkt');
+
+INSERT INTO message_categories (customer_id, category, is_reply, is_function_call, description)
+VALUES (2, 'Buchungsanfrage', true, false, 'Buchungsanfragen für ein Hotelzimmer');
+
+INSERT INTO message_log (user_id, customer_id, category, language, from_email_address_enc, subject, received_at, processed_at, processing_time_in_seconds, llm_used, input_tokens, output_tokens, total_tokens)
+VALUES (1, 1, 'Produkt Frage', 'Deutsch', 'schultzmoritz@gmail.com', 'Was kann MailFlow?', NOW(), NOW() + INTERVAL '30 seconds', 30, 'gpt-4o-mini', 1500, 1000, 2500);
+
+INSERT INTO message_log (user_id, customer_id, category, language, from_email_address_enc, subject, received_at, processed_at, processing_time_in_seconds, llm_used, input_tokens, output_tokens, total_tokens)
+VALUES (2, 2, 'Buchungsanfrage', 'Deutsch', 'schultzmoritz@gmail.com', 'Zimmer für 6 Personen', NOW(), NOW() + INTERVAL '30 seconds', 30, 'gpt-4o-mini', 1500, 1000, 2500);
+
+INSERT INTO response_ratings (message_log_id, user_id, isSatisfied, rating, feedback)
+VALUES (1, 1, true, 5, 'Frage schnell beantwortet!');
+
+INSERT INTO response_ratings (message_log_id, user_id, isSatisfied, rating, feedback)
+VALUES (2, 2, false, 2, 'Viel zu teuer!');
