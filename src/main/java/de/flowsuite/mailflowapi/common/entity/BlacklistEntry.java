@@ -22,6 +22,8 @@ public class BlacklistEntry {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(updatable = false)
     @NotNull private Long customerId;
+
     @Email @NotBlank private String blacklistedEmailAddress;
 }
