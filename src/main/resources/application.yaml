@@ -22,15 +22,3 @@ google:
     secret-key: ${GOOGLE_RECAPTCHA_SECRET_KEY}
     verify-url: https://www.google.com/recaptcha/api/siteverify
     threshold: 0.5
-
-jwt:
-  issuer:
-    location: self
-
-client:
-  mailbox:
-    secret: ${CLIENT_MAILBOX_SECRET}
-  ai-completion:
-    secret: ${CLIENT_AI_COMPLETION_SECRET}
-  rag:
-    secret: ${CLIENT_RAG_SECRET}
