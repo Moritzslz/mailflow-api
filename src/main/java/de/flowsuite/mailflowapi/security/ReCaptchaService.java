@@ -17,19 +17,19 @@ import org.springframework.web.client.RestTemplate;
 class ReCaptchaService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ReCaptchaService.class);
-
-    @Value("${google.recaptcha.secret-key}")
-    private String secretKey;
-
-    @Value("${google.recaptcha.verify-url}")
-    private String verifyUrl;
-
-    @Value("${google.recaptcha.threshold}")
-    private double threshold;
-
+    private final String secretKey;
+    private final String verifyUrl;
+    private final double threshold;
     private final RestTemplate restTemplate;
 
-    ReCaptchaService(RestTemplate restTemplate) {
+    ReCaptchaService(
+            @Value("${google.recaptcha.secret-key}") String secretKey,
+            @Value("${google.recaptcha.verify-url}") String verifyUrl,
+            @Value("${google.recaptcha.threshold}") double threshold,
+            RestTemplate restTemplate) {
+        this.secretKey = secretKey;
+        this.verifyUrl = verifyUrl;
+        this.threshold = threshold;
         this.restTemplate = restTemplate;
     }
 
