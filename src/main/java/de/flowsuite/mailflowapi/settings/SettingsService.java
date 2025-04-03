@@ -28,7 +28,7 @@ class SettingsService {
             throw new IdConflictException();
         }
 
-        settings.setMailboxPassword(AesUtil.encrypt(settings.getMailboxPassword()));
+        settings.setMailboxPasswordEnc(AesUtil.encrypt(settings.getMailboxPasswordEnc()));
 
         return settingsRepository.save(settings);
     }
@@ -87,11 +87,11 @@ class SettingsService {
                         .orElseThrow(
                                 () -> new EntityNotFoundException(Customer.class.getSimpleName()));
 
-        if (!settings.getMailboxPassword().equals(AesUtil.encrypt(request.currentPassword()))) {
+        if (!settings.getMailboxPasswordEnc().equals(AesUtil.encrypt(request.currentPassword()))) {
             throw new UpdateConflictException();
         }
 
-        settings.setMailboxPassword(AesUtil.encrypt(request.updatedPassword()));
+        settings.setMailboxPasswordEnc(AesUtil.encrypt(request.updatedPassword()));
 
         return settingsRepository.save(settings);
     }

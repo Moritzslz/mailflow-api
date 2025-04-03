@@ -1,7 +1,6 @@
 package de.flowsuite.mailflowapi.common.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -36,7 +35,7 @@ public class User implements UserDetails {
     @NotNull private Long customerId;
 
     @NotBlank private String firstNameEnc;
-    @NotBlank private String lastNameEmc;
+    @NotBlank private String lastNameEnc;
     @NotBlank private String emailAddressHash;
     @NotBlank private String emailAddressEnc;
     @NotBlank private String passwordHash;

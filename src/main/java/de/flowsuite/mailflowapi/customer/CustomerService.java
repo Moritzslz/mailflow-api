@@ -22,7 +22,7 @@ class CustomerService {
     }
 
     Customer createCustomer(Customer customer) {
-        customer.setOpenaiApiKey(AesUtil.encrypt(customer.getOpenaiApiKey()));
+        customer.setOpenaiApiKeyEnc(AesUtil.encrypt(customer.getOpenaiApiKeyEnc()));
         return customerRepository.save(customer);
     }
 
@@ -51,7 +51,7 @@ class CustomerService {
                         .orElseThrow(
                                 () -> new EntityNotFoundException(Customer.class.getSimpleName()));
 
-        if (!customer.getOpenaiApiKey().equals(updatedCustomer.getOpenaiApiKey())) {
+        if (!customer.getOpenaiApiKeyEnc().equals(updatedCustomer.getOpenaiApiKeyEnc())) {
             throw new UpdateConflictException();
         }
 
