@@ -1,7 +1,6 @@
 package de.flowsuite.mailflowapi.client;
 
 import de.flowsuite.mailflowapi.common.entity.Client;
-import de.flowsuite.mailflowapi.common.util.AesUtil;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

@@ -78,7 +78,7 @@ public class User implements UserDetails {
         return emailAddress;
     }
 
-    //spotless:off
+    // spotless:off
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> authorities = new ArrayList<>();
@@ -101,7 +101,7 @@ public class User implements UserDetails {
 
         return authorities;
     }
-    //spotless:on
+    // spotless:on
 
     @Override
     public boolean isAccountNonLocked() {

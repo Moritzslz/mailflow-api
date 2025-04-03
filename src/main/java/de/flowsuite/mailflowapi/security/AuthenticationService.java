@@ -119,8 +119,7 @@ class AuthenticationService {
                         .map(GrantedAuthority::getAuthority)
                         .collect(Collectors.joining(" "));
         String accessToken =
-                generateAccessToken(
-                        String.valueOf(user.getId()), scope, user.getCustomerId());
+                generateAccessToken(String.valueOf(user.getId()), scope, user.getCustomerId());
         return new AuthenticationResource.UserTokenResponse(accessToken, refreshToken);
     }
 
