@@ -35,14 +35,13 @@ public class User implements UserDetails {
     @Column(updatable = false)
     @NotNull private Long customerId;
 
-    @NotBlank private String firstName; // TODO encrypt using AES
-    @NotBlank private String lastName; // TODO encrypt using AES
-    @Email @NotBlank private String emailAddress;
-
-    @Column(name = "password_hash")
-    @NotBlank private String password;
-
-    private String phoneNumber;
+    @NotBlank private String firstNameEnc;
+    @NotBlank private String lastNameEmc;
+    @NotBlank private String emailAddressHash;
+    @NotBlank private String emailAddressEnc;
+    @NotBlank private String passwordHash;
+    private String phoneNumberEnc;
+    private String position;
     @NotNull private String role = Authorities.USER.getAuthority();
     @NotNull private Boolean isAccountLocked;
     @NotNull private Boolean isAccountEnabled;
@@ -75,7 +74,12 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return emailAddress;
+        return emailAddressHash;
+    }
+
+    @Override
+    public String getPassword() {
+        return passwordHash;
     }
 
     // spotless:off

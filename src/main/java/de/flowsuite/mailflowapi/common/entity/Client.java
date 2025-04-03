@@ -30,8 +30,7 @@ public class Client implements UserDetails {
 
     @NotBlank private String clientName;
 
-    @Column(name = "client_secret_hash")
-    @NotBlank private String clientSecret;
+    @NotBlank private String clientSecretHash;
 
     @NotBlank private String scope;
 
@@ -42,7 +41,7 @@ public class Client implements UserDetails {
 
     @Override
     public String getPassword() {
-        return clientSecret;
+        return clientSecretHash;
     }
 
     @Override

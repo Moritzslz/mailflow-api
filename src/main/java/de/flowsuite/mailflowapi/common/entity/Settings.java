@@ -32,7 +32,7 @@ public class Settings {
 
     private ZonedDateTime lastCrawlAt;
     private ZonedDateTime nextCrawlAt;
-    @NotBlank private String mailboxPassword;
+    @NotBlank private String mailboxPasswordEnc;
     private String imapHost;
     private String smtpHost;
     private Integer imapPort;

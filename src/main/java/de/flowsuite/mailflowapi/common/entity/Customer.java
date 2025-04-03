@@ -27,7 +27,7 @@ public class Customer {
     @NotBlank private String city;
 
     @Column(updatable = false)
-    @NotBlank private String openaiApiKey;
+    @NotBlank private String openaiApiKeyEnc;
 
     private String sourceOfContact;
     private String websiteUrl;

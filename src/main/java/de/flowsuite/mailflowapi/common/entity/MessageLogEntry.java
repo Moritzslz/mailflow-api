@@ -33,7 +33,7 @@ public class MessageLogEntry {
 
     @NotBlank private String category;
     @NotBlank private String language;
-    @Email private String fromEmailAddress; // TODO encrypt using AES
+    @Email private String fromEmailAddressEnc;
     private String subject;
     @NotNull private ZonedDateTime receivedAt;
     @NotNull private ZonedDateTime processedAt;

@@ -25,5 +25,5 @@ public class BlacklistEntry {
     @Column(updatable = false)
     @NotNull private Long customerId;
 
-    @Email @NotBlank private String blacklistedEmailAddress;
+    @Email @NotBlank private String blacklistedEmailAddressEnc;
 }
