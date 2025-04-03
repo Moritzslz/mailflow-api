@@ -4,10 +4,11 @@ import de.flowsuite.mailflowapi.common.entity.Customer;
 import de.flowsuite.mailflowapi.common.entity.Settings;
 import de.flowsuite.mailflowapi.common.exception.EntityNotFoundException;
 import de.flowsuite.mailflowapi.common.exception.IdConflictException;
-import de.flowsuite.mailflowapi.common.exception.InvalidValueException;
-import de.flowsuite.mailflowapi.common.util.security.AesUtil;
-import de.flowsuite.mailflowapi.common.util.security.AuthorisationUtil;
+import de.flowsuite.mailflowapi.common.exception.UpdateConflictException;
+import de.flowsuite.mailflowapi.common.util.AesUtil;
+import de.flowsuite.mailflowapi.common.util.AuthorisationUtil;
 
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,9 +20,9 @@ class SettingsService {
         this.settingsRepository = settingsRepository;
     }
 
-    Settings createSettings(long customerId, long userId, Settings settings) {
-        AuthorisationUtil.checkCustomerAllowed(customerId);
-        AuthorisationUtil.checkUserAllowed(userId);
+    Settings createSettings(long customerId, long userId, Settings settings, Jwt jwt) {
+        AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
+        AuthorisationUtil.validateAccessToUser(userId, jwt);
 
         if (userId != settings.getUserId() || customerId != settings.getCustomerId()) {
             throw new IdConflictException();
@@ -32,9 +33,9 @@ class SettingsService {
         return settingsRepository.save(settings);
     }
 
-    Settings getSettings(long customerId, long userId) {
-        AuthorisationUtil.checkCustomerAllowed(customerId);
-        AuthorisationUtil.checkUserAllowed(userId);
+    Settings getSettings(long customerId, long userId, Jwt jwt) {
+        AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
+        AuthorisationUtil.validateAccessToUser(userId, jwt);
 
         return settingsRepository
                 .findById(userId)
@@ -42,9 +43,9 @@ class SettingsService {
     }
 
     Settings updateSettings(
-            long customerId, long userId, SettingsResource.UpdateSettingsRequest request) {
-        AuthorisationUtil.checkCustomerAllowed(customerId);
-        AuthorisationUtil.checkUserAllowed(userId);
+            long customerId, long userId, SettingsResource.UpdateSettingsRequest request, Jwt jwt) {
+        AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
+        AuthorisationUtil.validateAccessToUser(userId, jwt);
 
         if (userId != request.userId() || customerId != request.customerId()) {
             throw new IdConflictException();
@@ -69,9 +70,12 @@ class SettingsService {
     }
 
     Settings updateMailboxPassword(
-            long customerId, long userId, SettingsResource.UpdateMailboxPasswordRequest request) {
-        AuthorisationUtil.checkCustomerAllowed(customerId);
-        AuthorisationUtil.checkUserAllowed(userId);
+            long customerId,
+            long userId,
+            SettingsResource.UpdateMailboxPasswordRequest request,
+            Jwt jwt) {
+        AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
+        AuthorisationUtil.validateAccessToUser(userId, jwt);
 
         if (userId != request.userId() || customerId != request.customerId()) {
             throw new IdConflictException();
@@ -83,10 +87,8 @@ class SettingsService {
                         .orElseThrow(
                                 () -> new EntityNotFoundException(Customer.class.getSimpleName()));
 
-        String encryptedCurrentPassword = AesUtil.encrypt(request.currentPassword());
-
-        if (!settings.getMailboxPassword().equals(encryptedCurrentPassword)) {
-            throw new InvalidValueException();
+        if (!settings.getMailboxPassword().equals(AesUtil.encrypt(request.currentPassword()))) {
+            throw new UpdateConflictException();
         }
 
         settings.setMailboxPassword(AesUtil.encrypt(request.updatedPassword()));

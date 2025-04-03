@@ -9,6 +9,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,30 +27,36 @@ class SettingsResource {
     ResponseEntity<Settings> createSettings(
             @PathVariable long customerId,
             @PathVariable long userId,
-            @RequestBody @Valid Settings settings) {
-        return ResponseEntity.ok(settingsService.createSettings(customerId, userId, settings));
+            @RequestBody @Valid Settings settings,
+            @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(settingsService.createSettings(customerId, userId, settings, jwt));
     }
 
     @GetMapping("/{customerId}/users/{userId}/settings")
-    ResponseEntity<Settings> getSettings(@PathVariable long customerId, @PathVariable long userId) {
-        return ResponseEntity.ok(settingsService.getSettings(customerId, userId));
+    ResponseEntity<Settings> getSettings(
+            @PathVariable long customerId,
+            @PathVariable long userId,
+            @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(settingsService.getSettings(customerId, userId, jwt));
     }
 
     @PutMapping("/{customerId}/users/{userId}/settings")
     ResponseEntity<Settings> updateSettings(
             @PathVariable long customerId,
             @PathVariable long userId,
-            @RequestBody @Valid UpdateSettingsRequest request) {
-        return ResponseEntity.ok(settingsService.updateSettings(customerId, userId, request));
+            @RequestBody @Valid UpdateSettingsRequest request,
+            @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(settingsService.updateSettings(customerId, userId, request, jwt));
     }
 
     @PutMapping("/{customerId}/users/{userId}/settings/mailbox-password")
     ResponseEntity<Settings> updateMailboxPassword(
             @PathVariable long customerId,
             @PathVariable long userId,
-            @RequestBody @Valid SettingsResource.UpdateMailboxPasswordRequest request) {
+            @RequestBody @Valid SettingsResource.UpdateMailboxPasswordRequest request,
+            @AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity.ok(
-                settingsService.updateMailboxPassword(customerId, userId, request));
+                settingsService.updateMailboxPassword(customerId, userId, request, jwt));
     }
 
     record UpdateSettingsRequest(
