@@ -1,6 +1,6 @@
 package de.flowsuite.mailflowapi.security;
 
-import de.flowsuite.mailflowapi.common.exception.MissingEnvironmentVariableException;
+import de.flowsuite.mailflowapi.common.exception.MissingEnvVarException;
 
 import java.security.KeyFactory;
 import java.security.interfaces.RSAPrivateKey;
@@ -17,11 +17,11 @@ class RsaUtil {
     public RsaUtil() {}
 
     private static RSAPrivateKey loadPrivateKey() {
-        String environmentVariable = "RSA_PRIVATE_KEY";
+        String envVar = "RSA_PRIVATE_KEY";
 
-        String key = System.getenv(environmentVariable);
+        String key = System.getenv(envVar);
         if (key == null || key.isBlank()) {
-            throw new MissingEnvironmentVariableException(environmentVariable);
+            throw new MissingEnvVarException(envVar);
         }
 
         try {
@@ -40,11 +40,11 @@ class RsaUtil {
     }
 
     private static RSAPublicKey loadPublicKey() {
-        String environmentVariable = "RSA_PUBLIC_KEY";
+        String envVar = "RSA_PUBLIC_KEY";
 
-        String key = System.getenv(environmentVariable);
+        String key = System.getenv(envVar);
         if (key == null || key.isBlank()) {
-            throw new MissingEnvironmentVariableException(environmentVariable);
+            throw new MissingEnvVarException(envVar);
         }
 
         try {
