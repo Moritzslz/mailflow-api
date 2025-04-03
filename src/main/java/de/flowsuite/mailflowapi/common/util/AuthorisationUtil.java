@@ -14,7 +14,7 @@ public class AuthorisationUtil {
     public static final String CLAIM_SUB = "sub";
     public static final String CLAIM_CUSTOMER_ID = "customerId";
 
-    public static void validateAccess(long entityId, Jwt jwt, String claimType) {
+    public static void validateAccess(long entityId, Jwt jwt, String claim) {
         String scope = jwt.getClaim(CLAIM_SCOPE);
 
         LOG.debug("Scope: {}", scope);
@@ -25,10 +25,10 @@ public class AuthorisationUtil {
         }
 
         long jwtEntityId;
-        if (claimType.equals(CLAIM_SUB)) {
-            jwtEntityId = Long.parseLong(jwt.getClaim(claimType));
+        if (claim.equals(CLAIM_SUB)) {
+            jwtEntityId = Long.parseLong(jwt.getSubject());
         } else {
-            jwtEntityId = jwt.getClaim(claimType);
+            jwtEntityId = jwt.getClaim(claim);
         }
 
         LOG.debug("jwtEntityId: {}, entityId: {}", jwtEntityId, entityId);
