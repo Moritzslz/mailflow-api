@@ -4,9 +4,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(code = HttpStatus.BAD_REQUEST)
-public class InvalidValueException extends RuntimeException {
+public class UpdateConflictException extends RuntimeException {
 
-    public InvalidValueException() {
-        super("Invalid value.");
+    public UpdateConflictException() {
+        super("Unable to update due to a conflict with existing data.");
     }
 }
