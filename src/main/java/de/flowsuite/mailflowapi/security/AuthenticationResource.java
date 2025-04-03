@@ -1,5 +1,6 @@
 package de.flowsuite.mailflowapi.security;
 
+import de.flowsuite.mailflowapi.common.entity.Client;
 import de.flowsuite.mailflowapi.common.entity.User;
 import de.flowsuite.mailflowapi.user.UserService;
 
@@ -18,10 +19,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/auth/token")
 class AuthenticationResource {
-
-    private static final Logger LOG = LoggerFactory.getLogger(AuthenticationResource.class);
 
     private final AuthenticationService authenticationService;
     private final JwtDecoder jwtDecoder;
@@ -36,27 +35,39 @@ class AuthenticationResource {
         this.userService = userService;
     }
 
-    @PostMapping("/token")
-    ResponseEntity<TokenResponse> getToken(@RequestBody @Valid UserLoginRequest loginRequest) {
-        LOG.debug(loginRequest.toString());
+    @PostMapping("/user")
+    ResponseEntity<UserTokenResponse> getUserTokens(
+            @RequestBody @Valid UserLoginRequest loginRequest) {
         Authentication authentication = authenticationService.authenticateUser(loginRequest);
         User user = authenticationService.extractUser(authentication);
-        return ResponseEntity.ok(authenticationService.generateTokens(user));
+        return ResponseEntity.ok(authenticationService.generateUserTokens(user));
     }
 
-    @PostMapping("/token/refresh")
-    ResponseEntity<TokenResponse> refreshAccessToken(
+    @PostMapping("/user/refresh/")
+    ResponseEntity<UserTokenResponse> refreshUserAccessToken(
             @RequestBody @Valid RefreshTokenRequest refreshTokenRequest) {
         Jwt jwt = jwtDecoder.decode(refreshTokenRequest.refreshToken);
         authenticationService.validateRefreshToken(jwt);
         User user = userService.findByEmailAddress(jwt.getSubject());
         return ResponseEntity.ok(
-                authenticationService.generateTokens(user, refreshTokenRequest.refreshToken));
+                authenticationService.generateUserTokens(user, refreshTokenRequest.refreshToken));
+    }
+
+    @PostMapping("/client")
+    ResponseEntity<ClientTokenResponse> getClientAccessToken(
+            @RequestBody @Valid ClientLoginRequest loginRequest) {
+        Authentication authentication = authenticationService.authenticateClient(loginRequest);
+        Client client = authenticationService.extractClient(authentication);
+        return ResponseEntity.ok(authenticationService.generateClientAccessToken(client));
     }
 
     record UserLoginRequest(@NotBlank String username, @NotBlank String password) {}
 
+    record UserTokenResponse(@NotBlank String accessToken, @NotBlank String refreshToken) {}
+
     record RefreshTokenRequest(@NotBlank String refreshToken) {}
 
-    record TokenResponse(@NotBlank String accessToken, @NotBlank String refreshToken) {}
+    record ClientLoginRequest(@NotBlank String clientName, @NotBlank String clientSecret) {}
+
+    record ClientTokenResponse(@NotBlank String accessToken) {}
 }

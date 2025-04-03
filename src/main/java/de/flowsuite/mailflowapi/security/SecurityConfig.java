@@ -10,6 +10,7 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 
+import de.flowsuite.mailflowapi.client.ClientService;
 import de.flowsuite.mailflowapi.common.entity.Authorities;
 import de.flowsuite.mailflowapi.user.UserService;
 
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,17 +29,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
-import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
-import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -45,32 +41,28 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 @Configuration
 @EnableWebSecurity
 class SecurityConfig {
 
-    private final String mailboxClientSecret;
-    private final String aiCompletionClientSecret;
-    private final String ragClientSecret;
     private final String reCaptchaHttpHeader;
     private final ReCaptchaFilter reCaptchaFilter;
     private final UserService userService;
+    private final ClientService clientService;
+    private final PasswordEncoder passwordEncoder;
 
     SecurityConfig(
-            @Value("${client.mailbox.secret}") String mailboxClientSecret,
-            @Value("${client.ai-completion.secret}") String aiCompletionClientSecret,
-            @Value("${client.rag.secret}") String ragClientSecret,
             @Value("${google.recaptcha.http-header}") String reCaptchaHttpHeader,
             ReCaptchaService reCaptchaService,
-            UserService userService) {
-        this.mailboxClientSecret = mailboxClientSecret;
-        this.aiCompletionClientSecret = aiCompletionClientSecret;
-        this.ragClientSecret = ragClientSecret;
+            UserService userService,
+            ClientService clientService,
+            PasswordEncoder passwordEncoder) {
         this.reCaptchaHttpHeader = reCaptchaHttpHeader;
         this.reCaptchaFilter = new ReCaptchaFilter(reCaptchaHttpHeader, reCaptchaService);
         this.userService = userService;
+        this.clientService = clientService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // spotless:off
@@ -79,6 +71,9 @@ class SecurityConfig {
         return http.authorizeHttpRequests(auth -> auth
                         // Auth Resource
                         .requestMatchers(HttpMethod.POST, "/auth/**").permitAll()
+                        // Microservice Resource
+                        .requestMatchers(HttpMethod.POST, "/clients").access(hasScope(Authorities.ADMIN.getAuthority()))
+                        .requestMatchers(HttpMethod.GET, "/clients").access(hasScope(Authorities.ADMIN.getAuthority()))
                         // Customer Resource
                         .requestMatchers(HttpMethod.POST, "/customers").access(hasScope(Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.GET, "/customers").access(hasAnyScope(Authorities.CUSTOMERS_LIST.getAuthority(), Authorities.ADMIN.getAuthority()))
@@ -163,58 +158,20 @@ class SecurityConfig {
     }
 
     @Bean
-    PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    AuthenticationManager authenticationManager() {
+    @Primary
+    AuthenticationManager userAuthenticationManager() {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
         authenticationProvider.setUserDetailsService(userService);
-        authenticationProvider.setPasswordEncoder(passwordEncoder());
+        authenticationProvider.setPasswordEncoder(passwordEncoder);
         return new ProviderManager(authenticationProvider);
     }
 
-    // TODO InMemoryRegisteredClientRepository should only be used for local development
     @Bean
-    public RegisteredClientRepository registeredClientRepository() {
-        RegisteredClient mailboxClient =
-                RegisteredClient.withId(UUID.randomUUID().toString())
-                        .clientId("mailflow-mailbox-client")
-                        .clientSecret(passwordEncoder().encode(mailboxClientSecret))
-                        .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-                        .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                        .scope(Authorities.CLIENT.getAuthority())
-                        .scope(Authorities.CUSTOMERS_LIST.getAuthority())
-                        .scope(Authorities.CUSTOMERS_READ.getAuthority())
-                        .scope(Authorities.USERS_LIST.getAuthority())
-                        .scope(Authorities.USERS_READ.getAuthority())
-                        .scope(Authorities.SETTINGS_READ.getAuthority())
-                        .scope(Authorities.BLACKLIST_LIST.getAuthority())
-                        .build();
-
-        RegisteredClient aiCompletionClient =
-                RegisteredClient.withId(UUID.randomUUID().toString())
-                        .clientId("mailflow-ai-completion-client")
-                        .clientSecret(passwordEncoder().encode(aiCompletionClientSecret))
-                        .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                        .scope(Authorities.CLIENT.getAuthority())
-                        .scope(Authorities.SETTINGS_READ.getAuthority())
-                        .scope(Authorities.MESSAGE_CATEGORIES_LIST.getAuthority())
-                        .scope(Authorities.MESSAGE_LOG_WRITE.getAuthority())
-                        .build();
-
-        RegisteredClient ragClient =
-                RegisteredClient.withId(UUID.randomUUID().toString())
-                        .clientId("mailflow-rag-client")
-                        .clientSecret(passwordEncoder().encode(ragClientSecret))
-                        .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                        .scope(Authorities.CLIENT.getAuthority())
-                        .scope(Authorities.RAG_URLS_LIST.getAuthority())
-                        .scope(Authorities.RAG_URLS_WRITE.getAuthority())
-                        .build();
-
-        return new InMemoryRegisteredClientRepository(mailboxClient, aiCompletionClient, ragClient);
+    AuthenticationManager clientAuthenticationManager() {
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(clientService);
+        authenticationProvider.setPasswordEncoder(passwordEncoder);
+        return new ProviderManager(authenticationProvider);
     }
 
     @Bean
@@ -222,7 +179,7 @@ class SecurityConfig {
         FilterRegistrationBean<ReCaptchaFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(reCaptchaFilter);
         registrationBean.addUrlPatterns(
-                "/auth/token",
+                "/auth/user/token",
                 "/customers/users/register",
                 "/customers/users/enable",
                 "/customers/users/password",

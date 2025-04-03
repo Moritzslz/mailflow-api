@@ -35,6 +35,13 @@ CREATE TABLE users (
 CREATE INDEX idx_users_customer_id ON users(customer_id);
 CREATE INDEX idx_users_email_address ON users(email_address);
 
+CREATE TABLE clients (
+    id BIGSERIAL PRIMARY KEY,
+    client_name VARCHAR(256) NOT NULL UNIQUE,
+    client_secret_hash TEXT NOT NULL,
+    scope TEXT NOT NULL
+);
+
 CREATE TABLE settings (
     user_id BIGSERIAL PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
     customer_id INTEGER REFERENCES customers(id) ON DELETE CASCADE NOT NULL,
@@ -125,8 +132,11 @@ VALUES (1, 'Moritz', 'Schultz', 'moritz@flow-suite.de', '$2a$10$OTGphs2A9kBq/JCc
 INSERT INTO users (customer_id, first_name, last_name, email_address, password_hash, role, is_account_locked, is_account_enabled, is_subscribed_to_newsletter, verification_token, token_expires_at)
 VALUES (2, 'User', 'User', 'user', '$2a$10$OTGphs2A9kBq/JCce5np.uZaIfGb1exhMRuJ4pBBOOoLWuoxlO72.', 'USER', false, true, true, 'verif_token_2', NOW() + INTERVAL '30 minutes');
 
+INSERT INTO clients(client_name, client_secret_hash, scope)
+VALUES ('test-client', '$2a$10$OTGphs2A9kBq/JCce5np.uZaIfGb1exhMRuJ4pBBOOoLWuoxlO72.', 'CLIENT customers:list customers:read settings:read');
+
 INSERT INTO settings (user_id, customer_id, is_execution_enabled, is_auto_reply_enabled, is_response_rating_enabled, crawl_frequency_in_hours, mailbox_password, imap_host, smtp_host, imap_port, smtp_port)
-VALUES (1, 1,true, false, true, 168, 'encrypted_mailbox_password', 'imap.ionos.de', 'smtp.ionos.com', 993, 465);
+VALUES (2, 2,true, false, true, 168, 'encrypted_mailbox_password', 'imap.ionos.de', 'smtp.ionos.com', 993, 465);
 
 INSERT INTO rag_urls (customer_id, url, is_last_crawl_successful)
 VALUES (1, 'https://flow-suite.de', NULL);
