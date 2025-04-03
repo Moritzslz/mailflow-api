@@ -1,6 +1,6 @@
-package de.flowsuite.mailflowapi.common.util.security;
+package de.flowsuite.mailflowapi.common.util;
 
-import de.flowsuite.mailflowapi.common.exception.MissingEnvironmentVariableException;
+import de.flowsuite.mailflowapi.common.exception.MissingEnvVarException;
 
 import java.security.SecureRandom;
 import java.util.Base64;
@@ -14,7 +14,6 @@ public class AesUtil {
     private static final int GCM_TAG_LENGTH = 128;
     private static final int IV_LENGTH = 12;
     private static final String ALGORITHM = "AES/GCM/NoPadding";
-    private static final GCMParameterSpec gcmParameterSpec = generateIV();
     private static final SecretKey key = loadAESKey();
 
     public AesUtil() {}
@@ -37,10 +36,11 @@ public class AesUtil {
     }
 
     private static SecretKey loadAESKey() {
-        String environmentVariable = "AES_B64_SECRET_KEY";
-        String b64SecretKey = System.getenv(environmentVariable);
+        String envVar = "AES_B64_SECRET_KEY";
+
+        String b64SecretKey = System.getenv(envVar);
         if (b64SecretKey == null || b64SecretKey.isBlank()) {
-            throw new MissingEnvironmentVariableException(environmentVariable);
+            throw new MissingEnvVarException(envVar);
         }
 
         byte[] decodedKey = Base64.getDecoder().decode(b64SecretKey);
@@ -49,10 +49,18 @@ public class AesUtil {
 
     public static String encrypt(String plainText) {
         try {
+            GCMParameterSpec gcmParameterSpec = generateIV();
+
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.ENCRYPT_MODE, key, gcmParameterSpec);
+
             byte[] encrypted = cipher.doFinal(plainText.getBytes());
-            return Base64.getEncoder().encodeToString(encrypted);
+
+            byte[] ivAndCipherText = new byte[IV_LENGTH + encrypted.length];
+            System.arraycopy(gcmParameterSpec.getIV(), 0, ivAndCipherText, 0, IV_LENGTH);
+            System.arraycopy(encrypted, 0, ivAndCipherText, IV_LENGTH, encrypted.length);
+
+            return Base64.getEncoder().encodeToString(ivAndCipherText);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -60,10 +68,19 @@ public class AesUtil {
 
     public static String decrypt(String encryptedText) {
         try {
+            byte[] ivAndCipherText = Base64.getDecoder().decode(encryptedText);
+
+            byte[] iv = new byte[IV_LENGTH];
+            System.arraycopy(ivAndCipherText, 0, iv, 0, IV_LENGTH);
+            GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
+
+            byte[] cipherText = new byte[ivAndCipherText.length - IV_LENGTH];
+            System.arraycopy(ivAndCipherText, IV_LENGTH, cipherText, 0, cipherText.length);
+
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.DECRYPT_MODE, key, gcmParameterSpec);
-            byte[] decodedText = Base64.getDecoder().decode(encryptedText);
-            byte[] plainText = cipher.doFinal(decodedText);
+            byte[] plainText = cipher.doFinal(cipherText);
+
             return new String(plainText);
         } catch (Exception e) {
             throw new RuntimeException(e);
