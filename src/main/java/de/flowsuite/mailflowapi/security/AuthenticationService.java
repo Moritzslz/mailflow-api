@@ -110,7 +110,7 @@ class AuthenticationService {
     }
 
     AuthenticationResource.UserTokenResponse generateUserTokens(User user) {
-        return generateUserTokens(user, generateRefreshToken(user.getEmailAddress()));
+        return generateUserTokens(user, generateRefreshToken(String.valueOf(user.getId())));
     }
 
     AuthenticationResource.UserTokenResponse generateUserTokens(User user, String refreshToken) {

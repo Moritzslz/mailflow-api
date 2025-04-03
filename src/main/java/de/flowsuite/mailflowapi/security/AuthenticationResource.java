@@ -41,12 +41,12 @@ class AuthenticationResource {
         return ResponseEntity.ok(authenticationService.generateUserTokens(user));
     }
 
-    @PostMapping("/user/refresh/")
+    @PostMapping("/user/refresh")
     ResponseEntity<UserTokenResponse> refreshUserAccessToken(
             @RequestBody @Valid RefreshTokenRequest refreshTokenRequest) {
         Jwt jwt = jwtDecoder.decode(refreshTokenRequest.refreshToken);
         authenticationService.validateRefreshToken(jwt);
-        User user = userService.findByEmailAddress(jwt.getSubject());
+        User user = userService.getById(Long.parseLong(jwt.getSubject()));
         return ResponseEntity.ok(
                 authenticationService.generateUserTokens(user, refreshTokenRequest.refreshToken));
     }
