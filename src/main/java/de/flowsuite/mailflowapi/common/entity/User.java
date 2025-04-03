@@ -32,16 +32,18 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @Column(updatable = false)
     @NotNull private Long customerId;
+
     @NotBlank private String firstName; // TODO encrypt using AES
     @NotBlank private String lastName; // TODO encrypt using AES
-    @Email @NotBlank private String emailAddress; // TODO encrypt using AES
+    @Email @NotBlank private String emailAddress;
 
     @Column(name = "password_hash")
     @NotBlank private String password;
 
     private String phoneNumber;
-    @NotNull private String role;
+    @NotNull private String role = Authorities.USER.getAuthority();
     @NotNull private Boolean isAccountLocked;
     @NotNull private Boolean isAccountEnabled;
     @NotNull private Boolean isSubscribedToNewsletter;
@@ -76,6 +78,7 @@ public class User implements UserDetails {
         return emailAddress;
     }
 
+    //spotless:off
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> authorities = new ArrayList<>();
@@ -91,16 +94,14 @@ public class User implements UserDetails {
         authorities.add(new SimpleGrantedAuthority(Authorities.RAG_URLS_WRITE.getAuthority()));
         authorities.add(new SimpleGrantedAuthority(Authorities.BLACKLIST_LIST.getAuthority()));
         authorities.add(new SimpleGrantedAuthority(Authorities.BLACKLIST_WRITE.getAuthority()));
-        authorities.add(
-                new SimpleGrantedAuthority(Authorities.MESSAGE_CATEGORIES_LIST.getAuthority()));
-        authorities.add(
-                new SimpleGrantedAuthority(Authorities.MESSAGE_CATEGORIES_WRITE.getAuthority()));
+        authorities.add(new SimpleGrantedAuthority(Authorities.MESSAGE_CATEGORIES_LIST.getAuthority()));
+        authorities.add(new SimpleGrantedAuthority(Authorities.MESSAGE_CATEGORIES_WRITE.getAuthority()));
         authorities.add(new SimpleGrantedAuthority(Authorities.MESSAGE_LOG_LIST.getAuthority()));
-        authorities.add(
-                new SimpleGrantedAuthority(Authorities.RESPONSE_RATINGS_LIST.getAuthority()));
+        authorities.add(new SimpleGrantedAuthority(Authorities.RESPONSE_RATINGS_LIST.getAuthority()));
 
         return authorities;
     }
+    //spotless:on
 
     @Override
     public boolean isAccountNonLocked() {

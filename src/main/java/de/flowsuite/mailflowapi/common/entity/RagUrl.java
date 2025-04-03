@@ -21,7 +21,9 @@ public class RagUrl {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(updatable = false)
     @NotNull private Long customerId;
+
     @NotBlank private String url;
     private Boolean isLastCrawlSuccessful;
 }

@@ -20,6 +20,8 @@ import java.time.ZonedDateTime;
 public class Settings {
 
     @Id @NotNull private Long userId;
+
+    @Column(updatable = false)
     @NotNull private Long customerId;
 
     private boolean isExecutionEnabled;

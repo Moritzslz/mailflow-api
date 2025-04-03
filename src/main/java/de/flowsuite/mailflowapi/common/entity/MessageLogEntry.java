@@ -25,8 +25,12 @@ public class MessageLogEntry {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(updatable = false)
     @NotNull private Long userId;
+
+    @Column(updatable = false)
     @NotNull private Long customerID;
+
     @NotBlank private String category;
     @NotBlank private String language;
     @Email private String fromEmailAddress; // TODO encrypt using AES

@@ -22,6 +22,8 @@ import java.time.ZonedDateTime;
 public class ResponseRating {
 
     @Id @NotNull private Long messageLogId;
+
+    @Column(updatable = false)
     @NotNull private Long userID;
 
     boolean isSatisfied;

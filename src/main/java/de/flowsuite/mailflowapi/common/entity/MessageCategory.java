@@ -21,7 +21,9 @@ public class MessageCategory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(updatable = false)
     @NotNull private Long customerId;
+
     @NotBlank private String category;
     @NotNull private Boolean isReply;
     @NotNull private Boolean isFunctionCall;

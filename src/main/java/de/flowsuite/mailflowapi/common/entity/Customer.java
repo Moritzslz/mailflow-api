@@ -25,7 +25,10 @@ public class Customer {
     @NotBlank private String houseNumber;
     @NotBlank private String postalCode;
     @NotBlank private String city;
+
+    @Column(updatable = false)
     @NotBlank private String openaiApiKey;
+
     private String sourceOfContact;
     private String websiteUrl;
     private String privacyPolicyUrl;
