@@ -7,6 +7,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class IdConflictException extends RuntimeException {
 
     public IdConflictException() {
-        super("The path Id does not match the body Id.");
+        super("The provided Ids do not match the expected values.");
     }
 }
