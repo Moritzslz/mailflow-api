@@ -1,6 +1,7 @@
 package de.flowsuite.mailflowapi.common.util;
 
 import de.flowsuite.mailflowapi.common.exception.MissingEnvVarException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.security.SecureRandom;
 import java.util.Base64;
@@ -14,20 +15,9 @@ public class AesUtil {
     private static final int GCM_TAG_LENGTH = 128;
     private static final int IV_LENGTH = 12;
     private static final String ALGORITHM = "AES/GCM/NoPadding";
-    private static final SecretKey key = loadAESKey();
+    private static final SecretKey key = loadAesKey();
 
     public AesUtil() {}
-
-    private static SecretKey generateAESKey() {
-        try {
-            KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-            keyGenerator.init(256);
-            return keyGenerator.generateKey();
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     private static GCMParameterSpec generateIV() {
         byte[] iv = new byte[IV_LENGTH];
@@ -35,7 +25,7 @@ public class AesUtil {
         return new GCMParameterSpec(GCM_TAG_LENGTH, iv);
     }
 
-    private static SecretKey loadAESKey() {
+    private static SecretKey loadAesKey() {
         String envVar = "AES_B64_SECRET_KEY";
 
         String b64SecretKey = System.getenv(envVar);
