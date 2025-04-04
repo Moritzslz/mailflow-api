@@ -1,13 +1,12 @@
 package de.flowsuite.mailflowapi.common.util;
 
 import de.flowsuite.mailflowapi.common.exception.MissingEnvVarException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import java.util.Base64;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-
-import java.util.Base64;
 
 public class HmacUtil {
 

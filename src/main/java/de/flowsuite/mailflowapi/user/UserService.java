@@ -1,8 +1,8 @@
 package de.flowsuite.mailflowapi.user;
 
 import de.flowsuite.mailflowapi.common.entity.User;
-
 import de.flowsuite.mailflowapi.common.util.HmacUtil;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
