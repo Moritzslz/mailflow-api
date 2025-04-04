@@ -29,16 +29,16 @@ class BlacklistResource {
     ResponseEntity<List<BlacklistEntry>> getBlacklistEntriesByCustomerId(
             @PathVariable long customerId) {
         return ResponseEntity.ok(
-                (List<BlacklistEntry>) blacklistService.getBlacklistEntriesByCustomerId(customerId));
+                (List<BlacklistEntry>)
+                        blacklistService.getBlacklistEntriesByCustomerId(customerId));
     }
 
     @DeleteMapping("{customerId}/blacklist/{blacklistId}")
     ResponseEntity<Void> deleteBlacklistEntry(
             @PathVariable long customerId, @PathVariable long blacklistId) {
-        BlacklistEntry blacklistEntry = blacklistService.getBlacklistEntryByBlacklistId(customerId, blacklistId);
+        BlacklistEntry blacklistEntry =
+                blacklistService.getBlacklistEntryByBlacklistId(customerId, blacklistId);
         blacklistService.deleteBlacklistEntry(blacklistEntry);
         return ResponseEntity.noContent().build();
     }
-
-
 }

@@ -3,6 +3,7 @@ package de.flowsuite.mailflowapi.blacklist;
 import de.flowsuite.mailflowapi.common.entity.BlacklistEntry;
 import de.flowsuite.mailflowapi.common.exception.EntityNotFoundException;
 import de.flowsuite.mailflowapi.common.exception.IdConflictException;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,7 +16,7 @@ class BlacklistService {
     }
 
     BlacklistEntry createBlacklistEntry(BlacklistEntry blacklistEntry, long customerId) {
-        if(blacklistEntry.getCustomerId() != customerId) {
+        if (blacklistEntry.getCustomerId() != customerId) {
             throw new IdConflictException();
         }
         return blacklistRepository.save(blacklistEntry);
@@ -37,10 +38,13 @@ class BlacklistService {
     }
 
     BlacklistEntry getBlacklistEntryByBlacklistId(long customerId, long blacklistId) {
-        BlacklistEntry blacklistEntry = blacklistRepository
-                .findById(blacklistId)
-                .orElseThrow(
-                        () -> new EntityNotFoundException(BlacklistEntry.class.getSimpleName()));
+        BlacklistEntry blacklistEntry =
+                blacklistRepository
+                        .findById(blacklistId)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                BlacklistEntry.class.getSimpleName()));
         if (blacklistEntry.getCustomerId() != customerId) {
             throw new IdConflictException();
         }
