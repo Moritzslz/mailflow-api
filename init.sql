@@ -74,7 +74,7 @@ CREATE TABLE blacklist (
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
     blacklisted_email_address_hash TEXT NOT NULL,
     blacklisted_email_address_encrypted TEXT NOT NULL,
-    UNIQUE (user_id, blacklisted_email_address_encrypted)
+    UNIQUE (user_id, blacklisted_email_address_hash)
 );
 CREATE INDEX idx_blacklist_customer_id ON blacklist(user_id);
 
