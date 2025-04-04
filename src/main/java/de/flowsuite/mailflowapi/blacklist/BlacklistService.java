@@ -3,6 +3,7 @@ package de.flowsuite.mailflowapi.blacklist;
 import de.flowsuite.mailflowapi.common.entity.BlacklistEntry;
 import de.flowsuite.mailflowapi.common.exception.EntityNotFoundException;
 import de.flowsuite.mailflowapi.common.exception.IdConflictException;
+import de.flowsuite.mailflowapi.common.exception.IdorException;
 import de.flowsuite.mailflowapi.common.util.AesUtil;
 import de.flowsuite.mailflowapi.common.util.AuthorisationUtil;
 import de.flowsuite.mailflowapi.common.util.HmacUtil;
@@ -64,6 +65,10 @@ class BlacklistService {
                                 () ->
                                         new EntityNotFoundException(
                                                 BlacklistEntry.class.getSimpleName()));
+
+        if (userId != blacklistEntry.getUserId()) {
+            throw new IdorException();
+        }
 
         blacklistRepository.delete(blacklistEntry);
     }
