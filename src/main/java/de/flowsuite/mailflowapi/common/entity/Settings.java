@@ -1,10 +1,7 @@
 package de.flowsuite.mailflowapi.common.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.*;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,32 +12,34 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 @Entity
-@Table(name = "customer_settings")
+@Table(name = "settings")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CustomerSettings {
+public class Settings {
 
-    @Id private long customerId;
+    @Id @NotNull private Long userId;
+
+    @Column(updatable = false)
+    @NotNull private Long customerId;
+
     private boolean isExecutionEnabled;
     private boolean isAutoReplyEnabled;
     private boolean isResponseRatingEnabled;
-    @NotBlank private String supportAgentName;
 
     @Min(168) @Max(744) private int crawlFrequencyInHours;
 
     private ZonedDateTime lastCrawlAt;
     private ZonedDateTime nextCrawlAt;
-    @Email @NotBlank private String mailboxEmailAddress;
 
-    @Column(name = "mailbox_password_hash")
+    @Column(name = "mailbox_password_encrypted")
     @NotBlank private String mailboxPassword;
 
-    @NotBlank private String imapHost;
-    @NotBlank private String smtpHost;
-    private int imapPort;
-    private int smtpPort;
+    private String imapHost;
+    private String smtpHost;
+    private Integer imapPort;
+    private Integer smtpPort;
 
     @PrePersist
     @PreUpdate

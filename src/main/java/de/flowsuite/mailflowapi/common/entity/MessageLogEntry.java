@@ -23,23 +23,28 @@ public class MessageLogEntry {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "customer_id")
-    private Customer customer;
+    @Column(updatable = false)
+    @NotNull private Long userId;
+
+    @Column(updatable = false)
+    @NotNull private Long customerID;
 
     @NotBlank private String category;
     @NotBlank private String language;
+
+    @Column(name = "from_email_address_encrypted")
     @Email private String fromEmailAddress;
+
     private String subject;
     @NotNull private ZonedDateTime receivedAt;
     @NotNull private ZonedDateTime processedAt;
-    private int processingTimeInSeconds;
+    @NotNull private Integer processingTimeInSeconds;
     @NotBlank private String llmUsed;
-    private int inputTokens;
-    private int outputTokens;
-    private int totalTokens;
+    @NotNull private Integer inputTokens;
+    @NotNull private Integer outputTokens;
+    @NotNull private Integer totalTokens;
 
     @PrePersist
     @PreUpdate

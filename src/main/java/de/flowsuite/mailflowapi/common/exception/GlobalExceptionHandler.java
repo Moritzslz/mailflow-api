@@ -9,8 +9,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -21,6 +19,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Object> handleValidationException(
             MethodArgumentNotValidException ex, WebRequest request) {
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
         String errorMessageTemplate = "Field '%s' %s";
         String errorMessage =
                 ex.getBindingResult().getFieldErrors().stream()
@@ -32,7 +31,9 @@ public class GlobalExceptionHandler {
                                                 error.getDefaultMessage()))
                         .collect(Collectors.joining(". "));
 
-        return buildErrorResponse(HttpStatus.BAD_REQUEST, errorMessage, request);
+        Map<String, Object> body =
+                buildErrorResponseBody(httpStatus, errorMessage, request.getDescription(false));
+        return ResponseEntity.status(httpStatus).body(body);
     }
 
     @ExceptionHandler(Exception.class)
@@ -42,18 +43,20 @@ public class GlobalExceptionHandler {
             httpStatus = AnnotationUtils.getAnnotation(ex.getClass(), ResponseStatus.class).code();
         }
 
-        return buildErrorResponse(httpStatus, ex.getMessage(), request);
+        Map<String, Object> body =
+                buildErrorResponseBody(httpStatus, ex.getMessage(), request.getDescription(false));
+        return ResponseEntity.status(httpStatus).body(body);
     }
 
-    private ResponseEntity<Object> buildErrorResponse(
-            HttpStatus status, String message, WebRequest request) {
+    public static Map<String, Object> buildErrorResponseBody(
+            HttpStatus status, String message, String path) {
+
         Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", ZonedDateTime.now(ZoneId.of("Europe/Berlin")));
         body.put("status", status.value());
         body.put("error", status.getReasonPhrase());
         body.put("message", message);
-        body.put("path", request.getDescription(false));
+        body.put("path", path);
 
-        return ResponseEntity.status(status).body(body);
+        return body;
     }
 }

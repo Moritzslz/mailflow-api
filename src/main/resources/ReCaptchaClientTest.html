@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>reCAPTCHA Token Display</title>
+    <script src="https://www.google.com/recaptcha/api.js?render=6LcOJ_0qAAAAABCzo0QOk1YTs4ZEtjvh3gaCM3af"></script>
+    <script>
+        function onClick(e) {
+            e.preventDefault();
+            grecaptcha.ready(function() {
+                grecaptcha.execute('6LcOJ_0qAAAAABCzo0QOk1YTs4ZEtjvh3gaCM3af', {action: 'submit'}).then(function(token) {
+                    // Add your logic to submit to your backend server here.
+                    document.getElementById("recaptcha-token").textContent = token;
+                    console.log("reCAPTCHA token: ", token);
+                });
+            });
+        }
+    </script>
+</head>
+<body>
+    <button onclick="onClick(event)">Get reCAPTCHA Token</button>
+    <p id="recaptcha-token">reCAPTCHA token will appear here</p>
+</body>
+</html>

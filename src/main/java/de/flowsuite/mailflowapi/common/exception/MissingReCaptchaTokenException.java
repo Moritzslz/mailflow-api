@@ -4,9 +4,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(code = HttpStatus.BAD_REQUEST)
-public class IdConflictException extends RuntimeException {
+public class MissingReCaptchaTokenException extends RuntimeException {
 
-    public IdConflictException() {
-        super("The provided Ids do not match the expected values.");
+    public MissingReCaptchaTokenException() {
+        super("Missing reCAPTCHA token in the request header.");
     }
 }
