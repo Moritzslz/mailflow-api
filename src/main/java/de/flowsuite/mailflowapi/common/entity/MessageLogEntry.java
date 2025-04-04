@@ -1,7 +1,6 @@
 package de.flowsuite.mailflowapi.common.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -35,7 +34,7 @@ public class MessageLogEntry {
     @NotBlank private String language;
 
     @Column(name = "from_email_address_encrypted")
-    @Email private String fromEmailAddress;
+    private String fromEmailAddress; // TODO check if valid email & encrypt
 
     private String subject;
     @NotNull private ZonedDateTime receivedAt;

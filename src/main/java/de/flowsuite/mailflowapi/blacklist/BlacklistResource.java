@@ -5,12 +5,14 @@ import de.flowsuite.mailflowapi.common.entity.BlacklistEntry;
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/customers")
+@RequestMapping("/customers")
 class BlacklistResource {
 
     private final BlacklistService blacklistService;
@@ -19,26 +21,31 @@ class BlacklistResource {
         this.blacklistService = blacklistService;
     }
 
-    @PostMapping("{customerId}/blacklist")
+    @PostMapping("{customerId}/users/{userId}/blacklist")
     ResponseEntity<BlacklistEntry> createBlacklistEntry(
-            @PathVariable long customerId, @RequestBody @Valid BlacklistEntry blacklistEntry) {
-        return ResponseEntity.ok(blacklistService.createBlacklistEntry(blacklistEntry, customerId));
-    }
-
-    @GetMapping("{customerId}/blacklist")
-    ResponseEntity<List<BlacklistEntry>> getBlacklistEntriesByCustomerId(
-            @PathVariable long customerId) {
+            @PathVariable long customerId,
+            @PathVariable long userId,
+            @RequestBody @Valid BlacklistEntry blacklistEntry,
+            @AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity.ok(
-                (List<BlacklistEntry>)
-                        blacklistService.getBlacklistEntriesByCustomerId(customerId));
+                blacklistService.createBlacklistEntry(customerId, userId, blacklistEntry, jwt));
     }
 
-    @DeleteMapping("{customerId}/blacklist/{blacklistId}")
+    @GetMapping("{customerId}/users/{userId}/blacklist")
+    ResponseEntity<List<BlacklistEntry>> listBlacklistEntries(
+            @PathVariable long customerId,
+            @PathVariable long userId,
+            @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(blacklistService.listBlacklistEntries(customerId, userId, jwt));
+    }
+
+    @DeleteMapping("{customerId}/users/{userId}/blacklist/{blacklistEntryId}")
     ResponseEntity<Void> deleteBlacklistEntry(
-            @PathVariable long customerId, @PathVariable long blacklistId) {
-        BlacklistEntry blacklistEntry =
-                blacklistService.getBlacklistEntryByBlacklistId(customerId, blacklistId);
-        blacklistService.deleteBlacklistEntry(blacklistEntry);
+            @PathVariable long customerId,
+            @PathVariable long userId,
+            @PathVariable long blacklistEntryId,
+            @AuthenticationPrincipal Jwt jwt) {
+        blacklistService.deleteBlacklistEntry(customerId, userId, blacklistEntryId, jwt);
         return ResponseEntity.noContent().build();
     }
 }

@@ -1,5 +1,7 @@
 package de.flowsuite.mailflowapi.common.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 
@@ -29,7 +31,7 @@ public class Customer {
     @Column(name = "openai_api_key_encrypted", updatable = false)
     @NotBlank private String openaiApiKey;
 
-    private String sourceOfContact;
+    @JsonIgnore private String sourceOfContact;
     private String websiteUrl;
     private String privacyPolicyUrl;
     private String ctaUrl;

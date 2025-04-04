@@ -9,5 +9,5 @@ import java.util.List;
 
 @Repository
 interface BlacklistRepository extends CrudRepository<BlacklistEntry, Long> {
-    List<BlacklistEntry> findByCustomerId(long customerId);
+    List<BlacklistEntry> findByUserId(long userId);
 }

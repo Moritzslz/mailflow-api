@@ -80,7 +80,7 @@ class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/customers/{id}").access(hasScope(Authorities.CUSTOMERS_READ.getAuthority()))
                         .requestMatchers(HttpMethod.PUT, "/customers/{id}").access(hasScope(Authorities.CUSTOMERS_WRITE.getAuthority()))
                         // User Resource
-                        .requestMatchers(HttpMethod.POST, "/customers/users/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/customers/users").permitAll()
                         .requestMatchers(HttpMethod.GET, "/customers/users/enable").permitAll()
                         .requestMatchers(HttpMethod.POST, "/customers/users/password").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/customers/users/password").permitAll()
@@ -96,9 +96,9 @@ class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/customers/*/rag-urls").access(hasScope(Authorities.RAG_URLS_LIST.getAuthority()))
                         .requestMatchers(HttpMethod.PUT, "/customers/*/rag-urls").access(hasScope(Authorities.RAG_URLS_WRITE.getAuthority()))
                         // Blacklist Resource
-                        .requestMatchers(HttpMethod.POST, "/customers/*/blacklist").access(hasScope(Authorities.BLACKLIST_WRITE.getAuthority()))
-                        .requestMatchers(HttpMethod.GET, "/customers/*/blacklist").access(hasScope(Authorities.BLACKLIST_LIST.getAuthority()))
-                        .requestMatchers(HttpMethod.DELETE, "/customers/*/blacklist").access(hasScope(Authorities.BLACKLIST_WRITE.getAuthority()))
+                        .requestMatchers(HttpMethod.POST, "/customers/*/users/*/blacklist").access(hasScope(Authorities.BLACKLIST_WRITE.getAuthority()))
+                        .requestMatchers(HttpMethod.GET, "/customers/*/users/*/blacklist").access(hasScope(Authorities.BLACKLIST_LIST.getAuthority()))
+                        .requestMatchers(HttpMethod.DELETE, "/customers/*/users/*/blacklist/*").access(hasScope(Authorities.BLACKLIST_WRITE.getAuthority()))
                         // MessageCategories Resource
                         .requestMatchers(HttpMethod.POST, "/customers/*/message-categories").access(hasScope(Authorities.MESSAGE_CATEGORIES_WRITE.getAuthority()))
                         .requestMatchers(HttpMethod.GET, "/customers/*/message-categories").access(hasScope(Authorities.MESSAGE_CATEGORIES_LIST.getAuthority()))
@@ -179,8 +179,8 @@ class SecurityConfig {
         FilterRegistrationBean<ReCaptchaFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(reCaptchaFilter);
         registrationBean.addUrlPatterns(
-                "/auth/user/token",
-                "/customers/users/register",
+                "/auth/token/user",
+                "/customers/users",
                 "/customers/users/enable",
                 "/customers/users/password",
                 "/customers/users/response-ratings");

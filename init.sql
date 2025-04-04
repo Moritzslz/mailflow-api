@@ -17,12 +17,12 @@ CREATE TABLE customers (
 CREATE TABLE users (
     id BIGSERIAL PRIMARY KEY,
     customer_id INTEGER REFERENCES customers(id) ON DELETE CASCADE NOT NULL,
-    first_name_encrypted VARCHAR(64) NOT NULL,
-    last_name_encrypted VARCHAR(64) NOT NULL,
+    first_name_encrypted TEXT NOT NULL,
+    last_name_encrypted TEXT NOT NULL,
     email_address_hash TEXT NOT NULL UNIQUE,
-    email_address_encrypted VARCHAR(256) NOT NULL UNIQUE,
+    email_address_encrypted TEXT NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
-    phone_number_encrypted VARCHAR(64),
+    phone_number_encrypted TEXT,
     position VARCHAR(64),
     role VARCHAR(16) DEFAULT 'USER' NOT NULL,
     is_account_locked BOOLEAN NOT NULL,
@@ -71,11 +71,12 @@ CREATE INDEX idx_rag_urls_customer_id ON rag_urls(customer_id);
 
 CREATE TABLE blacklist (
     id BIGSERIAL PRIMARY KEY,
-    customer_id INTEGER REFERENCES customers(id) ON DELETE CASCADE NOT NULL,
-    blacklisted_email_address_encrypted VARCHAR(256) NOT NULL,
-    UNIQUE (customer_id, blacklisted_email_address_encrypted)
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+    blacklisted_email_address_hash TEXT NOT NULL,
+    blacklisted_email_address_encrypted TEXT NOT NULL,
+    UNIQUE (user_id, blacklisted_email_address_encrypted)
 );
-CREATE INDEX idx_blacklist_customer_id ON blacklist(customer_id);
+CREATE INDEX idx_blacklist_customer_id ON blacklist(user_id);
 
 CREATE TABLE message_categories (
     id BIGSERIAL PRIMARY KEY,
@@ -94,7 +95,7 @@ CREATE TABLE message_log (
     customer_id INTEGER REFERENCES customers(id) ON DELETE CASCADE NOT NULL,
     category VARCHAR(64) NOT NULL,
     language VARCHAR(64) NOT NULL,
-    from_email_address_encrypted VARCHAR(256),
+    from_email_address_encrypted TEXT,
     subject TEXT,
     received_at TIMESTAMP WITH TIME ZONE NOT NULL,
     processed_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -150,11 +151,14 @@ VALUES (1, 'https://www.flow-suite.de', NULL);
 INSERT INTO rag_urls (customer_id, url, is_last_crawl_successful)
 VALUES (2, 'https://www.flow-suite.de', NULL);
 
-INSERT INTO blacklist (customer_id, blacklisted_email_address_encrypted)
-VALUES (1, 'ks5Bk+l9E29nDULdti6ihyz8ZFfqwvc8wfxiRL2d0HSvtVOkPJZ8g3zDnnFhJQ==');
+INSERT INTO blacklist (user_id, blacklisted_email_address_hash, blacklisted_email_address_encrypted)
+VALUES (1, 'PCwU0vnyGsBYrljsDMd3Kf5Lq/fhqG7VLMc/aCKR+fU=', 'ks5Bk+l9E29nDULdti6ihyz8ZFfqwvc8wfxiRL2d0HSvtVOkPJZ8g3zDnnFhJQ==');
 
-INSERT INTO blacklist (customer_id, blacklisted_email_address_encrypted)
-VALUES (2, 'ks5Bk+l9E29nDULdti6ihyz8ZFfqwvc8wfxiRL2d0HSvtVOkPJZ8g3zDnnFhJQ==');
+INSERT INTO blacklist (user_id, blacklisted_email_address_hash, blacklisted_email_address_encrypted)
+VALUES (1, 'sOCDd3BNjIapxAdppHUn6OcqwPkmkw6XVjVwR0acfJ8=', 'qLwsA99/GkXAT56obP1sLJBg9sB5yGHWCxCsBmQjN3hs3lm86kXFaxNjAMMQx8mHtKsy');
+
+INSERT INTO blacklist (user_id, blacklisted_email_address_hash, blacklisted_email_address_encrypted)
+VALUES (2, 'PCwU0vnyGsBYrljsDMd3Kf5Lq/fhqG7VLMc/aCKR+fU=', 'ks5Bk+l9E29nDULdti6ihyz8ZFfqwvc8wfxiRL2d0HSvtVOkPJZ8g3zDnnFhJQ==');
 
 INSERT INTO message_categories (customer_id, category, is_reply, is_function_call, description)
 VALUES (1, 'Produkt Frage', true, false, 'Allgemeine Fragen zum Produkt');
