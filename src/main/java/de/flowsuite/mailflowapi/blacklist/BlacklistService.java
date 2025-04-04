@@ -36,7 +36,8 @@ class BlacklistService {
 
         blacklistEntry.setBlacklistedEmailAddressHash(
                 HmacUtil.hash(blacklistEntry.getBlacklistedEmailAddress()));
-        blacklistEntry.setBlacklistedEmailAddress(AesUtil.encrypt(blacklistEntry.getBlacklistedEmailAddress()));
+        blacklistEntry.setBlacklistedEmailAddress(
+                AesUtil.encrypt(blacklistEntry.getBlacklistedEmailAddress()));
 
         return blacklistRepository.save(blacklistEntry);
     }
