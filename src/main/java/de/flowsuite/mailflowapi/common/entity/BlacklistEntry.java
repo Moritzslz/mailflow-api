@@ -26,7 +26,7 @@ public class BlacklistEntry {
     @Column(updatable = false)
     @NotNull private Long userId;
 
-    @JsonIgnore @NotBlank private String blacklistedEmailAddressHash;
+    @JsonIgnore private String blacklistedEmailAddressHash;
 
     @Column(name = "blacklisted_email_address_encrypted")
     @NotBlank private String blacklistedEmailAddress; // TODO check if valid email

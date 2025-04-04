@@ -42,7 +42,7 @@ public class User implements UserDetails {
     @Column(name = "last_name_encrypted")
     @NotBlank private String lastName;
 
-    @JsonIgnore @NotBlank private String emailAddressHash;
+    @JsonIgnore private String emailAddressHash;
 
     @Column(name = "email_address_encrypted")
     @NotBlank private String emailAddress; // TODO check if valid email
