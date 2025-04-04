@@ -48,7 +48,7 @@ class BlacklistService {
                         blacklistEntry -> {
                             blacklistEntry.setBlacklistedEmailAddress(
                                     AesUtil.decrypt(blacklistEntry.getBlacklistedEmailAddress()));
-                            return blacklistEntry; // Return the modified object
+                            return blacklistEntry;
                         })
                 .toList();
     }
