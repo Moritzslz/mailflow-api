@@ -45,7 +45,8 @@ public class User implements UserDetails {
     @Column(name = "email_address_encrypted")
     @NotBlank private String emailAddress;
 
-    @NotBlank private String passwordHash;
+    @Column(name = "password_hash")
+    @NotBlank private String password;
 
     @Column(name = "phone_number_encrypted")
     private String phoneNumber;
@@ -84,11 +85,6 @@ public class User implements UserDetails {
     @Override
     public String getUsername() {
         return emailAddressHash;
-    }
-
-    @Override
-    public String getPassword() {
-        return passwordHash;
     }
 
     // spotless:off

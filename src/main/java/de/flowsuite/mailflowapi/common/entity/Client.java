@@ -1,5 +1,6 @@
 package de.flowsuite.mailflowapi.common.entity;
 
+import de.flowsuite.mailflowapi.common.util.AesUtil;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 
@@ -11,6 +12,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,7 +32,8 @@ public class Client implements UserDetails {
 
     @NotBlank private String clientName;
 
-    @NotBlank private String clientSecretHash;
+    @Column(name = "client_secret_hash")
+    @NotBlank private String clientSecret;
 
     @NotBlank private String scope;
 
@@ -41,7 +44,7 @@ public class Client implements UserDetails {
 
     @Override
     public String getPassword() {
-        return clientSecretHash;
+        return clientSecret;
     }
 
     @Override
