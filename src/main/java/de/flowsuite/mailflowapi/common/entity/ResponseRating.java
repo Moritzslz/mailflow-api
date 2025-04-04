@@ -24,7 +24,7 @@ public class ResponseRating {
     @Id @NotNull private Long messageLogId;
 
     @Column(updatable = false)
-    @NotNull private Long userID;
+    @NotNull private Long userId;
 
     boolean isSatisfied;
 
