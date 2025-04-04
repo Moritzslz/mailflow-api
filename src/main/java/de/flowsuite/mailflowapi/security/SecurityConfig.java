@@ -179,7 +179,7 @@ class SecurityConfig {
         FilterRegistrationBean<ReCaptchaFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(reCaptchaFilter);
         registrationBean.addUrlPatterns(
-                "/auth/user/token",
+                "/auth/token/user",
                 "/customers/users",
                 "/customers/users/enable",
                 "/customers/users/password",
