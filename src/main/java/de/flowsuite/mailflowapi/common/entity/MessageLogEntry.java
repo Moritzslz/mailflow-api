@@ -1,7 +1,6 @@
 package de.flowsuite.mailflowapi.common.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -23,22 +22,28 @@ public class MessageLogEntry {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
-    @NotNull
-    private Long customerId;
+    @Column(updatable = false)
+    @NotNull private Long userId;
+
+    @Column(updatable = false)
+    @NotNull private Long customerID;
 
     @NotBlank private String category;
     @NotBlank private String language;
-    @Email private String fromEmailAddress;
+
+    @Column(name = "from_email_address_encrypted")
+    private String fromEmailAddress; // TODO check if valid email & encrypt
+
     private String subject;
     @NotNull private ZonedDateTime receivedAt;
     @NotNull private ZonedDateTime processedAt;
-    private int processingTimeInSeconds;
+    @NotNull private Integer processingTimeInSeconds;
     @NotBlank private String llmUsed;
-    private int inputTokens;
-    private int outputTokens;
-    private int totalTokens;
+    @NotNull private Integer inputTokens;
+    @NotNull private Integer outputTokens;
+    @NotNull private Integer totalTokens;
 
     @PrePersist
     @PreUpdate

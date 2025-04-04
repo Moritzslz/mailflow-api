@@ -21,16 +21,16 @@ import java.time.ZonedDateTime;
 @Builder
 public class ResponseRating {
 
-    @Id private long messageLogId;
+    @Id @NotNull private Long messageLogId;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "customer_id")
-    private Customer customer;
+    @Column(updatable = false)
+    @NotNull private Long userID;
+
+    boolean isSatisfied;
 
     @Min(0) @Max(5) private int rating;
 
     private String feedback;
-
     @NotNull private ZonedDateTime createdAt;
 
     @PrePersist

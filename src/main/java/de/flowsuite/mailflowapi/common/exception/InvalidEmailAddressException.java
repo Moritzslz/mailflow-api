@@ -4,9 +4,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(code = HttpStatus.BAD_REQUEST)
-public class IdConflictException extends RuntimeException {
+public class InvalidEmailAddressException extends RuntimeException {
 
-    public IdConflictException() {
-        super("The provided Ids do not match the expected values.");
+    public InvalidEmailAddressException() {
+        super("The email address is invalid.");
     }
 }

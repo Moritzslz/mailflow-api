@@ -4,9 +4,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(code = HttpStatus.BAD_REQUEST)
-public class IdConflictException extends RuntimeException {
+public class UpdateConflictException extends RuntimeException {
 
-    public IdConflictException() {
-        super("The provided Ids do not match the expected values.");
+    public UpdateConflictException() {
+        super("Unable to update due to a conflict with existing data.");
     }
 }

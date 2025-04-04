@@ -2,6 +2,7 @@ package de.flowsuite.mailflowapi.common.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,15 +19,13 @@ public class MessageCategory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "customer_id")
-    private Customer customer;
+    @Column(updatable = false)
+    @NotNull private Long customerId;
 
     @NotBlank private String category;
-
-    private boolean isReply;
-    private boolean isFunctionCall;
+    @NotNull private Boolean isReply;
+    @NotNull private Boolean isFunctionCall;
     @NotBlank private String description;
 }

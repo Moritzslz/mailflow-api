@@ -1,7 +1,8 @@
 package de.flowsuite.mailflowapi.common.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -10,8 +11,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -19,35 +27,42 @@ import java.time.ZonedDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "customer_id")
-    private Customer customer;
+    @Column(updatable = false)
+    @NotNull private Long customerId;
 
-    @NotBlank private String firstName;
-    @NotBlank private String lastName;
-    @Email @NotBlank private String emailAddress;
+    @Column(name = "first_name_encrypted")
+    @NotBlank private String firstName; // TODO encrypt
+
+    @Column(name = "last_name_encrypted")
+    @NotBlank private String lastName; // TODO encrypt
+
+    @JsonIgnore private String emailAddressHash;
+
+    @Column(name = "email_address_encrypted")
+    @NotBlank private String emailAddress; // TODO check if valid email & encrypt
 
     @Column(name = "password_hash")
     @NotBlank private String password;
 
-    private String phoneNumber;
+    @Column(name = "phone_number_encrypted")
+    private String phoneNumber; // TODO encrypt
 
-    @NotNull private String role;
-
-    private boolean isAccountLocked;
-    private boolean isAccountEnabled;
-    private boolean isSubscribedToNewsletter;
+    private String position;
+    @NotNull private String role = Authorities.USER.getAuthority();
+    @NotNull private Boolean isAccountLocked;
+    @NotNull private Boolean isAccountEnabled;
+    @NotNull private Boolean isSubscribedToNewsletter;
     @NotBlank private String verificationToken;
     @NotNull private ZonedDateTime tokenExpiresAt;
     private ZonedDateTime lastLoginAt;
-    @NotNull private ZonedDateTime createdAt;
-    @NotNull private ZonedDateTime updatedAt;
+    private ZonedDateTime createdAt;
+    private ZonedDateTime updatedAt;
 
     @PrePersist
     protected void onCreate() {
@@ -67,5 +82,45 @@ public class User {
         if (lastLoginAt != null) {
             lastLoginAt = lastLoginAt.withZoneSameInstant(berlinZone);
         }
+    }
+
+    @Override
+    public String getUsername() {
+        return emailAddressHash;
+    }
+
+    // spotless:off
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        List<GrantedAuthority> authorities = new ArrayList<>();
+
+        authorities.add(new SimpleGrantedAuthority(role));
+        authorities.add(new SimpleGrantedAuthority(Authorities.CUSTOMERS_READ.getAuthority()));
+        authorities.add(new SimpleGrantedAuthority(Authorities.CUSTOMERS_WRITE.getAuthority()));
+        authorities.add(new SimpleGrantedAuthority(Authorities.USERS_READ.getAuthority()));
+        authorities.add(new SimpleGrantedAuthority(Authorities.USERS_WRITE.getAuthority()));
+        authorities.add(new SimpleGrantedAuthority(Authorities.SETTINGS_READ.getAuthority()));
+        authorities.add(new SimpleGrantedAuthority(Authorities.SETTINGS_WRITE.getAuthority()));
+        authorities.add(new SimpleGrantedAuthority(Authorities.RAG_URLS_LIST.getAuthority()));
+        authorities.add(new SimpleGrantedAuthority(Authorities.RAG_URLS_WRITE.getAuthority()));
+        authorities.add(new SimpleGrantedAuthority(Authorities.BLACKLIST_LIST.getAuthority()));
+        authorities.add(new SimpleGrantedAuthority(Authorities.BLACKLIST_WRITE.getAuthority()));
+        authorities.add(new SimpleGrantedAuthority(Authorities.MESSAGE_CATEGORIES_LIST.getAuthority()));
+        authorities.add(new SimpleGrantedAuthority(Authorities.MESSAGE_CATEGORIES_WRITE.getAuthority()));
+        authorities.add(new SimpleGrantedAuthority(Authorities.MESSAGE_LOG_LIST.getAuthority()));
+        authorities.add(new SimpleGrantedAuthority(Authorities.RESPONSE_RATINGS_LIST.getAuthority()));
+
+        return authorities;
+    }
+    // spotless:on
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return !isAccountLocked;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return isAccountEnabled;
     }
 }
