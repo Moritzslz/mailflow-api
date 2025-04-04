@@ -1,5 +1,6 @@
 package de.flowsuite.mailflowapi.common.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -40,10 +41,10 @@ public class User implements UserDetails {
     @Column(name = "last_name_encrypted")
     @NotBlank private String lastName;
 
-    @NotBlank private String emailAddressHash;
+    @JsonIgnore @NotBlank private String emailAddressHash;
 
     @Column(name = "email_address_encrypted")
-    @NotBlank private String emailAddress;
+    @NotBlank private String emailAddress; // TODO check if valid email
 
     @Column(name = "password_hash")
     @NotBlank private String password;
