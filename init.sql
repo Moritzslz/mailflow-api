@@ -7,7 +7,7 @@ CREATE TABLE customers (
     house_number VARCHAR(64) NOT NULL,
     postal_code VARCHAR(64) NOT NULL,
     city VARCHAR(64) NOT NULL,
-    openai_api_key_enc TEXT NOT NULL,
+    openai_api_key_encrypted TEXT NOT NULL,
     source_of_contact VARCHAR(64),
     website_url TEXT,
     privacy_policy_url TEXT,
@@ -17,12 +17,12 @@ CREATE TABLE customers (
 CREATE TABLE users (
     id BIGSERIAL PRIMARY KEY,
     customer_id INTEGER REFERENCES customers(id) ON DELETE CASCADE NOT NULL,
-    first_name_enc VARCHAR(64) NOT NULL,
-    last_name_enc VARCHAR(64) NOT NULL,
+    first_name_encrypted VARCHAR(64) NOT NULL,
+    last_name_encrypted VARCHAR(64) NOT NULL,
     email_address_hash TEXT NOT NULL UNIQUE,
-    email_address_enc VARCHAR(256) NOT NULL UNIQUE,
+    email_address_encrypted VARCHAR(256) NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
-    phone_number_enc VARCHAR(64),
+    phone_number_encrypted VARCHAR(64),
     position VARCHAR(64),
     role VARCHAR(16) DEFAULT 'USER' NOT NULL,
     is_account_locked BOOLEAN NOT NULL,
@@ -53,7 +53,7 @@ CREATE TABLE settings (
     crawl_frequency_in_hours INTEGER DEFAULT 168 NOT NULL,
     last_crawl_at TIMESTAMP WITH TIME ZONE,
     next_crawl_at TIMESTAMP WITH TIME ZONE,
-    mailbox_password_enc TEXT NOT NULL,
+    mailbox_password_encrypted TEXT NOT NULL,
     imap_host VARCHAR(64),
     smtp_host VARCHAR(64),
     imap_port INTEGER,
@@ -71,8 +71,8 @@ CREATE INDEX idx_rag_urls_customer_id ON rag_urls(customer_id);
 CREATE TABLE blacklist (
     id BIGSERIAL PRIMARY KEY,
     customer_id INTEGER REFERENCES customers(id) ON DELETE CASCADE NOT NULL,
-    blacklisted_email_address_enc VARCHAR(256) NOT NULL,
-    UNIQUE (customer_id, blacklisted_email_address_enc)
+    blacklisted_email_address_encrypted VARCHAR(256) NOT NULL,
+    UNIQUE (customer_id, blacklisted_email_address_encrypted)
 );
 CREATE INDEX idx_blacklist_customer_id ON blacklist(customer_id);
 
@@ -93,7 +93,7 @@ CREATE TABLE message_log (
     customer_id INTEGER REFERENCES customers(id) ON DELETE CASCADE NOT NULL,
     category VARCHAR(64) NOT NULL,
     language VARCHAR(64) NOT NULL,
-    from_email_address_enc VARCHAR(256),
+    from_email_address_encrypted VARCHAR(256),
     subject TEXT,
     received_at TIMESTAMP WITH TIME ZONE NOT NULL,
     processed_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -122,25 +122,25 @@ CREATE INDEX idx_response_ratings_user_id ON response_ratings(user_id);
 CREATE INDEX idx_response_ratings_rating ON response_ratings(rating);
 CREATE INDEX idx_response_ratings_rated_at ON response_ratings(created_at);
 
-INSERT INTO customers (company, street, house_number, postal_code, city, openai_api_key_enc)
+INSERT INTO customers (company, street, house_number, postal_code, city, openai_api_key_encrypted)
 VALUES ('FlowSuite', 'Straße', '69', '1337', 'München', 'R0p2fHYTSBAHIq5YEWzN1Jwnfar/IwvyqnPhw/AGjwliTfNO71WPHw==');
 
-INSERT INTO customers (company, street, house_number, postal_code, city, openai_api_key_enc)
+INSERT INTO customers (company, street, house_number, postal_code, city, openai_api_key_encrypted)
 VALUES ('Company', 'Street', '69', '1337', 'City', 'R0p2fHYTSBAHIq5YEWzN1Jwnfar/IwvyqnPhw/AGjwliTfNO71WPHw==');
 
-INSERT INTO users (customer_id, first_name_enc, last_name_enc, email_address_hash, email_address_enc, password_hash, role, is_account_locked, is_account_enabled, is_subscribed_to_newsletter, verification_token, token_expires_at)
+INSERT INTO users (customer_id, first_name_encrypted, last_name_encrypted, email_address_hash, email_address_encrypted, password_hash, role, is_account_locked, is_account_enabled, is_subscribed_to_newsletter, verification_token, token_expires_at)
 VALUES (1, 'Uztmz8Fii79yN2SY6wg5md6Ek5RLeBzMGYlNlqYutLyj', 'Uztmz8Fii79yN2SY6wg5md6Ek5RLeBzMGYlNlqYutLyj', 'Cb6R4BLpHhVMebqauEd3TZrhfdkR8hFjvulTHYUfbNM=', 'DMX3vfIVH7vta9jAgOUbwEWGRTa5jFiv2yLi6BMnNv4d7hcfQFdMGnUCRcJPfA==', '$2a$10$t0Olv0N4TdmUfd9yG242i.znX.NN7c.a3AU9DadUg1ro0Xsc8jvom', 'ADMIN', false, true, true, 'token1', NOW() + INTERVAL '30 minutes');
 
-INSERT INTO users (customer_id, first_name_enc, last_name_enc, email_address_hash, email_address_enc, password_hash, role, is_account_locked, is_account_enabled, is_subscribed_to_newsletter, verification_token, token_expires_at)
+INSERT INTO users (customer_id, first_name_encrypted, last_name_encrypted, email_address_hash, email_address_encrypted, password_hash, role, is_account_locked, is_account_enabled, is_subscribed_to_newsletter, verification_token, token_expires_at)
 VALUES (2, 'RtlBAwPz6EdINA4O51gu8uz0AuZ0UHE5FJPC26Xbquo=', 'RtlBAwPz6EdINA4O51gu8uz0AuZ0UHE5FJPC26Xbquo=', 'U8c45XuAqt5w5/4xkE6/vFfnLE5E3t1uNJJqoywHvUM=', 'g6jxJeir/fXKqxEOwUGuuyLraFFSFnW9Gn8/3QF/J9eS6ka9yyk55iLA5rwgcg==', '$2a$10$t0Olv0N4TdmUfd9yG242i.znX.NN7c.a3AU9DadUg1ro0Xsc8jvom', 'USER', false, true, true, 'token2', NOW() + INTERVAL '30 minutes');
 
 INSERT INTO clients(client_name, client_secret_hash, scope)
 VALUES ('test-client', '$2a$10$WdPzc4aO2o4dkjpk9OXg5OCWAYCkm/G314raW8pkUgi1ctS8VxnpS', 'CLIENT customers:list customers:read settings:read');
 
-INSERT INTO settings (user_id, customer_id, is_execution_enabled, is_auto_reply_enabled, is_response_rating_enabled, crawl_frequency_in_hours, mailbox_password_enc, imap_host, smtp_host, imap_port, smtp_port)
+INSERT INTO settings (user_id, customer_id, is_execution_enabled, is_auto_reply_enabled, is_response_rating_enabled, crawl_frequency_in_hours, mailbox_password_encrypted, imap_host, smtp_host, imap_port, smtp_port)
 VALUES (1, 1,true, false, true, 168, '$2a$10$/fXalbMsPDJvqVAVo2YNYeEFWdKl67nIyM4.7DEsoy/ZXdWHkJRHm', 'imap.ionos.de', 'smtp.ionos.com', 993, 465);
 
-INSERT INTO settings (user_id, customer_id, is_execution_enabled, is_auto_reply_enabled, is_response_rating_enabled, crawl_frequency_in_hours, mailbox_password_enc, imap_host, smtp_host, imap_port, smtp_port)
+INSERT INTO settings (user_id, customer_id, is_execution_enabled, is_auto_reply_enabled, is_response_rating_enabled, crawl_frequency_in_hours, mailbox_password_encrypted, imap_host, smtp_host, imap_port, smtp_port)
 VALUES (2, 2,true, false, true, 168, '$2a$10$/fXalbMsPDJvqVAVo2YNYeEFWdKl67nIyM4.7DEsoy/ZXdWHkJRHm', 'imap.ionos.de', 'smtp.ionos.com', 993, 465);
 
 INSERT INTO rag_urls (customer_id, url, is_last_crawl_successful)
@@ -149,10 +149,10 @@ VALUES (1, 'https://www.flow-suite.de', NULL);
 INSERT INTO rag_urls (customer_id, url, is_last_crawl_successful)
 VALUES (2, 'https://www.flow-suite.de', NULL);
 
-INSERT INTO blacklist (customer_id, blacklisted_email_address_enc)
+INSERT INTO blacklist (customer_id, blacklisted_email_address_encrypted)
 VALUES (1, 'ks5Bk+l9E29nDULdti6ihyz8ZFfqwvc8wfxiRL2d0HSvtVOkPJZ8g3zDnnFhJQ==');
 
-INSERT INTO blacklist (customer_id, blacklisted_email_address_enc)
+INSERT INTO blacklist (customer_id, blacklisted_email_address_encrypted)
 VALUES (2, 'ks5Bk+l9E29nDULdti6ihyz8ZFfqwvc8wfxiRL2d0HSvtVOkPJZ8g3zDnnFhJQ==');
 
 INSERT INTO message_categories (customer_id, category, is_reply, is_function_call, description)
@@ -161,10 +161,10 @@ VALUES (1, 'Produkt Frage', true, false, 'Allgemeine Fragen zum Produkt');
 INSERT INTO message_categories (customer_id, category, is_reply, is_function_call, description)
 VALUES (2, 'Buchungsanfrage', true, false, 'Buchungsanfragen für ein Hotelzimmer');
 
-INSERT INTO message_log (user_id, customer_id, category, language, from_email_address_enc, subject, received_at, processed_at, processing_time_in_seconds, llm_used, input_tokens, output_tokens, total_tokens)
+INSERT INTO message_log (user_id, customer_id, category, language, from_email_address_encrypted, subject, received_at, processed_at, processing_time_in_seconds, llm_used, input_tokens, output_tokens, total_tokens)
 VALUES (1, 1, 'Produkt Frage', 'Deutsch', 'schultzmoritz@gmail.com', 'Was kann MailFlow?', NOW(), NOW() + INTERVAL '30 seconds', 30, 'gpt-4o-mini', 1500, 1000, 2500);
 
-INSERT INTO message_log (user_id, customer_id, category, language, from_email_address_enc, subject, received_at, processed_at, processing_time_in_seconds, llm_used, input_tokens, output_tokens, total_tokens)
+INSERT INTO message_log (user_id, customer_id, category, language, from_email_address_encrypted, subject, received_at, processed_at, processing_time_in_seconds, llm_used, input_tokens, output_tokens, total_tokens)
 VALUES (2, 2, 'Buchungsanfrage', 'Deutsch', 'schultzmoritz@gmail.com', 'Zimmer für 6 Personen', NOW(), NOW() + INTERVAL '30 seconds', 30, 'gpt-4o-mini', 1500, 1000, 2500);
 
 INSERT INTO response_ratings (message_log_id, user_id, isSatisfied, rating, feedback)

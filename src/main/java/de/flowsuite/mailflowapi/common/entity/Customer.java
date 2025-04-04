@@ -26,8 +26,8 @@ public class Customer {
     @NotBlank private String postalCode;
     @NotBlank private String city;
 
-    @Column(updatable = false)
-    @NotBlank private String openaiApiKeyEnc;
+    @Column(name = "openai_api_key_encrypted", updatable = false)
+    @NotBlank private String openaiApiKey;
 
     private String sourceOfContact;
     private String websiteUrl;

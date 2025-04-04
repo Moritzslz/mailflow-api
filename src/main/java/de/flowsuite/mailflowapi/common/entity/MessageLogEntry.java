@@ -33,7 +33,10 @@ public class MessageLogEntry {
 
     @NotBlank private String category;
     @NotBlank private String language;
-    @Email private String fromEmailAddressEnc;
+
+    @Column(name = "from_email_address_encrypted")
+    @Email private String fromEmailAddress;
+
     private String subject;
     @NotNull private ZonedDateTime receivedAt;
     @NotNull private ZonedDateTime processedAt;

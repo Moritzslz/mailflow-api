@@ -32,7 +32,10 @@ public class Settings {
 
     private ZonedDateTime lastCrawlAt;
     private ZonedDateTime nextCrawlAt;
-    @NotBlank private String mailboxPasswordEnc;
+
+    @Column(name = "mailbox_password_encrypted")
+    @NotBlank private String mailboxPassword;
+
     private String imapHost;
     private String smtpHost;
     private Integer imapPort;

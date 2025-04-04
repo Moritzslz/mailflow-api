@@ -34,12 +34,22 @@ public class User implements UserDetails {
     @Column(updatable = false)
     @NotNull private Long customerId;
 
-    @NotBlank private String firstNameEnc;
-    @NotBlank private String lastNameEnc;
+    @Column(name = "first_name_encrypted")
+    @NotBlank private String firstName;
+
+    @Column(name = "last_name_encrypted")
+    @NotBlank private String lastName;
+
     @NotBlank private String emailAddressHash;
-    @NotBlank private String emailAddressEnc;
+
+    @Column(name = "email_address_encrypted")
+    @NotBlank private String emailAddress;
+
     @NotBlank private String passwordHash;
-    private String phoneNumberEnc;
+
+    @Column(name = "phone_number_encrypted")
+    private String phoneNumber;
+
     private String position;
     @NotNull private String role = Authorities.USER.getAuthority();
     @NotNull private Boolean isAccountLocked;
