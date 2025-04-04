@@ -2,6 +2,7 @@ package de.flowsuite.mailflowapi.user;
 
 import de.flowsuite.mailflowapi.common.entity.User;
 
+import de.flowsuite.mailflowapi.common.util.HmacUtil;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -18,12 +19,18 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String emailAddress) throws UsernameNotFoundException {
-        return findByEmailAddress(emailAddress);
+        return getByEmailAddress(emailAddress);
     }
 
-    public User findByEmailAddress(String emailAddress) {
+    public User getByEmailAddress(String emailAddress) {
         return userRepository
-                .findByEmailAddress(emailAddress)
+                .findByEmailAddressHash(HmacUtil.hash(emailAddress))
+                .orElseThrow(() -> new UsernameNotFoundException("User not found."));
+    }
+
+    public User getById(long id) {
+        return userRepository
+                .findById(id)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found."));
     }
 

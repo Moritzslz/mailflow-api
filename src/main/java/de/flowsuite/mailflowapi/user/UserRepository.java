@@ -11,7 +11,7 @@ import java.util.Set;
 @Repository
 interface UserRepository extends CrudRepository<User, Long> {
 
-    Optional<User> findByEmailAddress(String emailAddress);
+    Optional<User> findByEmailAddressHash(String emailAddressHash);
 
     Optional<User> findByVerificationToken(String verificationToken);
 
