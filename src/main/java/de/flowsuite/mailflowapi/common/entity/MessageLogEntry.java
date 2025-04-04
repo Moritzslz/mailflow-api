@@ -28,7 +28,7 @@ public class MessageLogEntry {
     @NotNull private Long userId;
 
     @Column(updatable = false)
-    @NotNull private Long customerID;
+    @NotNull private Long customerId;
 
     @NotBlank private String category;
     @NotBlank private String language;
