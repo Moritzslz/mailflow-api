@@ -1,7 +1,6 @@
 package de.flowsuite.mailflowapi.common.util;
 
 import de.flowsuite.mailflowapi.common.exception.MissingEnvVarException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.security.SecureRandom;
 import java.util.Base64;
