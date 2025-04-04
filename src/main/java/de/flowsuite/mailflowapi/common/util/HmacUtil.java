@@ -34,11 +34,4 @@ public class HmacUtil {
             throw new RuntimeException(e);
         }
     }
-
-    public static void main(String[] args) {
-        String adminEmail = "test@flow-suite.de";
-        String userEmail = "user@flow-suite.de";
-        System.out.printf("%s: %s\n", adminEmail, hash(adminEmail));
-        System.out.printf("%s: %s\n", userEmail, hash(userEmail));
-    }
 }
