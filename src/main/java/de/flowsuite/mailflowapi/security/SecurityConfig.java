@@ -96,9 +96,9 @@ class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/customers/*/rag-urls").access(hasScope(Authorities.RAG_URLS_LIST.getAuthority()))
                         .requestMatchers(HttpMethod.PUT, "/customers/*/rag-urls").access(hasScope(Authorities.RAG_URLS_WRITE.getAuthority()))
                         // Blacklist Resource
-                        .requestMatchers(HttpMethod.POST, "/customers/*/blacklist").access(hasScope(Authorities.BLACKLIST_WRITE.getAuthority()))
-                        .requestMatchers(HttpMethod.GET, "/customers/*/blacklist").access(hasScope(Authorities.BLACKLIST_LIST.getAuthority()))
-                        .requestMatchers(HttpMethod.DELETE, "/customers/*/blacklist").access(hasScope(Authorities.BLACKLIST_WRITE.getAuthority()))
+                        .requestMatchers(HttpMethod.POST, "/customers/*/users/*/blacklist").access(hasScope(Authorities.BLACKLIST_WRITE.getAuthority()))
+                        .requestMatchers(HttpMethod.GET, "/customers/*/users/*/blacklist").access(hasScope(Authorities.BLACKLIST_LIST.getAuthority()))
+                        .requestMatchers(HttpMethod.DELETE, "/customers/*/users/*/blacklist/*").access(hasScope(Authorities.BLACKLIST_WRITE.getAuthority()))
                         // MessageCategories Resource
                         .requestMatchers(HttpMethod.POST, "/customers/*/message-categories").access(hasScope(Authorities.MESSAGE_CATEGORIES_WRITE.getAuthority()))
                         .requestMatchers(HttpMethod.GET, "/customers/*/message-categories").access(hasScope(Authorities.MESSAGE_CATEGORIES_LIST.getAuthority()))
