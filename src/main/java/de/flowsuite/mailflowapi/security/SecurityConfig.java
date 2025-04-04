@@ -80,7 +80,7 @@ class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/customers/{id}").access(hasScope(Authorities.CUSTOMERS_READ.getAuthority()))
                         .requestMatchers(HttpMethod.PUT, "/customers/{id}").access(hasScope(Authorities.CUSTOMERS_WRITE.getAuthority()))
                         // User Resource
-                        .requestMatchers(HttpMethod.POST, "/customers/users/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/customers/users").permitAll()
                         .requestMatchers(HttpMethod.GET, "/customers/users/enable").permitAll()
                         .requestMatchers(HttpMethod.POST, "/customers/users/password").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/customers/users/password").permitAll()
@@ -180,7 +180,7 @@ class SecurityConfig {
         registrationBean.setFilter(reCaptchaFilter);
         registrationBean.addUrlPatterns(
                 "/auth/user/token",
-                "/customers/users/register",
+                "/customers/users",
                 "/customers/users/enable",
                 "/customers/users/password",
                 "/customers/users/response-ratings");
