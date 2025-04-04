@@ -29,5 +29,5 @@ public class BlacklistEntry {
     @JsonIgnore private String blacklistedEmailAddressHash;
 
     @Column(name = "blacklisted_email_address_encrypted")
-    @NotBlank private String blacklistedEmailAddress; // TODO check if valid email
+    @NotBlank private String blacklistedEmailAddress;
 }

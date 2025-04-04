@@ -37,21 +37,21 @@ public class User implements UserDetails {
     @NotNull private Long customerId;
 
     @Column(name = "first_name_encrypted")
-    @NotBlank private String firstName;
+    @NotBlank private String firstName; // TODO encrypt
 
     @Column(name = "last_name_encrypted")
-    @NotBlank private String lastName;
+    @NotBlank private String lastName; // TODO encrypt
 
     @JsonIgnore private String emailAddressHash;
 
     @Column(name = "email_address_encrypted")
-    @NotBlank private String emailAddress; // TODO check if valid email
+    @NotBlank private String emailAddress; // TODO check if valid email & encrypt
 
     @Column(name = "password_hash")
     @NotBlank private String password;
 
     @Column(name = "phone_number_encrypted")
-    private String phoneNumber;
+    private String phoneNumber; // TODO encrypt
 
     private String position;
     @NotNull private String role = Authorities.USER.getAuthority();
