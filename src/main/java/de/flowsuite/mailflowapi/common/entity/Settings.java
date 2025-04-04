@@ -1,5 +1,7 @@
 package de.flowsuite.mailflowapi.common.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
@@ -32,6 +34,7 @@ public class Settings {
 
     private ZonedDateTime lastCrawlAt;
     private ZonedDateTime nextCrawlAt;
+    @JsonIgnore private String mailboxPasswordHash;
 
     @Column(name = "mailbox_password_encrypted")
     @NotBlank private String mailboxPassword;

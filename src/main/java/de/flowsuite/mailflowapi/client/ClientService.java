@@ -33,7 +33,7 @@ public class ClientService implements UserDetailsService {
     }
 
     Client createClient(Client client) {
-        client.setClientSecretHash(passwordEncoder.encode(client.getPassword()));
+        client.setClientSecret(passwordEncoder.encode(client.getPassword()));
         return clientRepository.save(client);
     }
 

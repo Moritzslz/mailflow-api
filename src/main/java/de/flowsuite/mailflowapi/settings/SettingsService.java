@@ -8,6 +8,7 @@ import de.flowsuite.mailflowapi.common.exception.UpdateConflictException;
 import de.flowsuite.mailflowapi.common.util.AesUtil;
 import de.flowsuite.mailflowapi.common.util.AuthorisationUtil;
 
+import de.flowsuite.mailflowapi.common.util.HmacUtil;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +29,7 @@ class SettingsService {
             throw new IdConflictException();
         }
 
+        settings.setMailboxPasswordHash(HmacUtil.hash(settings.getMailboxPassword()));
         settings.setMailboxPassword(AesUtil.encrypt(settings.getMailboxPassword()));
 
         return settingsRepository.save(settings);
@@ -87,10 +89,11 @@ class SettingsService {
                         .orElseThrow(
                                 () -> new EntityNotFoundException(Customer.class.getSimpleName()));
 
-        if (!settings.getMailboxPassword().equals(AesUtil.encrypt(request.currentPassword()))) {
+        if (!settings.getMailboxPasswordHash().equals(HmacUtil.hash(request.currentPassword()))) {
             throw new UpdateConflictException();
         }
 
+        settings.setMailboxPasswordHash(HmacUtil.hash(request.updatedPassword()));
         settings.setMailboxPassword(AesUtil.encrypt(request.updatedPassword()));
 
         return settingsRepository.save(settings);
