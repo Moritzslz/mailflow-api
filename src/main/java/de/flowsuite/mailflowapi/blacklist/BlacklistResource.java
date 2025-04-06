@@ -21,7 +21,7 @@ class BlacklistResource {
         this.blacklistService = blacklistService;
     }
 
-    @PostMapping("{customerId}/users/{userId}/blacklist")
+    @PostMapping("/{customerId}/users/{userId}/blacklist")
     ResponseEntity<BlacklistEntry> createBlacklistEntry(
             @PathVariable long customerId,
             @PathVariable long userId,
@@ -31,7 +31,7 @@ class BlacklistResource {
                 blacklistService.createBlacklistEntry(customerId, userId, blacklistEntry, jwt));
     }
 
-    @GetMapping("{customerId}/users/{userId}/blacklist")
+    @GetMapping("/{customerId}/users/{userId}/blacklist")
     ResponseEntity<List<BlacklistEntry>> listBlacklistEntries(
             @PathVariable long customerId,
             @PathVariable long userId,
@@ -39,7 +39,7 @@ class BlacklistResource {
         return ResponseEntity.ok(blacklistService.listBlacklistEntries(customerId, userId, jwt));
     }
 
-    @DeleteMapping("{customerId}/users/{userId}/blacklist/{blacklistEntryId}")
+    @DeleteMapping("/{customerId}/users/{userId}/blacklist/{blacklistEntryId}")
     ResponseEntity<Void> deleteBlacklistEntry(
             @PathVariable long customerId,
             @PathVariable long userId,
