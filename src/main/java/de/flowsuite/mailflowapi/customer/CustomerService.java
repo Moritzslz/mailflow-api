@@ -38,23 +38,23 @@ class CustomerService {
                 .orElseThrow(() -> new EntityNotFoundException(Customer.class.getSimpleName()));
     }
 
-    Customer updateCustomer(long id, Customer updatedCustomer, Jwt jwt) {
+    Customer updateCustomer(long id, Customer customer, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(id, jwt);
 
-        if (id != updatedCustomer.getId()) {
+        if (!customer.getId().equals(id)) {
             throw new IdConflictException();
         }
 
-        Customer customer =
+        Customer existingCustomer =
                 customerRepository
                         .findById(id)
                         .orElseThrow(
                                 () -> new EntityNotFoundException(Customer.class.getSimpleName()));
 
-        if (!customer.getOpenaiApiKey().equals(updatedCustomer.getOpenaiApiKey())) {
+        if (!existingCustomer.getOpenaiApiKey().equals(customer.getOpenaiApiKey())) {
             throw new UpdateConflictException();
         }
 
-        return customerRepository.save(updatedCustomer);
+        return customerRepository.save(customer);
     }
 }

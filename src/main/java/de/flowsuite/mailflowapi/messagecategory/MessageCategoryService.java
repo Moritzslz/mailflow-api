@@ -53,6 +53,7 @@ class MessageCategoryService {
                         .findById(categoryId)
                         .orElseThrow(
                                 () -> new EntityNotFoundException(MessageCategory.class.getSimpleName()));
+
         if (!existingCategory.getUserId().equals(userId)) {
             throw new UpdateConflictException();
         }
@@ -70,6 +71,7 @@ class MessageCategoryService {
                         .findById(categoryId)
                         .orElseThrow(
                                 () -> new EntityNotFoundException(MessageCategory.class.getSimpleName()));
+
         if (!messageCategory.getUserId().equals(userId)) {
             throw new IdorException();
         }
