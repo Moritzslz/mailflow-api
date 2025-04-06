@@ -69,7 +69,6 @@ public class User implements UserDetails {
         ZoneId berlinZone = ZoneId.of("Europe/Berlin");
         createdAt = ZonedDateTime.now(berlinZone);
         updatedAt = createdAt;
-        tokenExpiresAt = createdAt.plusMinutes(30);
     }
 
     @PreUpdate
