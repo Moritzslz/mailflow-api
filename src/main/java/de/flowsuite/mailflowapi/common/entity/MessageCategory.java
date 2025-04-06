@@ -22,7 +22,7 @@ public class MessageCategory {
     private Long id;
 
     @Column(updatable = false)
-    @NotNull private Long customerId;
+    @NotNull private Long userId;
 
     @NotBlank private String category;
     @NotNull private Boolean isReply;
