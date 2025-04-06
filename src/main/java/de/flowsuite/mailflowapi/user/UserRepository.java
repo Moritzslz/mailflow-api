@@ -17,5 +17,7 @@ interface UserRepository extends CrudRepository<User, Long> {
 
     Set<User> findAllByIsSubscribedToNewsletter(Boolean isSubscribedToNewsletter);
 
+    boolean existsByEmailAddressHash(String emailAddressHash);
+
     boolean existsByVerificationToken(String verificationToken);
 }
