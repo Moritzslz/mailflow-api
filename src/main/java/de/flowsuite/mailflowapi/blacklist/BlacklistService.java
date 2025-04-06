@@ -38,7 +38,8 @@ class BlacklistService {
 
         Util.validateEmailAddress(emailAddress);
 
-        if (blacklistRepository.existsByUserIdAndBlacklistedEmailAddressHash(userId, emailAddressHash)) {
+        if (blacklistRepository.existsByUserIdAndBlacklistedEmailAddressHash(
+                userId, emailAddressHash)) {
             throw new EntityExistsException(BlacklistEntry.class.getSimpleName());
         }
 
