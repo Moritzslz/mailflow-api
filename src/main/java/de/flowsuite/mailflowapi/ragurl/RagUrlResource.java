@@ -43,5 +43,4 @@ class RagUrlResource {
         ragUrlService.deleteRagUrl(customerId, ragUrlId, jwt);
         return ResponseEntity.noContent().build();
     }
-
 }

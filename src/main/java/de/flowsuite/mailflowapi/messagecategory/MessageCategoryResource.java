@@ -1,7 +1,9 @@
 package de.flowsuite.mailflowapi.messagecategory;
 
 import de.flowsuite.mailflowapi.common.entity.MessageCategory;
+
 import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -26,7 +28,8 @@ class MessageCategoryResource {
             @RequestBody @Valid MessageCategory messageCategory,
             @AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity.ok(
-                messageCategoryService.createMessageCategory(customerId, userId, messageCategory, jwt));
+                messageCategoryService.createMessageCategory(
+                        customerId, userId, messageCategory, jwt));
     }
 
     @GetMapping("/{customerId}/users/{userId}/message-categories")
@@ -34,7 +37,8 @@ class MessageCategoryResource {
             @PathVariable long customerId,
             @PathVariable long userId,
             @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(messageCategoryService.listMessageCategories(customerId, userId, jwt));
+        return ResponseEntity.ok(
+                messageCategoryService.listMessageCategories(customerId, userId, jwt));
     }
 
     @PutMapping("/{customerId}/users/{userId}/message-categories/{categoryId}")
