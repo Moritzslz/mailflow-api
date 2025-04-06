@@ -28,7 +28,7 @@ class BlacklistService {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
         AuthorisationUtil.validateAccessToUser(userId, jwt);
 
-        if (userId != blacklistEntry.getUserId()) {
+        if (!blacklistEntry.getUserId().equals(userId)) {
             throw new IdConflictException();
         }
 
@@ -68,7 +68,7 @@ class BlacklistService {
                                         new EntityNotFoundException(
                                                 BlacklistEntry.class.getSimpleName()));
 
-        if (userId != blacklistEntry.getUserId()) {
+        if (!blacklistEntry.getUserId().equals(userId)) {
             throw new IdorException();
         }
 

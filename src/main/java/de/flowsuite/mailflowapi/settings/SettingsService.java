@@ -25,7 +25,7 @@ class SettingsService {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
         AuthorisationUtil.validateAccessToUser(userId, jwt);
 
-        if (userId != settings.getUserId() || customerId != settings.getCustomerId()) {
+        if (!settings.getUserId().equals(userId) || !settings.getCustomerId().equals(customerId)) {
             throw new IdConflictException();
         }
 
@@ -49,7 +49,7 @@ class SettingsService {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
         AuthorisationUtil.validateAccessToUser(userId, jwt);
 
-        if (userId != request.userId() || customerId != request.customerId()) {
+        if (!request.userId().equals(userId) || !request.customerId().equals(customerId)) {
             throw new IdConflictException();
         }
 
@@ -79,7 +79,7 @@ class SettingsService {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
         AuthorisationUtil.validateAccessToUser(userId, jwt);
 
-        if (userId != request.userId() || customerId != request.customerId()) {
+        if (!request.userId().equals(userId) || !request.customerId().equals(customerId)) {
             throw new IdConflictException();
         }
 
