@@ -54,15 +54,15 @@ public class User implements UserDetails {
     private String phoneNumber; // TODO encrypt
 
     private String position;
-    @NotNull private String role = Authorities.USER.getAuthority();
-    @NotNull private Boolean isAccountLocked;
-    @NotNull private Boolean isAccountEnabled;
+    @JsonIgnore @NotNull private String role = Authorities.USER.getAuthority();
+    @JsonIgnore @NotNull private Boolean isAccountLocked;
+    @JsonIgnore @NotNull private Boolean isAccountEnabled;
     @NotNull private Boolean isSubscribedToNewsletter;
-    @NotBlank private String verificationToken;
-    @NotNull private ZonedDateTime tokenExpiresAt;
-    private ZonedDateTime lastLoginAt;
-    private ZonedDateTime createdAt;
-    private ZonedDateTime updatedAt;
+    @JsonIgnore @NotBlank private String verificationToken;
+    @JsonIgnore @NotNull private ZonedDateTime tokenExpiresAt;
+    @JsonIgnore private ZonedDateTime lastLoginAt;
+    @JsonIgnore private ZonedDateTime createdAt;
+    @JsonIgnore private ZonedDateTime updatedAt;
 
     @PrePersist
     protected void onCreate() {
