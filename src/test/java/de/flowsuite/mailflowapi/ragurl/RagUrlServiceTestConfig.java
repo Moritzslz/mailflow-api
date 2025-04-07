@@ -1,4 +1,4 @@
-package de.flowsuite.mailflowapi.messagecategory;
+package de.flowsuite.mailflowapi.ragurl;
 
 import static org.mockito.Mockito.mock;
 
@@ -7,10 +7,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
 @TestConfiguration
-public class MessageCategoryServiceTestConfig {
+public class RagUrlServiceTestConfig {
     @Bean
     @Primary
-    public MessageCategoryService messageCategoryService() {
-        return mock(MessageCategoryService.class);
+    public RagUrlService ragUrlService() {
+        return mock(RagUrlService.class);
     }
 }

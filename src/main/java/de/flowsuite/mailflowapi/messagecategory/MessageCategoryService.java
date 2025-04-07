@@ -60,7 +60,7 @@ class MessageCategoryService {
                                 () ->
                                         new EntityNotFoundException(
                                                 MessageCategory.class.getSimpleName()));
-      
+
         if (!existingCategory.getUserId().equals(userId)) {
             throw new UpdateConflictException();
         }
