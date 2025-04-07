@@ -12,6 +12,7 @@ import de.flowsuite.mailflowapi.common.util.AesUtil;
 import de.flowsuite.mailflowapi.common.util.AuthorisationUtil;
 import de.flowsuite.mailflowapi.common.util.HmacUtil;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,9 +35,32 @@ class SettingsServiceTest {
 
     private Jwt jwt;
 
+    private MockedStatic<AuthorisationUtil> authUtilMock;
+    private MockedStatic<HmacUtil> hmacUtilMock;
+    private MockedStatic<AesUtil> aesUtilMock;
+
     @BeforeEach
     void setup() {
         jwt = mock(Jwt.class);
+        authUtilMock = mockStatic(AuthorisationUtil.class);
+        hmacUtilMock = mockStatic(HmacUtil.class);
+        aesUtilMock = mockStatic(AesUtil.class);
+    }
+
+    @AfterEach
+    void tearDown() {
+        authUtilMock.close();
+        hmacUtilMock.close();
+        aesUtilMock.close();
+    }
+
+    void setupDefaultAuthUtil() {
+        authUtilMock
+                .when(() -> AuthorisationUtil.validateAccessToCustomer(anyLong(), any(Jwt.class)))
+                .thenAnswer(invocation -> null);
+        authUtilMock
+                .when(() -> AuthorisationUtil.validateAccessToUser(anyLong(), any(Jwt.class)))
+                .thenAnswer(invocation -> null);
     }
 
     @Test
@@ -55,40 +79,32 @@ class SettingsServiceTest {
                         .crawlFrequencyInHours(200)
                         .build();
 
-        try (MockedStatic<AuthorisationUtil> authUtil = mockStatic(AuthorisationUtil.class);
-                MockedStatic<HmacUtil> hmacUtil = mockStatic(HmacUtil.class);
-                MockedStatic<AesUtil> aesUtil = mockStatic(AesUtil.class)) {
-            authUtil.when(() -> AuthorisationUtil.validateAccessToCustomer(eq(customerId), eq(jwt)))
-                    .thenAnswer(invocation -> null);
-            authUtil.when(() -> AuthorisationUtil.validateAccessToUser(eq(userId), eq(jwt)))
-                    .thenAnswer(invocation -> null);
+        setupDefaultAuthUtil();
 
-            hmacUtil.when(() -> HmacUtil.hash("plainpassword")).thenReturn("hashed");
-            aesUtil.when(() -> AesUtil.encrypt("plainpassword")).thenReturn("encrypted");
+        hmacUtilMock.when(() -> HmacUtil.hash("plainpassword")).thenReturn("hashed");
+        aesUtilMock.when(() -> AesUtil.encrypt("plainpassword")).thenReturn("encrypted");
 
-            Settings savedSettings =
-                    Settings.builder()
-                            .userId(userId)
-                            .customerId(customerId)
-                            .mailboxPassword("encrypted")
-                            .mailboxPasswordHash("hashed")
-                            .imapHost("imap.example.com")
-                            .smtpHost("smtp.example.com")
-                            .imapPort(993)
-                            .smtpPort(587)
-                            .crawlFrequencyInHours(200)
-                            .lastCrawlAt(ZonedDateTime.now(ZoneId.of("Europe/Berlin")))
-                            .nextCrawlAt(
-                                    ZonedDateTime.now(ZoneId.of("Europe/Berlin")).plusHours(200))
-                            .build();
+        Settings savedSettings =
+                Settings.builder()
+                        .userId(userId)
+                        .customerId(customerId)
+                        .mailboxPassword("encrypted")
+                        .mailboxPasswordHash("hashed")
+                        .imapHost("imap.example.com")
+                        .smtpHost("smtp.example.com")
+                        .imapPort(993)
+                        .smtpPort(587)
+                        .crawlFrequencyInHours(200)
+                        .lastCrawlAt(ZonedDateTime.now(ZoneId.of("Europe/Berlin")))
+                        .nextCrawlAt(ZonedDateTime.now(ZoneId.of("Europe/Berlin")).plusHours(200))
+                        .build();
 
-            when(settingsRepository.save(any(Settings.class))).thenReturn(savedSettings);
+        when(settingsRepository.save(any(Settings.class))).thenReturn(savedSettings);
 
-            Settings result = settingsService.createSettings(customerId, userId, settings, jwt);
-            assertNotNull(result);
-            assertEquals("encrypted", result.getMailboxPassword());
-            assertEquals("hashed", result.getMailboxPasswordHash());
-        }
+        Settings result = settingsService.createSettings(customerId, userId, settings, jwt);
+        assertNotNull(result);
+        assertEquals("encrypted", result.getMailboxPassword());
+        assertEquals("hashed", result.getMailboxPasswordHash());
     }
 
     @Test
@@ -103,15 +119,11 @@ class SettingsServiceTest {
                         .mailboxPassword("plainpassword")
                         .build();
 
-        try (MockedStatic<AuthorisationUtil> authUtil = mockStatic(AuthorisationUtil.class)) {
-            authUtil.when(() -> AuthorisationUtil.validateAccessToCustomer(eq(customerId), eq(jwt)))
-                    .thenAnswer(invocation -> null);
-            authUtil.when(() -> AuthorisationUtil.validateAccessToUser(eq(userId), eq(jwt)))
-                    .thenAnswer(invocation -> null);
-            assertThrows(
-                    IdConflictException.class,
-                    () -> settingsService.createSettings(customerId, userId, settings, jwt));
-        }
+        setupDefaultAuthUtil();
+
+        assertThrows(
+                IdConflictException.class,
+                () -> settingsService.createSettings(customerId, userId, settings, jwt));
     }
 
     @Test
@@ -127,15 +139,11 @@ class SettingsServiceTest {
                         .build();
         when(settingsRepository.findById(userId)).thenReturn(Optional.of(savedSettings));
 
-        try (MockedStatic<AuthorisationUtil> authUtil = mockStatic(AuthorisationUtil.class)) {
-            authUtil.when(() -> AuthorisationUtil.validateAccessToCustomer(eq(customerId), eq(jwt)))
-                    .thenAnswer(invocation -> null);
-            authUtil.when(() -> AuthorisationUtil.validateAccessToUser(eq(userId), eq(jwt)))
-                    .thenAnswer(invocation -> null);
-            Settings result = settingsService.getSettings(customerId, userId, jwt);
-            assertNotNull(result);
-            assertEquals("encrypted", result.getMailboxPassword());
-        }
+        setupDefaultAuthUtil();
+
+        Settings result = settingsService.getSettings(customerId, userId, jwt);
+        assertNotNull(result);
+        assertEquals("encrypted", result.getMailboxPassword());
     }
 
     @Test
@@ -144,15 +152,11 @@ class SettingsServiceTest {
         long userId = 100L;
         when(settingsRepository.findById(userId)).thenReturn(Optional.empty());
 
-        try (MockedStatic<AuthorisationUtil> authUtil = mockStatic(AuthorisationUtil.class)) {
-            authUtil.when(() -> AuthorisationUtil.validateAccessToCustomer(eq(customerId), eq(jwt)))
-                    .thenAnswer(invocation -> null);
-            authUtil.when(() -> AuthorisationUtil.validateAccessToUser(eq(userId), eq(jwt)))
-                    .thenAnswer(invocation -> null);
-            assertThrows(
-                    EntityNotFoundException.class,
-                    () -> settingsService.getSettings(customerId, userId, jwt));
-        }
+        setupDefaultAuthUtil();
+
+        assertThrows(
+                EntityNotFoundException.class,
+                () -> settingsService.getSettings(customerId, userId, jwt));
     }
 
     @Test
@@ -180,37 +184,31 @@ class SettingsServiceTest {
                         .mailboxPasswordHash("hashed")
                         .build();
 
-        try (MockedStatic<AuthorisationUtil> authUtil = mockStatic(AuthorisationUtil.class)) {
-            authUtil.when(() -> AuthorisationUtil.validateAccessToCustomer(eq(customerId), eq(jwt)))
-                    .thenAnswer(invocation -> null);
-            authUtil.when(() -> AuthorisationUtil.validateAccessToUser(eq(userId), eq(jwt)))
-                    .thenAnswer(invocation -> null);
+        setupDefaultAuthUtil();
 
-            when(settingsRepository.findById(userId)).thenReturn(Optional.of(existing));
-            Settings updated =
-                    Settings.builder()
-                            .userId(userId)
-                            .customerId(customerId)
-                            .mailboxPassword("encrypted")
-                            .mailboxPasswordHash("hashed")
-                            .isExecutionEnabled(true)
-                            .isAutoReplyEnabled(false)
-                            .isResponseRatingEnabled(true)
-                            .crawlFrequencyInHours(300)
-                            .imapHost("imap.updated.com")
-                            .smtpHost("smtp.updated.com")
-                            .imapPort(995)
-                            .smtpPort(465)
-                            .build();
+        when(settingsRepository.findById(userId)).thenReturn(Optional.of(existing));
+        Settings updated =
+                Settings.builder()
+                        .userId(userId)
+                        .customerId(customerId)
+                        .mailboxPassword("encrypted")
+                        .mailboxPasswordHash("hashed")
+                        .isExecutionEnabled(true)
+                        .isAutoReplyEnabled(false)
+                        .isResponseRatingEnabled(true)
+                        .crawlFrequencyInHours(300)
+                        .imapHost("imap.updated.com")
+                        .smtpHost("smtp.updated.com")
+                        .imapPort(995)
+                        .smtpPort(465)
+                        .build();
+        when(settingsRepository.save(any(Settings.class))).thenReturn(updated);
 
-            when(settingsRepository.save(any(Settings.class))).thenReturn(updated);
-
-            Settings result = settingsService.updateSettings(customerId, userId, request, jwt);
-            assertNotNull(result);
-            assertTrue(result.isExecutionEnabled());
-            assertEquals(300, result.getCrawlFrequencyInHours());
-            assertEquals("imap.updated.com", result.getImapHost());
-        }
+        Settings result = settingsService.updateSettings(customerId, userId, request, jwt);
+        assertNotNull(result);
+        assertTrue(result.isExecutionEnabled());
+        assertEquals(300, result.getCrawlFrequencyInHours());
+        assertEquals("imap.updated.com", result.getImapHost());
     }
 
     @Test
@@ -231,15 +229,11 @@ class SettingsServiceTest {
                         995,
                         465);
 
-        try (MockedStatic<AuthorisationUtil> authUtil = mockStatic(AuthorisationUtil.class)) {
-            authUtil.when(() -> AuthorisationUtil.validateAccessToCustomer(eq(customerId), eq(jwt)))
-                    .thenAnswer(invocation -> null);
-            authUtil.when(() -> AuthorisationUtil.validateAccessToUser(eq(userId), eq(jwt)))
-                    .thenAnswer(invocation -> null);
-            assertThrows(
-                    IdConflictException.class,
-                    () -> settingsService.updateSettings(customerId, userId, request, jwt));
-        }
+        setupDefaultAuthUtil();
+
+        assertThrows(
+                IdConflictException.class,
+                () -> settingsService.updateSettings(customerId, userId, request, jwt));
     }
 
     @Test
@@ -259,23 +253,18 @@ class SettingsServiceTest {
                         995,
                         465);
 
-        try (MockedStatic<AuthorisationUtil> authUtil = mockStatic(AuthorisationUtil.class)) {
-            authUtil.when(() -> AuthorisationUtil.validateAccessToCustomer(eq(customerId), eq(jwt)))
-                    .thenAnswer(invocation -> null);
-            authUtil.when(() -> AuthorisationUtil.validateAccessToUser(eq(userId), eq(jwt)))
-                    .thenAnswer(invocation -> null);
-            when(settingsRepository.findById(userId)).thenReturn(Optional.empty());
-            assertThrows(
-                    EntityNotFoundException.class,
-                    () -> settingsService.updateSettings(customerId, userId, request, jwt));
-        }
+        setupDefaultAuthUtil();
+
+        when(settingsRepository.findById(userId)).thenReturn(Optional.empty());
+        assertThrows(
+                EntityNotFoundException.class,
+                () -> settingsService.updateSettings(customerId, userId, request, jwt));
     }
 
     @Test
     void testUpdateMailboxPassword_Success() {
         long customerId = 1L;
         long userId = 100L;
-        // Existing settings with stored password hash.
         Settings settings =
                 Settings.builder()
                         .userId(userId)
@@ -287,41 +276,32 @@ class SettingsServiceTest {
                 new SettingsResource.UpdateMailboxPasswordRequest(
                         userId, customerId, "currentPass", "updatedPass");
 
-        try (MockedStatic<AuthorisationUtil> authUtil = mockStatic(AuthorisationUtil.class);
-                MockedStatic<HmacUtil> hmacUtil = mockStatic(HmacUtil.class);
-                MockedStatic<AesUtil> aesUtil = mockStatic(AesUtil.class)) {
-            authUtil.when(() -> AuthorisationUtil.validateAccessToCustomer(eq(customerId), eq(jwt)))
-                    .thenAnswer(invocation -> null);
-            authUtil.when(() -> AuthorisationUtil.validateAccessToUser(eq(userId), eq(jwt)))
-                    .thenAnswer(invocation -> null);
+        setupDefaultAuthUtil();
 
-            when(settingsRepository.findById(userId)).thenReturn(Optional.of(settings));
-            hmacUtil.when(() -> HmacUtil.hash("currentPass")).thenReturn("old-hashed");
-            hmacUtil.when(() -> HmacUtil.hash("updatedPass")).thenReturn("new-hashed");
-            aesUtil.when(() -> AesUtil.encrypt("updatedPass")).thenReturn("new-encrypted");
+        when(settingsRepository.findById(userId)).thenReturn(Optional.of(settings));
+        hmacUtilMock.when(() -> HmacUtil.hash("currentPass")).thenReturn("old-hashed");
+        hmacUtilMock.when(() -> HmacUtil.hash("updatedPass")).thenReturn("new-hashed");
+        aesUtilMock.when(() -> AesUtil.encrypt("updatedPass")).thenReturn("new-encrypted");
 
-            Settings updatedSettings =
-                    Settings.builder()
-                            .userId(userId)
-                            .customerId(customerId)
-                            .mailboxPassword("new-encrypted")
-                            .mailboxPasswordHash("new-hashed")
-                            .build();
-            when(settingsRepository.save(any(Settings.class))).thenReturn(updatedSettings);
+        Settings updatedSettings =
+                Settings.builder()
+                        .userId(userId)
+                        .customerId(customerId)
+                        .mailboxPassword("new-encrypted")
+                        .mailboxPasswordHash("new-hashed")
+                        .build();
+        when(settingsRepository.save(any(Settings.class))).thenReturn(updatedSettings);
 
-            Settings result =
-                    settingsService.updateMailboxPassword(customerId, userId, request, jwt);
-            assertNotNull(result);
-            assertEquals("new-hashed", result.getMailboxPasswordHash());
-            assertEquals("new-encrypted", result.getMailboxPassword());
-        }
+        Settings result = settingsService.updateMailboxPassword(customerId, userId, request, jwt);
+        assertNotNull(result);
+        assertEquals("new-hashed", result.getMailboxPasswordHash());
+        assertEquals("new-encrypted", result.getMailboxPassword());
     }
 
     @Test
     void testUpdateMailboxPassword_UpdateConflict() {
         long customerId = 1L;
         long userId = 100L;
-        // Existing settings with a stored hash that doesn't match the provided current password.
         Settings settings =
                 Settings.builder()
                         .userId(userId)
@@ -333,19 +313,13 @@ class SettingsServiceTest {
                 new SettingsResource.UpdateMailboxPasswordRequest(
                         userId, customerId, "wrongPass", "updatedPass");
 
-        try (MockedStatic<AuthorisationUtil> authUtil = mockStatic(AuthorisationUtil.class);
-                MockedStatic<HmacUtil> hmacUtil = mockStatic(HmacUtil.class)) {
-            authUtil.when(() -> AuthorisationUtil.validateAccessToCustomer(eq(customerId), eq(jwt)))
-                    .thenAnswer(invocation -> null);
-            authUtil.when(() -> AuthorisationUtil.validateAccessToUser(eq(userId), eq(jwt)))
-                    .thenAnswer(invocation -> null);
+        setupDefaultAuthUtil();
 
-            when(settingsRepository.findById(userId)).thenReturn(Optional.of(settings));
-            hmacUtil.when(() -> HmacUtil.hash("wrongPass")).thenReturn("not-old-hashed");
+        when(settingsRepository.findById(userId)).thenReturn(Optional.of(settings));
+        hmacUtilMock.when(() -> HmacUtil.hash("wrongPass")).thenReturn("not-old-hashed");
 
-            assertThrows(
-                    UpdateConflictException.class,
-                    () -> settingsService.updateMailboxPassword(customerId, userId, request, jwt));
-        }
+        assertThrows(
+                UpdateConflictException.class,
+                () -> settingsService.updateMailboxPassword(customerId, userId, request, jwt));
     }
 }

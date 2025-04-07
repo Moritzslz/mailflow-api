@@ -2,7 +2,7 @@ package de.flowsuite.mailflowapi.ragurl;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 import de.flowsuite.mailflowapi.common.entity.RagUrl;
@@ -11,6 +11,7 @@ import de.flowsuite.mailflowapi.common.exception.IdConflictException;
 import de.flowsuite.mailflowapi.common.exception.IdorException;
 import de.flowsuite.mailflowapi.common.util.AuthorisationUtil;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,9 +33,26 @@ class RagUrlServiceTest {
 
     private Jwt jwt;
 
+    private MockedStatic<AuthorisationUtil> authUtilMock;
+
     @BeforeEach
     void setup() {
         jwt = mock(Jwt.class);
+        authUtilMock = mockStatic(AuthorisationUtil.class);
+    }
+
+    @AfterEach
+    void tearDown() {
+        authUtilMock.close();
+    }
+
+    void setupDefaultAuthUtil() {
+        authUtilMock
+                .when(() -> AuthorisationUtil.validateAccessToCustomer(anyLong(), any(Jwt.class)))
+                .thenAnswer(invocation -> null);
+        authUtilMock
+                .when(() -> AuthorisationUtil.validateAccessToUser(anyLong(), any(Jwt.class)))
+                .thenAnswer(invocation -> null);
     }
 
     @Test
@@ -47,26 +65,21 @@ class RagUrlServiceTest {
                         .isLastCrawlSuccessful(true)
                         .build();
 
-        try (MockedStatic<AuthorisationUtil> authUtilMock = mockStatic(AuthorisationUtil.class)) {
-            authUtilMock
-                    .when(() -> AuthorisationUtil.validateAccessToCustomer(eq(customerId), eq(jwt)))
-                    .thenAnswer(invocation -> null);
+        setupDefaultAuthUtil();
 
-            RagUrl savedRagUrl =
-                    RagUrl.builder()
-                            .id(10L)
-                            .customerId(customerId)
-                            .url("http://example.com")
-                            .isLastCrawlSuccessful(true)
-                            .build();
+        RagUrl savedRagUrl =
+                RagUrl.builder()
+                        .id(10L)
+                        .customerId(customerId)
+                        .url("http://example.com")
+                        .isLastCrawlSuccessful(true)
+                        .build();
+        when(ragUrlRepository.save(any(RagUrl.class))).thenReturn(savedRagUrl);
 
-            when(ragUrlRepository.save(any(RagUrl.class))).thenReturn(savedRagUrl);
-
-            RagUrl result = ragUrlService.createRagUrl(customerId, ragUrl, jwt);
-            assertNotNull(result);
-            assertEquals(10L, result.getId());
-            assertEquals("http://example.com", result.getUrl());
-        }
+        RagUrl result = ragUrlService.createRagUrl(customerId, ragUrl, jwt);
+        assertNotNull(result);
+        assertEquals(10L, result.getId());
+        assertEquals("http://example.com", result.getUrl());
     }
 
     @Test
@@ -80,14 +93,11 @@ class RagUrlServiceTest {
                         .isLastCrawlSuccessful(true)
                         .build();
 
-        try (MockedStatic<AuthorisationUtil> authUtilMock = mockStatic(AuthorisationUtil.class)) {
-            authUtilMock
-                    .when(() -> AuthorisationUtil.validateAccessToCustomer(eq(customerId), eq(jwt)))
-                    .thenAnswer(invocation -> null);
-            assertThrows(
-                    IdConflictException.class,
-                    () -> ragUrlService.createRagUrl(customerId, ragUrl, jwt));
-        }
+        setupDefaultAuthUtil();
+
+        assertThrows(
+                IdConflictException.class,
+                () -> ragUrlService.createRagUrl(customerId, ragUrl, jwt));
     }
 
     @Test
@@ -103,16 +113,14 @@ class RagUrlServiceTest {
 
         when(ragUrlRepository.findByCustomerId(customerId)).thenReturn(List.of(ragUrl));
 
-        try (MockedStatic<AuthorisationUtil> authUtilMock = mockStatic(AuthorisationUtil.class)) {
-            authUtilMock
-                    .when(() -> AuthorisationUtil.validateAccessToCustomer(eq(customerId), eq(jwt)))
-                    .thenAnswer(invocation -> null);
+        authUtilMock
+                .when(() -> AuthorisationUtil.validateAccessToCustomer(anyLong(), any(Jwt.class)))
+                .thenAnswer(invocation -> null);
 
-            List<RagUrl> result = ragUrlService.listRagUrls(customerId, jwt);
-            assertNotNull(result);
-            assertEquals(1, result.size());
-            assertEquals("http://example.com", result.get(0).getUrl());
-        }
+        List<RagUrl> result = ragUrlService.listRagUrls(customerId, jwt);
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("http://example.com", result.get(0).getUrl());
     }
 
     @Test
@@ -127,30 +135,30 @@ class RagUrlServiceTest {
                         .isLastCrawlSuccessful(true)
                         .build();
 
-        try (MockedStatic<AuthorisationUtil> authUtilMock = mockStatic(AuthorisationUtil.class)) {
-            authUtilMock
-                    .when(() -> AuthorisationUtil.validateAccessToCustomer(eq(customerId), eq(jwt)))
-                    .thenAnswer(invocation -> null);
+        when(ragUrlRepository.findById(ragUrlId)).thenReturn(Optional.of(ragUrl));
 
-            when(ragUrlRepository.findById(ragUrlId)).thenReturn(Optional.of(ragUrl));
-            assertDoesNotThrow(() -> ragUrlService.deleteRagUrl(customerId, ragUrlId, jwt));
-            verify(ragUrlRepository).delete(ragUrl);
-        }
+        authUtilMock
+                .when(() -> AuthorisationUtil.validateAccessToCustomer(anyLong(), any(Jwt.class)))
+                .thenAnswer(invocation -> null);
+
+        assertDoesNotThrow(() -> ragUrlService.deleteRagUrl(customerId, ragUrlId, jwt));
+        verify(ragUrlRepository).delete(ragUrl);
     }
 
     @Test
     void testDeleteRagUrl_NotFound() {
         long customerId = 1L;
         long ragUrlId = 10L;
-        try (MockedStatic<AuthorisationUtil> authUtilMock = mockStatic(AuthorisationUtil.class)) {
-            authUtilMock
-                    .when(() -> AuthorisationUtil.validateAccessToCustomer(eq(customerId), eq(jwt)))
-                    .thenAnswer(invocation -> null);
-            when(ragUrlRepository.findById(ragUrlId)).thenReturn(Optional.empty());
-            assertThrows(
-                    EntityNotFoundException.class,
-                    () -> ragUrlService.deleteRagUrl(customerId, ragUrlId, jwt));
-        }
+
+        when(ragUrlRepository.findById(ragUrlId)).thenReturn(Optional.empty());
+
+        authUtilMock
+                .when(() -> AuthorisationUtil.validateAccessToCustomer(anyLong(), any(Jwt.class)))
+                .thenAnswer(invocation -> null);
+
+        assertThrows(
+                EntityNotFoundException.class,
+                () -> ragUrlService.deleteRagUrl(customerId, ragUrlId, jwt));
     }
 
     @Test
@@ -166,14 +174,13 @@ class RagUrlServiceTest {
                         .isLastCrawlSuccessful(true)
                         .build();
 
-        try (MockedStatic<AuthorisationUtil> authUtilMock = mockStatic(AuthorisationUtil.class)) {
-            authUtilMock
-                    .when(() -> AuthorisationUtil.validateAccessToCustomer(eq(customerId), eq(jwt)))
-                    .thenAnswer(invocation -> null);
-            when(ragUrlRepository.findById(ragUrlId)).thenReturn(Optional.of(ragUrl));
-            assertThrows(
-                    IdorException.class,
-                    () -> ragUrlService.deleteRagUrl(customerId, ragUrlId, jwt));
-        }
+        when(ragUrlRepository.findById(ragUrlId)).thenReturn(Optional.of(ragUrl));
+
+        authUtilMock
+                .when(() -> AuthorisationUtil.validateAccessToCustomer(anyLong(), any(Jwt.class)))
+                .thenAnswer(invocation -> null);
+
+        assertThrows(
+                IdorException.class, () -> ragUrlService.deleteRagUrl(customerId, ragUrlId, jwt));
     }
 }

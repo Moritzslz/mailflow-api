@@ -13,6 +13,7 @@ import de.flowsuite.mailflowapi.common.util.AuthorisationUtil;
 import de.flowsuite.mailflowapi.common.util.HmacUtil;
 import de.flowsuite.mailflowapi.common.util.Util;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,9 +35,35 @@ class BlacklistServiceTest {
 
     private Jwt jwt;
 
+    private MockedStatic<AuthorisationUtil> authUtilMock;
+    private MockedStatic<Util> utilMock;
+    private MockedStatic<HmacUtil> hmacUtilMock;
+    private MockedStatic<AesUtil> aesUtilMock;
+
     @BeforeEach
     void setup() {
         jwt = mock(Jwt.class);
+        authUtilMock = mockStatic(AuthorisationUtil.class);
+        utilMock = mockStatic(Util.class);
+        hmacUtilMock = mockStatic(HmacUtil.class);
+        aesUtilMock = mockStatic(AesUtil.class);
+    }
+
+    @AfterEach
+    void tearDown() {
+        authUtilMock.close();
+        utilMock.close();
+        hmacUtilMock.close();
+        aesUtilMock.close();
+    }
+
+    void setupDefaultAuthUtil() {
+        authUtilMock
+                .when(() -> AuthorisationUtil.validateAccessToCustomer(anyLong(), any(Jwt.class)))
+                .thenAnswer(invocation -> null);
+        authUtilMock
+                .when(() -> AuthorisationUtil.validateAccessToUser(anyLong(), any(Jwt.class)))
+                .thenAnswer(invocation -> null);
     }
 
     @Test
@@ -49,69 +76,48 @@ class BlacklistServiceTest {
                         .blacklistedEmailAddress("test@example.com")
                         .build();
 
-        try (MockedStatic<AuthorisationUtil> authUtilMock = mockStatic(AuthorisationUtil.class);
-                MockedStatic<Util> utilMock = mockStatic(Util.class);
-                MockedStatic<HmacUtil> hmacUtilMock = mockStatic(HmacUtil.class);
-                MockedStatic<AesUtil> aesUtilMock = mockStatic(AesUtil.class)) {
+        setupDefaultAuthUtil();
+        utilMock.when(() -> Util.validateEmailAddress("test@example.com"))
+                .thenAnswer(invocation -> null);
 
-            authUtilMock
-                    .when(() -> AuthorisationUtil.validateAccessToCustomer(customerId, jwt))
-                    .thenAnswer(invocation -> null);
-            authUtilMock
-                    .when(() -> AuthorisationUtil.validateAccessToUser(userId, jwt))
-                    .thenAnswer(invocation -> null);
-            utilMock.when(() -> Util.validateEmailAddress("test@example.com"))
-                    .thenAnswer(invocation -> null);
+        hmacUtilMock.when(() -> HmacUtil.hash("test@example.com")).thenReturn("hashed-email");
+        aesUtilMock.when(() -> AesUtil.encrypt("test@example.com")).thenReturn("encrypted-email");
 
-            hmacUtilMock.when(() -> HmacUtil.hash("test@example.com")).thenReturn("hashed-email");
-            aesUtilMock
-                    .when(() -> AesUtil.encrypt("test@example.com"))
-                    .thenReturn("encrypted-email");
+        BlacklistEntry savedEntry =
+                BlacklistEntry.builder()
+                        .id(10L)
+                        .userId(userId)
+                        .blacklistedEmailAddress("encrypted-email")
+                        .build();
+        when(blacklistRepository.save(any(BlacklistEntry.class))).thenReturn(savedEntry);
 
-            BlacklistEntry savedEntry =
-                    BlacklistEntry.builder()
-                            .id(10L)
-                            .userId(userId)
-                            .blacklistedEmailAddress("encrypted-email")
-                            .build();
-            when(blacklistRepository.save(any(BlacklistEntry.class))).thenReturn(savedEntry);
+        BlacklistEntry result =
+                blacklistService.createBlacklistEntry(customerId, userId, entry, jwt);
 
-            BlacklistEntry result =
-                    blacklistService.createBlacklistEntry(customerId, userId, entry, jwt);
-
-            assertNotNull(result);
-            assertEquals(10L, result.getId());
-            assertEquals("encrypted-email", result.getBlacklistedEmailAddress());
-            verify(blacklistRepository).save(any(BlacklistEntry.class));
-        }
+        assertNotNull(result);
+        assertEquals(10L, result.getId());
+        assertEquals("encrypted-email", result.getBlacklistedEmailAddress());
+        verify(blacklistRepository).save(any(BlacklistEntry.class));
     }
 
     @Test
     void testCreateBlacklistEntry_IdConflict() {
         long customerId = 1L;
         long userId = 100L;
-        // Mismatched userId between method parameter and entity
+        // Mismatched userId between method parameter and entity.
         BlacklistEntry entry =
                 BlacklistEntry.builder()
                         .userId(200L)
                         .blacklistedEmailAddress("test@example.com")
                         .build();
 
-        try (MockedStatic<AuthorisationUtil> authUtilMock = mockStatic(AuthorisationUtil.class);
-                MockedStatic<Util> utilMock = mockStatic(Util.class)) {
-            authUtilMock
-                    .when(() -> AuthorisationUtil.validateAccessToCustomer(customerId, jwt))
-                    .thenAnswer(invocation -> null);
-            authUtilMock
-                    .when(() -> AuthorisationUtil.validateAccessToUser(userId, jwt))
-                    .thenAnswer(invocation -> null);
-            utilMock.when(() -> Util.validateEmailAddress("test@example.com"))
-                    .thenAnswer(invocation -> null);
+        setupDefaultAuthUtil();
+        utilMock.when(() -> Util.validateEmailAddress("test@example.com"))
+                .thenAnswer(invocation -> null);
 
-            assertThrows(
-                    IdConflictException.class,
-                    () -> blacklistService.createBlacklistEntry(customerId, userId, entry, jwt));
-        }
+        assertThrows(
+                IdConflictException.class,
+                () -> blacklistService.createBlacklistEntry(customerId, userId, entry, jwt));
     }
 
     @Test
@@ -127,25 +133,14 @@ class BlacklistServiceTest {
 
         when(blacklistRepository.findByUserId(userId)).thenReturn(List.of(entry));
 
-        try (MockedStatic<AuthorisationUtil> authUtilMock = mockStatic(AuthorisationUtil.class);
-                MockedStatic<AesUtil> aesUtilMock = mockStatic(AesUtil.class)) {
+        setupDefaultAuthUtil();
+        aesUtilMock.when(() -> AesUtil.decrypt("encrypted-email")).thenReturn("decrypted-email");
 
-            authUtilMock
-                    .when(() -> AuthorisationUtil.validateAccessToCustomer(customerId, jwt))
-                    .thenAnswer(invocation -> null);
-            authUtilMock
-                    .when(() -> AuthorisationUtil.validateAccessToUser(userId, jwt))
-                    .thenAnswer(invocation -> null);
-            aesUtilMock
-                    .when(() -> AesUtil.decrypt("encrypted-email"))
-                    .thenReturn("decrypted-email");
-
-            List<BlacklistEntry> result =
-                    blacklistService.listBlacklistEntries(customerId, userId, jwt);
-            assertNotNull(result);
-            assertEquals(1, result.size());
-            assertEquals("decrypted-email", result.get(0).getBlacklistedEmailAddress());
-        }
+        List<BlacklistEntry> result =
+                blacklistService.listBlacklistEntries(customerId, userId, jwt);
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("decrypted-email", result.get(0).getBlacklistedEmailAddress());
     }
 
     @Test
@@ -162,20 +157,13 @@ class BlacklistServiceTest {
 
         when(blacklistRepository.findById(blacklistEntryId)).thenReturn(Optional.of(entry));
 
-        try (MockedStatic<AuthorisationUtil> authUtilMock = mockStatic(AuthorisationUtil.class)) {
-            authUtilMock
-                    .when(() -> AuthorisationUtil.validateAccessToCustomer(customerId, jwt))
-                    .thenAnswer(invocation -> null);
-            authUtilMock
-                    .when(() -> AuthorisationUtil.validateAccessToUser(userId, jwt))
-                    .thenAnswer(invocation -> null);
+        setupDefaultAuthUtil();
 
-            assertDoesNotThrow(
-                    () ->
-                            blacklistService.deleteBlacklistEntry(
-                                    customerId, userId, blacklistEntryId, jwt));
-            verify(blacklistRepository).delete(entry);
-        }
+        assertDoesNotThrow(
+                () ->
+                        blacklistService.deleteBlacklistEntry(
+                                customerId, userId, blacklistEntryId, jwt));
+        verify(blacklistRepository).delete(entry);
     }
 
     @Test
@@ -186,20 +174,13 @@ class BlacklistServiceTest {
 
         when(blacklistRepository.findById(blacklistEntryId)).thenReturn(Optional.empty());
 
-        try (MockedStatic<AuthorisationUtil> authUtilMock = mockStatic(AuthorisationUtil.class)) {
-            authUtilMock
-                    .when(() -> AuthorisationUtil.validateAccessToCustomer(customerId, jwt))
-                    .thenAnswer(invocation -> null);
-            authUtilMock
-                    .when(() -> AuthorisationUtil.validateAccessToUser(userId, jwt))
-                    .thenAnswer(invocation -> null);
+        setupDefaultAuthUtil();
 
-            assertThrows(
-                    EntityNotFoundException.class,
-                    () ->
-                            blacklistService.deleteBlacklistEntry(
-                                    customerId, userId, blacklistEntryId, jwt));
-        }
+        assertThrows(
+                EntityNotFoundException.class,
+                () ->
+                        blacklistService.deleteBlacklistEntry(
+                                customerId, userId, blacklistEntryId, jwt));
     }
 
     @Test
@@ -217,19 +198,12 @@ class BlacklistServiceTest {
 
         when(blacklistRepository.findById(blacklistEntryId)).thenReturn(Optional.of(entry));
 
-        try (MockedStatic<AuthorisationUtil> authUtilMock = mockStatic(AuthorisationUtil.class)) {
-            authUtilMock
-                    .when(() -> AuthorisationUtil.validateAccessToCustomer(customerId, jwt))
-                    .thenAnswer(invocation -> null);
-            authUtilMock
-                    .when(() -> AuthorisationUtil.validateAccessToUser(userId, jwt))
-                    .thenAnswer(invocation -> null);
+        setupDefaultAuthUtil();
 
-            assertThrows(
-                    IdorException.class,
-                    () ->
-                            blacklistService.deleteBlacklistEntry(
-                                    customerId, userId, blacklistEntryId, jwt));
-        }
+        assertThrows(
+                IdorException.class,
+                () ->
+                        blacklistService.deleteBlacklistEntry(
+                                customerId, userId, blacklistEntryId, jwt));
     }
 }
