@@ -1,6 +1,7 @@
 package de.flowsuite.mailflowapi.messagecategory;
 
 import de.flowsuite.mailflowapi.common.entity.MessageCategory;
+
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

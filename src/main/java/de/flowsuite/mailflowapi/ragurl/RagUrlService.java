@@ -5,6 +5,7 @@ import de.flowsuite.mailflowapi.common.exception.EntityNotFoundException;
 import de.flowsuite.mailflowapi.common.exception.IdConflictException;
 import de.flowsuite.mailflowapi.common.exception.IdorException;
 import de.flowsuite.mailflowapi.common.util.AuthorisationUtil;
+
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +42,8 @@ class RagUrlService {
         RagUrl ragUrl =
                 ragUrlRepository
                         .findById(ragUrlId)
-                        .orElseThrow(() -> new EntityNotFoundException(RagUrl.class.getSimpleName()));
+                        .orElseThrow(
+                                () -> new EntityNotFoundException(RagUrl.class.getSimpleName()));
 
         if (!ragUrl.getCustomerId().equals(customerId)) {
             throw new IdorException();
