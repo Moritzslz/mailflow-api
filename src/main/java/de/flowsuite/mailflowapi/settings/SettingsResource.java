@@ -53,7 +53,7 @@ class SettingsResource {
     ResponseEntity<Settings> updateMailboxPassword(
             @PathVariable long customerId,
             @PathVariable long userId,
-            @RequestBody @Valid SettingsResource.UpdateMailboxPasswordRequest request,
+            @RequestBody @Valid UpdateMailboxPasswordRequest request,
             @AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity.ok(
                 settingsService.updateMailboxPassword(customerId, userId, request, jwt));
