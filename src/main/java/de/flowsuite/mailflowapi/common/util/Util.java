@@ -2,8 +2,14 @@ package de.flowsuite.mailflowapi.common.util;
 
 import de.flowsuite.mailflowapi.common.exception.InvalidEmailAddressException;
 import de.flowsuite.mailflowapi.common.exception.InvalidPasswordException;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class Util {
 

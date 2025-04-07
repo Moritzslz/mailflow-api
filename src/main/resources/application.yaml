@@ -22,3 +22,7 @@ google:
     secret-key: ${GOOGLE_RECAPTCHA_SECRET_KEY}
     verify-url: https://www.google.com/recaptcha/api/siteverify
     threshold: 0.5
+
+mailflow:
+  frontend:
+    url: https://mailflow.flow-suite.de
