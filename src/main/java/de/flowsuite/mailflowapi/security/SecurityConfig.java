@@ -111,6 +111,8 @@ class SecurityConfig {
                         // Authenticate any request
                         .anyRequest()
                         .authenticated())
+                // TODO uncomment in prod:
+                //  .requiresChannel(channel -> channel.anyRequest().requiresSecure())
                 .oauth2ResourceServer(resourceServer -> resourceServer.jwt(Customizer.withDefaults()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(AbstractHttpConfigurer::disable)

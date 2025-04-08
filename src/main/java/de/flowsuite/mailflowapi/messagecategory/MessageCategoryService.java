@@ -6,6 +6,7 @@ import de.flowsuite.mailflowapi.common.exception.IdConflictException;
 import de.flowsuite.mailflowapi.common.exception.IdorException;
 import de.flowsuite.mailflowapi.common.exception.UpdateConflictException;
 import de.flowsuite.mailflowapi.common.util.AuthorisationUtil;
+
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
@@ -40,7 +41,11 @@ class MessageCategoryService {
     }
 
     MessageCategory updateMessageCategory(
-            long customerId, long userId, long categoryId, MessageCategory messageCategory, Jwt jwt) {
+            long customerId,
+            long userId,
+            long categoryId,
+            MessageCategory messageCategory,
+            Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
         AuthorisationUtil.validateAccessToUser(userId, jwt);
 
@@ -52,7 +57,9 @@ class MessageCategoryService {
                 messageCategoryRepository
                         .findById(categoryId)
                         .orElseThrow(
-                                () -> new EntityNotFoundException(MessageCategory.class.getSimpleName()));
+                                () ->
+                                        new EntityNotFoundException(
+                                                MessageCategory.class.getSimpleName()));
 
         if (!existingCategory.getUserId().equals(userId)) {
             throw new UpdateConflictException();
@@ -61,8 +68,7 @@ class MessageCategoryService {
         return messageCategoryRepository.save(messageCategory);
     }
 
-    void deleteMessageCategory(
-            long customerId, long userId, long categoryId, Jwt jwt) {
+    void deleteMessageCategory(long customerId, long userId, long categoryId, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
         AuthorisationUtil.validateAccessToUser(userId, jwt);
 
@@ -70,7 +76,9 @@ class MessageCategoryService {
                 messageCategoryRepository
                         .findById(categoryId)
                         .orElseThrow(
-                                () -> new EntityNotFoundException(MessageCategory.class.getSimpleName()));
+                                () ->
+                                        new EntityNotFoundException(
+                                                MessageCategory.class.getSimpleName()));
 
         if (!messageCategory.getUserId().equals(userId)) {
             throw new IdorException();
