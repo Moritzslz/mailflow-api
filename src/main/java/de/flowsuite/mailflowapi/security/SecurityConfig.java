@@ -82,8 +82,7 @@ class SecurityConfig {
                         // User Resource
                         .requestMatchers(HttpMethod.POST, "/customers/users").permitAll()
                         .requestMatchers(HttpMethod.GET, "/customers/users/enable").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/customers/users/password").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/customers/users/password").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/customers/users/reset-password/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/customers/users").access(hasScope(Authorities.USERS_LIST.getAuthority()))
                         .requestMatchers(HttpMethod.GET, "/customers/*/users/*").access(hasScope(Authorities.USERS_READ.getAuthority()))
                         .requestMatchers(HttpMethod.PUT, "/customers/*/users/*").access(hasScope(Authorities.USERS_WRITE.getAuthority()))
@@ -112,6 +111,8 @@ class SecurityConfig {
                         // Authenticate any request
                         .anyRequest()
                         .authenticated())
+                // TODO uncomment in prod:
+                //  .requiresChannel(channel -> channel.anyRequest().requiresSecure())
                 .oauth2ResourceServer(resourceServer -> resourceServer.jwt(Customizer.withDefaults()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(AbstractHttpConfigurer::disable)
