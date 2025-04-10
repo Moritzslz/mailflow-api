@@ -116,11 +116,11 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return !accountLocked;
+        return !isAccountLocked;
     }
 
     @Override
     public boolean isEnabled() {
-        return accountEnabled;
+        return isAccountEnabled;
     }
 }
