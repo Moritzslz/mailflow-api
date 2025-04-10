@@ -56,7 +56,8 @@ public class MailService {
         this.welcomeEmail = MailUtil.readFile(resourceLoader, WELCOME_EMAIL_PATH);
     }
 
-    public void sendDoubleOptInEmail(String fistName, String emailAddress, String token, int hours) {
+    public void sendDoubleOptInEmail(
+            String fistName, String emailAddress, String token, int hours) {
         String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
 
         URI uri =
