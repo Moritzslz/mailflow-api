@@ -30,7 +30,7 @@ public class MailService {
     private static final String WELCOME_EMAIL_PATH = "classpath:templates/WelcomeEmail.html";
     private static final String DOUBLE_OPT_IN_EMAIL_SUBJECT = "Bitte bestätige deine Registrierung 🤝";
     private static final String RESET_PASSWORD_EMAIL_SUBJECT = "Dein Link zum Zurücksetzen deines Passwort 🔐";
-    private static final String RESET_PASSWORD_EXPIRED_EMAIL_SUBJECT = "Dein Link zum Passwort zurücksetzen ist abgelaufen ⏳";
+    private static final String RESET_PASSWORD_EXPIRED_EMAIL_SUBJECT = "Dein Link zum Passwort Zurücksetzen ist abgelaufen ⏳";
     private static final String WELCOME_EMAIL_SUBJECT = "Willkommen bei MailFlow – schön, dass du dabei bist! 🥳";
     private final String contextPath;
     private final String mailFlowFrontendUrl;
