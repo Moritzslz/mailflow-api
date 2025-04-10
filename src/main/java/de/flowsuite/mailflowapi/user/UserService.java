@@ -1,10 +1,9 @@
 package de.flowsuite.mailflowapi.user;
 
-import de.flowsuite.mailflowapi.common.entity.Authorities;
+import de.flowsuite.mailflowapi.common.auth.Authorities;
+import de.flowsuite.mailflowapi.common.dto.Message;
 import de.flowsuite.mailflowapi.common.entity.User;
 import de.flowsuite.mailflowapi.common.exception.EntityAlreadyExistsException;
-import de.flowsuite.mailflowapi.common.exception.EntityNotFoundException;
-import de.flowsuite.mailflowapi.common.exception.TokenExpiredException;
 import de.flowsuite.mailflowapi.common.util.AesUtil;
 import de.flowsuite.mailflowapi.common.util.HmacUtil;
 import de.flowsuite.mailflowapi.common.util.Util;
@@ -25,14 +24,18 @@ import java.util.Optional;
 @Service
 public class UserService implements UserDetailsService {
 
+    // spotless:off
     private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
     private static final int TOKEN_TTL_HOURS = 6;
     private static final int TOKEN_TTL_MINUTES = 30;
-    private static final String ENABLE_USER_SUCCESS_MSG =
-            "Your account has been enabled. You can close this window now.";
+    private static final String CREATE_USER_MSG = "Please check your inbox to enable your account.";
+    private static final String ENABLE_USER_MSG = "Thank you! Your account has been enabled.";
+    private static final String REQUEST_PASSWORD_RESET_MSG = "A password reset link will be sent shortly.";
+    private static final String COMPLETE_PASSWORD_RESET_MSG = "Your password has been updated successfully.";
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final MailService mailService;
+    // spotless:on
 
     UserService(
             UserRepository userRepository,
@@ -68,82 +71,123 @@ public class UserService implements UserDetailsService {
         return verificationToken;
     }
 
-    User createUser(UserResource.CreateUserRequest request) {
+    Message createUser(UserResource.CreateUserRequest request) {
         String emailAddress = request.emailAddress().toLowerCase();
 
         Util.validateEmailAddress(emailAddress);
         UserUtil.validatePassword(request.password(), request.confirmationPassword());
 
         String emailAddressHash = HmacUtil.hash(emailAddress);
-        if (userRepository.existsByEmailAddressHash(emailAddressHash)) {
-            throw new EntityAlreadyExistsException(User.class.getSimpleName());
+        if (!userRepository.existsByEmailAddressHash(emailAddressHash)) {
+            String passwordHash = passwordEncoder.encode(request.password());
+
+            String verificationToken = generateVerificationToken();
+            ZonedDateTime tokenExpiresAt =
+                    ZonedDateTime.now(ZoneId.of("Europe/Berlin")).plusHours(TOKEN_TTL_HOURS);
+
+            LOG.debug("Verification token: {}", verificationToken);
+
+            String phoneNumberEncrypted = null;
+            if (request.phoneNumber() != null && !request.phoneNumber().isBlank()) {
+                phoneNumberEncrypted = AesUtil.encrypt(request.phoneNumber());
+            }
+
+            User user =
+                    User.builder()
+                            .customerId(request.customerId())
+                            .firstName(AesUtil.encrypt(request.firstName()))
+                            .lastName(AesUtil.encrypt(request.lastName()))
+                            .emailAddressHash(emailAddressHash)
+                            .emailAddress(AesUtil.encrypt(emailAddress))
+                            .password(passwordHash)
+                            .phoneNumber(phoneNumberEncrypted)
+                            .position(request.position())
+                            .role(Authorities.USER.getAuthority())
+                            .isAccountLocked(false)
+                            .isAccountEnabled(false)
+                            .isSubscribedToNewsletter(request.isSubscribedToNewsletter())
+                            .verificationToken(verificationToken)
+                            .tokenExpiresAt(tokenExpiresAt)
+                            .build();
+
+            userRepository.save(user);
+            mailService.sendDoubleOptInEmail(
+                    request.firstName(), emailAddress, verificationToken, TOKEN_TTL_HOURS);
         }
 
-        String passwordHash = passwordEncoder.encode(request.password());
-
-        String verificationToken = generateVerificationToken();
-        ZonedDateTime tokenExpiresAt =
-                ZonedDateTime.now(ZoneId.of("Europe/Berlin")).plusHours(TOKEN_TTL_HOURS);
-
-        LOG.debug("Verification token: {}", verificationToken);
-
-        String phoneNumberEncrypted = null;
-        if (request.phoneNumber() != null && request.phoneNumber().isBlank()) {
-            phoneNumberEncrypted = AesUtil.encrypt(request.phoneNumber());
-        }
-
-        User user =
-                User.builder()
-                        .customerId(request.customerId())
-                        .firstName(AesUtil.encrypt(request.firstName()))
-                        .lastName(AesUtil.encrypt(request.lastName()))
-                        .emailAddressHash(emailAddressHash)
-                        .emailAddress(AesUtil.encrypt(emailAddress))
-                        .password(passwordHash)
-                        .phoneNumber(phoneNumberEncrypted)
-                        .position(request.position())
-                        .role(Authorities.USER.getAuthority())
-                        .accountLocked(false)
-                        .accountEnabled(false)
-                        .subscribedToNewsletter(request.subscribedToNewsletter())
-                        .verificationToken(verificationToken)
-                        .tokenExpiresAt(tokenExpiresAt)
-                        .build();
-
-        mailService.sendDoubleOptInEmail(
-                request.firstName(), emailAddress, verificationToken, TOKEN_TTL_HOURS);
-
-        return userRepository.save(user);
+        return new Message(CREATE_USER_MSG);
     }
 
-    String enableUser(String token) {
+    Message enableUser(String token) {
         Optional<User> optionalUser = userRepository.findByVerificationToken(token);
-
-        if (optionalUser.isEmpty()) {
-            throw new EntityNotFoundException(User.class.getSimpleName());
-        }
-
-        User user = optionalUser.get();
-        boolean isEnabled = user.isEnabled();
-        ZonedDateTime tokenExpiresAt = user.getTokenExpiresAt();
-
-        if (tokenExpiresAt.isBefore(ZonedDateTime.now(ZoneId.of("Europe/Berlin"))) && !isEnabled) {
-            // Token expired => delete user account (GDPR data minimisation)
-            userRepository.delete(user);
-            throw new TokenExpiredException(
-                    "Your registration has expired. Please register again.");
-        }
-
-        if (!isEnabled) {
-            user.setAccountEnabled(true);
-            userRepository.save(user);
-
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
             String firstName = AesUtil.decrypt(user.getFirstName());
             String emailAddress = AesUtil.decrypt(user.getEmailAddress());
+            ZonedDateTime tokenExpiresAt = user.getTokenExpiresAt();
+            boolean isEnabled = user.isEnabled();
 
-            mailService.sendWelcomeEmail(user.getId(), firstName, emailAddress);
+            if (tokenExpiresAt.isBefore(ZonedDateTime.now(ZoneId.of("Europe/Berlin")))
+                    && !isEnabled) {
+                // Token expired => delete user account (GDPR data minimisation)
+                userRepository.delete(user);
+                mailService.sendRegistrationExpiredEmail(user.getId(), firstName, emailAddress);
+            }
+
+            if (!isEnabled) {
+                user.setIsAccountEnabled(true);
+                userRepository.save(user);
+                mailService.sendWelcomeEmail(user.getId(), firstName, emailAddress);
+            }
         }
 
-        return ENABLE_USER_SUCCESS_MSG;
+        return new Message(ENABLE_USER_MSG);
+    }
+
+    Message requestPasswordReset(String emailAddress) {
+        emailAddress = emailAddress.toLowerCase();
+        Util.validateEmailAddress(emailAddress);
+        String emailAddressHash = HmacUtil.hash(emailAddress);
+
+        Optional<User> optionalUser = userRepository.findByEmailAddressHash(emailAddressHash);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            String firstName = AesUtil.decrypt(user.getFirstName());
+
+            String verificationToken = generateVerificationToken();
+            ZonedDateTime tokenExpiresAt =
+                    ZonedDateTime.now(ZoneId.of("Europe/Berlin")).plusMinutes(TOKEN_TTL_MINUTES);
+
+            user.setVerificationToken(verificationToken);
+            user.setTokenExpiresAt(tokenExpiresAt);
+
+            userRepository.save(user);
+            mailService.sendPasswordResetEmail(
+                    user.getId(), firstName, emailAddress, verificationToken, TOKEN_TTL_MINUTES);
+        }
+
+        return new Message(REQUEST_PASSWORD_RESET_MSG);
+    }
+
+    Message completePasswordReset(String token, UserResource.CompletePasswordResetRequest request) {
+        Optional<User> optionalUser = userRepository.findByVerificationToken(token);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            String firstName = AesUtil.decrypt(user.getFirstName());
+            String emailAddress = AesUtil.decrypt(user.getEmailAddress());
+            ZonedDateTime tokenExpiresAt = user.getTokenExpiresAt();
+
+            if (tokenExpiresAt.isBefore(ZonedDateTime.now(ZoneId.of("Europe/Berlin")))) {
+                mailService.sendPasswordResetExpiredEmail(user.getId(), firstName, emailAddress);
+            } else {
+                UserUtil.validatePassword(request.password(), request.confirmationPassword());
+                String passwordHash = passwordEncoder.encode(request.password());
+
+                user.setPassword(passwordHash);
+                userRepository.save(user);
+            }
+        }
+
+        return new Message(COMPLETE_PASSWORD_RESET_MSG);
     }
 }

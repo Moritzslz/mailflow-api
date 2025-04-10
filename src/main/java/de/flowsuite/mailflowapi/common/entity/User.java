@@ -3,6 +3,7 @@ package de.flowsuite.mailflowapi.common.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import de.flowsuite.mailflowapi.common.auth.Authorities;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -49,7 +50,8 @@ public class User implements UserDetails {
     @NotBlank private String emailAddress;
 
     @Column(name = "password_hash")
-    @JsonIgnore @NotBlank private String password;
+    @JsonIgnore
+    @NotBlank private String password;
 
     @Column(name = "phone_number_encrypted")
     private String phoneNumber;

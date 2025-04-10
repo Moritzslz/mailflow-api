@@ -11,7 +11,7 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 
 import de.flowsuite.mailflowapi.client.ClientService;
-import de.flowsuite.mailflowapi.common.entity.Authorities;
+import de.flowsuite.mailflowapi.common.auth.Authorities;
 import de.flowsuite.mailflowapi.user.UserService;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -82,7 +82,8 @@ class SecurityConfig {
                         // User Resource
                         .requestMatchers(HttpMethod.POST, "/customers/users").permitAll()
                         .requestMatchers(HttpMethod.GET, "/customers/users/enable").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/customers/users/reset-password/*").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/customers/users/password-reset").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/customers/users/password-reset").permitAll()
                         .requestMatchers(HttpMethod.GET, "/customers/users").access(hasScope(Authorities.USERS_LIST.getAuthority()))
                         .requestMatchers(HttpMethod.GET, "/customers/*/users/*").access(hasScope(Authorities.USERS_READ.getAuthority()))
                         .requestMatchers(HttpMethod.PUT, "/customers/*/users/*").access(hasScope(Authorities.USERS_WRITE.getAuthority()))
@@ -180,10 +181,10 @@ class SecurityConfig {
         FilterRegistrationBean<ReCaptchaFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(reCaptchaFilter);
         registrationBean.addUrlPatterns(
-                "/auth/token/user",
+                "/auth/token/users",
                 "/customers/users",
                 "/customers/users/enable",
-                "/customers/users/password",
+                "/customers/users/password-reset",
                 "/customers/users/response-ratings");
         return registrationBean;
     }

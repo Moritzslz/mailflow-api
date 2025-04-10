@@ -25,16 +25,19 @@ public class MailService {
     private static final String FROM_EMAIL_ADDRESS = "noreply@flow-suite.de";
     private static final String FROM_PERSONAL = "MailFlow";
     private static final String DOUBLE_OPT_IN_EMAIL_PATH = "classpath:templates/DoubleOptInEmail.html";
-    private static final String RESET_PASSWORD_EMAIL_PATH = "classpath:templates/ResetPasswordEmail.html";
-    private static final String RESET_PASSWORD_EXPIRED_EMAIL_PATH = "classpath:templates/ResetPasswordExpiredEmail.html";
+    private static final String REGISTRATION_EXPIRED_EMAIL_PATH = "classpath:templates/RegistrationExpiredEmail.html";
+    private static final String RESET_PASSWORD_EMAIL_PATH = "classpath:templates/PasswordResetEmail.html";
+    private static final String RESET_PASSWORD_EXPIRED_EMAIL_PATH = "classpath:templates/PasswordResetExpiredEmail.html";
     private static final String WELCOME_EMAIL_PATH = "classpath:templates/WelcomeEmail.html";
     private static final String DOUBLE_OPT_IN_EMAIL_SUBJECT = "Bitte bestätige deine Registrierung 🤝";
+    private static final String REGISTRATION_EXPIRED_SUBJECT = "Deine Registrierung ist abgelaufen ⏳";
     private static final String RESET_PASSWORD_EMAIL_SUBJECT = "Dein Link zum Zurücksetzen deines Passwort 🔐";
     private static final String RESET_PASSWORD_EXPIRED_EMAIL_SUBJECT = "Dein Link zum Passwort Zurücksetzen ist abgelaufen ⏳";
     private static final String WELCOME_EMAIL_SUBJECT = "Willkommen bei MailFlow – schön, dass du dabei bist! 🥳";
     private final String mailFlowFrontendUrl;
     private final JavaMailSender mailSender;
     private final String doubleOptInEmail;
+    private final String registrationExpiredEmail;
     private final String resetPasswordEmail;
     private final String resetPasswordExpiredEmail;
     private final String welcomeEmail;
@@ -47,6 +50,8 @@ public class MailService {
         this.mailFlowFrontendUrl = mailFlowFrontendUrl;
         this.mailSender = mailSender;
         this.doubleOptInEmail = MailUtil.readFile(resourceLoader, DOUBLE_OPT_IN_EMAIL_PATH);
+        this.registrationExpiredEmail =
+                MailUtil.readFile(resourceLoader, REGISTRATION_EXPIRED_EMAIL_PATH);
         this.resetPasswordEmail = MailUtil.readFile(resourceLoader, RESET_PASSWORD_EMAIL_PATH);
         this.resetPasswordExpiredEmail =
                 MailUtil.readFile(resourceLoader, RESET_PASSWORD_EXPIRED_EMAIL_PATH);
@@ -74,11 +79,28 @@ public class MailService {
         sendEmail(emailContent, emailAddress, DOUBLE_OPT_IN_EMAIL_SUBJECT);
     }
 
-    public void sendResetPasswordEmail(
+    public void sendRegistrationExpiredEmail(long userId, String firstName, String emailAddress) {
+        URI uri =
+                UriComponentsBuilder.fromUriString(mailFlowFrontendUrl)
+                        .path("/register")
+                        .build()
+                        .toUri();
+
+        String emailContent =
+                MailUtil.replacePlaceholder(
+                        registrationExpiredEmail, "TITLE", REGISTRATION_EXPIRED_SUBJECT);
+        emailContent = MailUtil.replacePlaceholder(emailContent, "FIRST_NAME", firstName);
+        emailContent = MailUtil.replacePlaceholder(emailContent, "URL", uri.toString());
+
+        LOG.info("Sending registration expired email to: {}.", userId);
+        sendEmail(emailContent, emailAddress, REGISTRATION_EXPIRED_SUBJECT);
+    }
+
+    public void sendPasswordResetEmail(
             long userId, String firstName, String emailAddress, String token, int minutes) {
         URI uri =
                 UriComponentsBuilder.fromUriString(mailFlowFrontendUrl)
-                        .path("/reset-password")
+                        .path("/password-reset")
                         .queryParam("token", token)
                         .build()
                         .toUri();
@@ -91,14 +113,14 @@ public class MailService {
         emailContent =
                 MailUtil.replacePlaceholder(emailContent, "MINUTES", String.valueOf(minutes));
 
-        LOG.info("Sending reset password email to: {}.", userId);
+        LOG.info("Sending password reset email to: {}.", userId);
         sendEmail(emailContent, emailAddress, RESET_PASSWORD_EMAIL_SUBJECT);
     }
 
-    public void sendResetPasswordExpiredEmail(long userId, String firstName, String emailAddress) {
+    public void sendPasswordResetExpiredEmail(long userId, String firstName, String emailAddress) {
         URI uri =
                 UriComponentsBuilder.fromUriString(mailFlowFrontendUrl)
-                        .path("/reset-password/request")
+                        .path("/password-reset/request")
                         .build()
                         .toUri();
 
@@ -108,7 +130,7 @@ public class MailService {
         emailContent = MailUtil.replacePlaceholder(emailContent, "FIRST_NAME", firstName);
         emailContent = MailUtil.replacePlaceholder(emailContent, "URL", uri.toString());
 
-        LOG.info("Sending reset password expired email to: {}.", userId);
+        LOG.info("Sending password reset expired email to: {}.", userId);
         sendEmail(emailContent, emailAddress, RESET_PASSWORD_EXPIRED_EMAIL_SUBJECT);
     }
 

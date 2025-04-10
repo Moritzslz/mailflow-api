@@ -1,6 +1,6 @@
 package de.flowsuite.mailflowapi.user;
 
-import de.flowsuite.mailflowapi.common.entity.User;
+import de.flowsuite.mailflowapi.common.dto.Message;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -20,13 +20,25 @@ class UserResource {
     }
 
     @PostMapping("/users")
-    ResponseEntity<User> createUser(@RequestBody @Valid CreateUserRequest request) {
-        return ResponseEntity.ok(userService.createUser(request));
+    ResponseEntity<Message> createUser(@RequestBody @Valid CreateUserRequest request) {
+        return ResponseEntity.accepted().body(userService.createUser(request));
     }
 
     @GetMapping("/users/enable")
-    ResponseEntity<String> enableUser(@RequestParam @NotBlank String token) {
+    ResponseEntity<Message> enableUser(@RequestParam @NotBlank String token) {
         return ResponseEntity.ok(userService.enableUser(token));
+    }
+
+    @PostMapping("/users/password-reset")
+    ResponseEntity<Message> requestPasswordReset(@RequestBody String emailAddress) {
+        return ResponseEntity.accepted().body(userService.requestPasswordReset(emailAddress));
+    }
+
+    @PutMapping("/users/password-reset")
+    ResponseEntity<Message> completePasswordReset(
+            @RequestParam @NotBlank String token,
+            @RequestBody @Valid UserResource.CompletePasswordResetRequest request) {
+        return ResponseEntity.ok(userService.completePasswordReset(token, request));
     }
 
     record CreateUserRequest(
@@ -38,5 +50,8 @@ class UserResource {
             @NotBlank String confirmationPassword,
             String phoneNumber,
             String position,
-            boolean subscribedToNewsletter) {}
+            boolean isSubscribedToNewsletter) {}
+
+    record CompletePasswordResetRequest(
+            @NotBlank String password, @NotBlank String confirmationPassword) {}
 }
