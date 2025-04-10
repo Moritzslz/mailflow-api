@@ -9,7 +9,7 @@ spring:
   mail:
     host: smtp.ionos.de
     port: 465
-    username: ${MAIL_USERNAME}
+    username: info@flow-suite.de
     password: ${MAIL_PASSWORD}
     properties:
       mail:
@@ -41,4 +41,4 @@ google:
 
 mailflow:
   frontend:
-    url: https://mailflow.flow-suite.de
+    url: https://dashboard.mail-flow.ai
