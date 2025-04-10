@@ -1,4 +1,4 @@
-package de.flowsuite.mailflowapi.common.entity;
+package de.flowsuite.mailflowapi.common.auth;
 
 import lombok.Getter;
 
