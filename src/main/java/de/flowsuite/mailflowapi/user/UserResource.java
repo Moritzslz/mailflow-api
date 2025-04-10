@@ -30,8 +30,8 @@ class UserResource {
     }
 
     @PostMapping("/users/password-reset")
-    ResponseEntity<Message> requestPasswordReset(@RequestBody String emailAddress) {
-        return ResponseEntity.accepted().body(userService.requestPasswordReset(emailAddress));
+    ResponseEntity<Message> requestPasswordReset(@RequestBody @Valid RequestPasswordResetRequest request) {
+        return ResponseEntity.accepted().body(userService.requestPasswordReset(request));
     }
 
     @PutMapping("/users/password-reset")
@@ -51,6 +51,8 @@ class UserResource {
             String phoneNumber,
             String position,
             boolean isSubscribedToNewsletter) {}
+
+    record RequestPasswordResetRequest(@NotBlank String emailAddress) {}
 
     record CompletePasswordResetRequest(
             @NotBlank String password, @NotBlank String confirmationPassword) {}

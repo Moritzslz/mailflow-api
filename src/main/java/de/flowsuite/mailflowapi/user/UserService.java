@@ -85,6 +85,7 @@ public class UserService implements UserDetailsService {
             ZonedDateTime tokenExpiresAt =
                     ZonedDateTime.now(ZoneId.of("Europe/Berlin")).plusHours(TOKEN_TTL_HOURS);
 
+            LOG.debug("Creating new user.");
             LOG.debug("Verification token: {}", verificationToken);
 
             String phoneNumberEncrypted = null;
@@ -127,6 +128,8 @@ public class UserService implements UserDetailsService {
             ZonedDateTime tokenExpiresAt = user.getTokenExpiresAt();
             boolean isEnabled = user.isEnabled();
 
+            LOG.debug("Enabling user: {}", user.getId());
+
             if (tokenExpiresAt.isBefore(ZonedDateTime.now(ZoneId.of("Europe/Berlin")))
                     && !isEnabled) {
                 // Token expired => delete user account (GDPR data minimisation)
@@ -144,8 +147,9 @@ public class UserService implements UserDetailsService {
         return new Message(ENABLE_USER_MSG);
     }
 
-    Message requestPasswordReset(String emailAddress) {
-        emailAddress = emailAddress.toLowerCase();
+    Message requestPasswordReset(UserResource.RequestPasswordResetRequest request) {
+        String emailAddress = request.emailAddress().toLowerCase();
+
         Util.validateEmailAddress(emailAddress);
         String emailAddressHash = HmacUtil.hash(emailAddress);
 
@@ -153,6 +157,8 @@ public class UserService implements UserDetailsService {
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             String firstName = AesUtil.decrypt(user.getFirstName());
+
+            LOG.debug("Processing password reset request for user: {}", user.getId());
 
             String verificationToken = generateVerificationToken();
             ZonedDateTime tokenExpiresAt =
@@ -176,6 +182,8 @@ public class UserService implements UserDetailsService {
             String firstName = AesUtil.decrypt(user.getFirstName());
             String emailAddress = AesUtil.decrypt(user.getEmailAddress());
             ZonedDateTime tokenExpiresAt = user.getTokenExpiresAt();
+
+            LOG.debug("Updating password for user: {}", user.getId());
 
             if (tokenExpiresAt.isBefore(ZonedDateTime.now(ZoneId.of("Europe/Berlin")))) {
                 mailService.sendPasswordResetExpiredEmail(user.getId(), firstName, emailAddress);
