@@ -1,6 +1,6 @@
 package de.flowsuite.mailflowapi.common.util;
 
-import de.flowsuite.mailflowapi.common.entity.Authorities;
+import de.flowsuite.mailflowapi.common.auth.Authorities;
 import de.flowsuite.mailflowapi.common.exception.IdorException;
 
 import org.slf4j.Logger;
