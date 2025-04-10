@@ -25,12 +25,7 @@ public class MessageCategory {
     @NotNull private Long userId;
 
     @NotBlank private String category;
-
-    @Column(name = "is_reply")
-    @NotNull private Boolean reply;
-
-    @Column(name = "is_function_call")
-    @NotNull private Boolean functionCall;
-
+    @NotNull private Boolean isReply;
+    @NotNull private Boolean isFunctionCall;
     @NotBlank private String description;
 }

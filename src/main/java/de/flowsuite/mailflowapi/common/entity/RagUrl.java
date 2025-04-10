@@ -25,7 +25,5 @@ public class RagUrl {
     @NotNull private Long customerId;
 
     @NotBlank private String url;
-
-    @Column(name = "is_last_crawl_successful")
-    private Boolean lastCrawlSuccessful;
+    private Boolean isLastCrawlSuccessful;
 }

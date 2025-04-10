@@ -2,6 +2,7 @@ package de.flowsuite.mailflowapi.common.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import de.flowsuite.mailflowapi.common.auth.Authorities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -55,18 +56,9 @@ public class User implements UserDetails {
 
     private String position;
     @JsonIgnore @NotNull private String role = Authorities.USER.getAuthority();
-
-    @Column(name = "is_account_locked")
-    @JsonIgnore
-    @NotNull private Boolean accountLocked;
-
-    @Column(name = "is_account_enabled")
-    @JsonIgnore
-    @NotNull private Boolean accountEnabled;
-
-    @Column(name = "is_subscribed_to_newsletter")
-    @NotNull private Boolean subscribedToNewsletter;
-
+    @JsonIgnore @NotNull private Boolean isAccountLocked;
+    @JsonIgnore @NotNull private Boolean isAccountEnabled;
+    @NotNull private Boolean isSubscribedToNewsletter;
     @JsonIgnore @NotBlank private String verificationToken;
     @JsonIgnore @NotNull private ZonedDateTime tokenExpiresAt;
     @JsonIgnore private ZonedDateTime lastLoginAt;
