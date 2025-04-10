@@ -32,7 +32,6 @@ public class MailService {
     private static final String RESET_PASSWORD_EMAIL_SUBJECT = "Dein Link zum Zurücksetzen deines Passwort 🔐";
     private static final String RESET_PASSWORD_EXPIRED_EMAIL_SUBJECT = "Dein Link zum Passwort Zurücksetzen ist abgelaufen ⏳";
     private static final String WELCOME_EMAIL_SUBJECT = "Willkommen bei MailFlow – schön, dass du dabei bist! 🥳";
-    private final String contextPath;
     private final String mailFlowFrontendUrl;
     private final JavaMailSender mailSender;
     private final String doubleOptInEmail;
@@ -42,11 +41,9 @@ public class MailService {
     // spotless:on
 
     public MailService(
-            @Value("${server.servlet.context-path}") String contextPath,
             @Value("${mailflow.frontend.url}") String mailFlowFrontendUrl,
             JavaMailSender mailSender,
             ResourceLoader resourceLoader) {
-        this.contextPath = contextPath;
         this.mailFlowFrontendUrl = mailFlowFrontendUrl;
         this.mailSender = mailSender;
         this.doubleOptInEmail = MailUtil.readFile(resourceLoader, DOUBLE_OPT_IN_EMAIL_PATH);
@@ -61,7 +58,7 @@ public class MailService {
         String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
 
         URI uri =
-                UriComponentsBuilder.fromUriString(baseUrl + contextPath)
+                UriComponentsBuilder.fromUriString(baseUrl)
                         .path("/customers/users/enable")
                         .queryParam("token", token)
                         .build()
