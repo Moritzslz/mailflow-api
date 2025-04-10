@@ -7,10 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/customers")
@@ -27,6 +24,11 @@ class UserResource {
         return ResponseEntity.ok(userService.createUser(request));
     }
 
+    @GetMapping("/users/enable")
+    ResponseEntity<String> enableUser(@RequestParam @NotBlank String token) {
+        return ResponseEntity.ok(userService.enableUser(token));
+    }
+
     record CreateUserRequest(
             @NotNull Long customerId,
             @NotBlank String firstName,
@@ -36,5 +38,5 @@ class UserResource {
             @NotBlank String confirmationPassword,
             String phoneNumber,
             String position,
-            boolean isSubscribedToNewsletter) {}
+            boolean subscribedToNewsletter) {}
 }
