@@ -4,9 +4,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(code = HttpStatus.BAD_REQUEST)
-public class EntityExistsException extends RuntimeException {
+public class EntityAlreadyExistsException extends RuntimeException {
 
-    public EntityExistsException(String entityName) {
+    public EntityAlreadyExistsException(String entityName) {
         super(entityName + " entity already exists.");
     }
 }
