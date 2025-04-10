@@ -7,6 +7,7 @@ import de.flowsuite.mailflowapi.common.util.AesUtil;
 import de.flowsuite.mailflowapi.common.util.HmacUtil;
 import de.flowsuite.mailflowapi.common.util.Util;
 
+import de.flowsuite.mailflowapi.mail.MailService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -19,12 +20,16 @@ import java.time.ZonedDateTime;
 @Service
 public class UserService implements UserDetailsService {
 
+    private static final int TOKEN_TTL_HOURS = 6;
+    private static final int TOKEN_TTL_MINUTES = 30;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final MailService mailService;
 
-    UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, MailService mailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.mailService = mailService;
     }
 
     @Override
@@ -67,7 +72,7 @@ public class UserService implements UserDetailsService {
 
         String verificationToken = generateVerificationToken();
         ZonedDateTime tokenExpiresAt =
-                ZonedDateTime.now(ZoneId.of("Europe/Berlin")).plusMinutes(30);
+                ZonedDateTime.now(ZoneId.of("Europe/Berlin")).plusHours(TOKEN_TTL_HOURS);
 
         User user =
                 User.builder()
@@ -87,7 +92,7 @@ public class UserService implements UserDetailsService {
                         .tokenExpiresAt(tokenExpiresAt)
                         .build();
 
-        // TODO send Double-Opt-In email
+        mailService.sendDoubleOptInEmail(request.firstName(), emailAddress, verificationToken, TOKEN_TTL_HOURS);
 
         return userRepository.save(user);
     }
