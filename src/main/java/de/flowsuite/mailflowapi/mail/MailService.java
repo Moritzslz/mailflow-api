@@ -56,8 +56,7 @@ public class MailService {
         this.welcomeEmail = MailUtil.readFile(resourceLoader, WELCOME_EMAIL_PATH);
     }
 
-    public void sendDoubleOptInEmail(
-            long userId, String fistName, String emailAddress, String token, int hours) {
+    public void sendDoubleOptInEmail(String fistName, String emailAddress, String token, int hours) {
         String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
 
         URI uri =
@@ -73,7 +72,7 @@ public class MailService {
         emailContent = MailUtil.replacePlaceholder(emailContent, "URL", uri.toString());
         emailContent = MailUtil.replacePlaceholder(emailContent, "HOURS", String.valueOf(hours));
 
-        LOG.info("Sending Double-Opt-In email to: {}", userId);
+        LOG.info("Sending Double-Opt-In email.");
         sendEmail(emailContent, emailAddress, DOUBLE_OPT_IN_EMAIL_SUBJECT);
     }
 
@@ -94,7 +93,7 @@ public class MailService {
         emailContent =
                 MailUtil.replacePlaceholder(emailContent, "MINUTES", String.valueOf(minutes));
 
-        LOG.info("Sending reset password email to: {}", userId);
+        LOG.info("Sending reset password email to: {}.", userId);
         sendEmail(emailContent, emailAddress, RESET_PASSWORD_EMAIL_SUBJECT);
     }
 
@@ -111,7 +110,7 @@ public class MailService {
         emailContent = MailUtil.replacePlaceholder(emailContent, "FIRST_NAME", firstName);
         emailContent = MailUtil.replacePlaceholder(emailContent, "URL", uri.toString());
 
-        LOG.info("Sending reset password expired email to: {}", userId);
+        LOG.info("Sending reset password expired email to: {}.", userId);
         sendEmail(emailContent, emailAddress, RESET_PASSWORD_EXPIRED_EMAIL_SUBJECT);
     }
 
@@ -123,7 +122,7 @@ public class MailService {
         emailContent = MailUtil.replacePlaceholder(emailContent, "FIRST_NAME", firstName);
         emailContent = MailUtil.replacePlaceholder(emailContent, "URL", uri.toString());
 
-        LOG.info("Sending welcome email to: {}", userId);
+        LOG.info("Sending welcome email to: {}.", userId);
         sendEmail(emailContent, emailAddress, WELCOME_EMAIL_SUBJECT);
     }
 
