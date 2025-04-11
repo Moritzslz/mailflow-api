@@ -68,6 +68,17 @@ class SettingsService {
         settings.setImapPort(request.imapPort());
         settings.setSmtpPort(request.smtpPort());
 
+        if (request.lastCrawlAt() != null) {
+            if (settings.getLastCrawlAt() == null || request.lastCrawlAt().isAfter(settings.getLastCrawlAt())) {
+                settings.setLastCrawlAt(request.lastCrawlAt());
+            }
+        }
+        if (request.nextCrawlAt() != null) {
+            if ( settings.getNextCrawlAt() == null || request.nextCrawlAt().isAfter( settings.getNextCrawlAt())) {
+                settings.setNextCrawlAt(request.nextCrawlAt());
+            }
+        }
+
         return settingsRepository.save(settings);
     }
 
