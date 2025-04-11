@@ -1,4 +1,4 @@
-SET timezone = 'Europe/Berlin';
+SET TIME ZONE 'Europe/Berlin';
 
 CREATE TABLE customers (
     id BIGSERIAL PRIMARY KEY,
