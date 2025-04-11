@@ -33,7 +33,7 @@ class AuthenticationResource {
         this.userService = userService;
     }
 
-    @PostMapping("/user")
+    @PostMapping("/users")
     ResponseEntity<UserTokenResponse> getUserTokens(
             @RequestBody @Valid UserLoginRequest loginRequest) {
         Authentication authentication = authenticationService.authenticateUser(loginRequest);
@@ -41,7 +41,7 @@ class AuthenticationResource {
         return ResponseEntity.ok(authenticationService.generateUserTokens(user));
     }
 
-    @PostMapping("/user/refresh")
+    @PostMapping("/users/refresh")
     ResponseEntity<UserTokenResponse> refreshUserAccessToken(
             @RequestBody @Valid RefreshTokenRequest refreshTokenRequest) {
         Jwt jwt = jwtDecoder.decode(refreshTokenRequest.refreshToken);
@@ -51,7 +51,7 @@ class AuthenticationResource {
                 authenticationService.generateUserTokens(user, refreshTokenRequest.refreshToken));
     }
 
-    @PostMapping("/client")
+    @PostMapping("/clients")
     ResponseEntity<ClientTokenResponse> getClientAccessToken(
             @RequestBody @Valid ClientLoginRequest loginRequest) {
         Authentication authentication = authenticationService.authenticateClient(loginRequest);

@@ -10,4 +10,6 @@ import java.util.List;
 @Repository
 interface BlacklistRepository extends CrudRepository<BlacklistEntry, Long> {
     List<BlacklistEntry> findByUserId(long userId);
+
+    boolean existsByUserIdAndBlacklistedEmailAddressHash(long userId, String emailAddressHash);
 }

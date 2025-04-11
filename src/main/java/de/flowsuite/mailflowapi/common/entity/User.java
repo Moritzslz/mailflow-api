@@ -2,6 +2,8 @@ package de.flowsuite.mailflowapi.common.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import de.flowsuite.mailflowapi.common.auth.Authorities;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -37,39 +39,43 @@ public class User implements UserDetails {
     @NotNull private Long customerId;
 
     @Column(name = "first_name_encrypted")
-    @NotBlank private String firstName; // TODO encrypt
+    @NotBlank private String firstName;
 
     @Column(name = "last_name_encrypted")
-    @NotBlank private String lastName; // TODO encrypt
+    @NotBlank private String lastName;
 
     @JsonIgnore private String emailAddressHash;
 
     @Column(name = "email_address_encrypted")
-    @NotBlank private String emailAddress; // TODO check if valid email & encrypt
+    @NotBlank private String emailAddress;
 
     @Column(name = "password_hash")
+    @JsonIgnore
     @NotBlank private String password;
 
     @Column(name = "phone_number_encrypted")
-    private String phoneNumber; // TODO encrypt
+    private String phoneNumber;
 
     private String position;
-    @NotNull private String role = Authorities.USER.getAuthority();
-    @NotNull private Boolean isAccountLocked;
-    @NotNull private Boolean isAccountEnabled;
+    @JsonIgnore @NotNull private String role = Authorities.USER.getAuthority();
+    @JsonIgnore @NotNull private Boolean isAccountLocked;
+    @JsonIgnore @NotNull private Boolean isAccountEnabled;
     @NotNull private Boolean isSubscribedToNewsletter;
-    @NotBlank private String verificationToken;
-    @NotNull private ZonedDateTime tokenExpiresAt;
-    private ZonedDateTime lastLoginAt;
-    private ZonedDateTime createdAt;
-    private ZonedDateTime updatedAt;
+    @JsonIgnore @NotBlank private String verificationToken;
+    @JsonIgnore @NotNull private ZonedDateTime tokenExpiresAt;
+    @JsonIgnore private ZonedDateTime lastLoginAt;
+    @JsonIgnore private ZonedDateTime createdAt;
+    @JsonIgnore private ZonedDateTime updatedAt;
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "id", referencedColumnName = "user_id")
+    private Settings settings;
 
     @PrePersist
     protected void onCreate() {
         ZoneId berlinZone = ZoneId.of("Europe/Berlin");
         createdAt = ZonedDateTime.now(berlinZone);
         updatedAt = createdAt;
-        tokenExpiresAt = createdAt.plusMinutes(30);
     }
 
     @PreUpdate
@@ -84,12 +90,14 @@ public class User implements UserDetails {
         }
     }
 
+    @JsonIgnore
     @Override
     public String getUsername() {
         return emailAddressHash;
     }
 
     // spotless:off
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> authorities = new ArrayList<>();
@@ -114,11 +122,25 @@ public class User implements UserDetails {
     }
     // spotless:on
 
+    @JsonIgnore
+    @Override
+    public boolean isAccountNonExpired() {
+        return UserDetails.super.isAccountNonExpired();
+    }
+
+    @JsonIgnore
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return UserDetails.super.isCredentialsNonExpired();
+    }
+
+    @JsonIgnore
     @Override
     public boolean isAccountNonLocked() {
         return !isAccountLocked;
     }
 
+    @JsonIgnore
     @Override
     public boolean isEnabled() {
         return isAccountEnabled;
