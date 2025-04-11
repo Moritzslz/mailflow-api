@@ -1,5 +1,7 @@
 package de.flowsuite.mailflowapi.common.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 
@@ -35,16 +37,19 @@ public class Client implements UserDetails {
 
     @NotBlank private String scope;
 
+    @JsonIgnore
     @Override
     public String getUsername() {
         return clientName;
     }
 
+    @JsonIgnore
     @Override
     public String getPassword() {
         return clientSecret;
     }
 
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> authorities = new ArrayList<>();
@@ -54,5 +59,29 @@ public class Client implements UserDetails {
         }
 
         return authorities;
+    }
+
+    @JsonIgnore
+    @Override
+    public boolean isAccountNonExpired() {
+        return UserDetails.super.isAccountNonExpired();
+    }
+
+    @JsonIgnore
+    @Override
+    public boolean isAccountNonLocked() {
+        return UserDetails.super.isAccountNonLocked();
+    }
+
+    @JsonIgnore
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return UserDetails.super.isCredentialsNonExpired();
+    }
+
+    @JsonIgnore
+    @Override
+    public boolean isEnabled() {
+        return UserDetails.super.isEnabled();
     }
 }
