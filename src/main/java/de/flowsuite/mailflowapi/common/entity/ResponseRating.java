@@ -35,6 +35,7 @@ public class ResponseRating {
 
     @PrePersist
     protected void onCreate() {
-        createdAt = ZonedDateTime.now(ZoneId.of("Europe/Berlin"));
+        ZoneId berlinZone = ZoneId.of("Europe/Berlin");
+        createdAt = ZonedDateTime.now(berlinZone);
     }
 }
