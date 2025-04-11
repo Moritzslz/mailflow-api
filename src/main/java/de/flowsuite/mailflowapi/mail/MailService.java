@@ -24,7 +24,7 @@ public class MailService {
     // spotless:off
     private static final Logger LOG = LoggerFactory.getLogger(MailService.class);
     private static final String FROM_EMAIL_ADDRESS = "noreply@flow-suite.de";
-    private static final String FROM_PERSONAL = "MailFlow";
+    private static final String FROM_PERSONAL = "mailflow";
     private static final String DOUBLE_OPT_IN_EMAIL_PATH = "classpath:templates/DoubleOptInEmail.html";
     private static final String REGISTRATION_EXPIRED_EMAIL_PATH = "classpath:templates/RegistrationExpiredEmail.html";
     private static final String RESET_PASSWORD_EMAIL_PATH = "classpath:templates/PasswordResetEmail.html";
@@ -34,7 +34,7 @@ public class MailService {
     private static final String REGISTRATION_EXPIRED_SUBJECT = "Deine Registrierung ist abgelaufen ⏳";
     private static final String RESET_PASSWORD_EMAIL_SUBJECT = "Dein Link zum Zurücksetzen deines Passwort 🔐";
     private static final String RESET_PASSWORD_EXPIRED_EMAIL_SUBJECT = "Dein Link zum Passwort Zurücksetzen ist abgelaufen ⏳";
-    private static final String WELCOME_EMAIL_SUBJECT = "Willkommen bei MailFlow – schön, dass du dabei bist! 🥳";
+    private static final String WELCOME_EMAIL_SUBJECT = "Willkommen bei mailflow – schön, dass du dabei bist! 🥳";
     private final String mailFlowFrontendUrl;
     private final JavaMailSender mailSender;
     private final String doubleOptInEmail;
