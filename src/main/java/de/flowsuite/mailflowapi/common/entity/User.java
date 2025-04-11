@@ -67,6 +67,10 @@ public class User implements UserDetails {
     @JsonIgnore private ZonedDateTime createdAt;
     @JsonIgnore private ZonedDateTime updatedAt;
 
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "id", referencedColumnName = "user_id")
+    private Settings settings;
+
     @PrePersist
     protected void onCreate() {
         ZoneId berlinZone = ZoneId.of("Europe/Berlin");
@@ -86,12 +90,14 @@ public class User implements UserDetails {
         }
     }
 
+    @JsonIgnore
     @Override
     public String getUsername() {
         return emailAddressHash;
     }
 
     // spotless:off
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> authorities = new ArrayList<>();
@@ -116,11 +122,25 @@ public class User implements UserDetails {
     }
     // spotless:on
 
+    @JsonIgnore
+    @Override
+    public boolean isAccountNonExpired() {
+        return UserDetails.super.isAccountNonExpired();
+    }
+
+    @JsonIgnore
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return UserDetails.super.isCredentialsNonExpired();
+    }
+
+    @JsonIgnore
     @Override
     public boolean isAccountNonLocked() {
         return !isAccountLocked;
     }
 
+    @JsonIgnore
     @Override
     public boolean isEnabled() {
         return isAccountEnabled;

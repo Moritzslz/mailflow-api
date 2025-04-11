@@ -3,8 +3,9 @@ package de.flowsuite.mailflowapi.user;
 import de.flowsuite.mailflowapi.common.auth.Authorities;
 import de.flowsuite.mailflowapi.common.dto.Message;
 import de.flowsuite.mailflowapi.common.entity.User;
-import de.flowsuite.mailflowapi.common.exception.EntityAlreadyExistsException;
+import de.flowsuite.mailflowapi.common.exception.IdConflictException;
 import de.flowsuite.mailflowapi.common.util.AesUtil;
+import de.flowsuite.mailflowapi.common.util.AuthorisationUtil;
 import de.flowsuite.mailflowapi.common.util.HmacUtil;
 import de.flowsuite.mailflowapi.common.util.Util;
 import de.flowsuite.mailflowapi.mail.MailService;
@@ -15,10 +16,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -28,10 +31,14 @@ public class UserService implements UserDetailsService {
     private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
     private static final int TOKEN_TTL_HOURS = 6;
     private static final int TOKEN_TTL_MINUTES = 30;
-    private static final String CREATE_USER_MSG = "Please check your inbox to enable your account.";
-    private static final String ENABLE_USER_MSG = "Thank you! Your account has been enabled.";
-    private static final String REQUEST_PASSWORD_RESET_MSG = "A password reset link will be sent shortly.";
-    private static final String COMPLETE_PASSWORD_RESET_MSG = "Your password has been updated successfully.";
+    private static final String CREATE_USER_MSG =
+            "Your account has been created. Please check your inbox to enable your account.";
+    private static final String ENABLE_USER_MSG =
+            "Your account has been enabled.";
+    private static final String REQUEST_PASSWORD_RESET_MSG =
+            "A password reset link will be sent shortly.";
+    private static final String COMPLETE_PASSWORD_RESET_MSG =
+            "Your password has been updated successfully.";
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final MailService mailService;
@@ -135,6 +142,7 @@ public class UserService implements UserDetailsService {
                 // Token expired => delete user account (GDPR data minimisation)
                 userRepository.delete(user);
                 mailService.sendRegistrationExpiredEmail(user.getId(), firstName, emailAddress);
+                return new Message(ENABLE_USER_MSG);
             }
 
             if (!isEnabled) {
@@ -197,5 +205,40 @@ public class UserService implements UserDetailsService {
         }
 
         return new Message(COMPLETE_PASSWORD_RESET_MSG);
+    }
+
+    List<User> listUsers() {
+        return (List<User>) userRepository.findAll();
+    }
+
+    User getUser(long customerId, long userId, Jwt jwt) {
+        AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
+        AuthorisationUtil.validateAccessToUser(userId, jwt);
+        return getById(userId);
+    }
+
+    User updateUser(long customerId, long userId, UserResource.UpdateUserRequest request, Jwt jwt) {
+        AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
+        AuthorisationUtil.validateAccessToUser(userId, jwt);
+
+        if (!request.userId().equals(userId) || !request.customerId().equals(customerId)) {
+            throw new IdConflictException();
+        }
+
+        User user = getById(userId);
+
+        user.setFirstName(AesUtil.encrypt(request.firstName()));
+        user.setLastName(AesUtil.encrypt(request.lastName()));
+
+        String phoneNumberEncrypted = null;
+        if (request.phoneNumber() != null && !request.phoneNumber().isBlank()) {
+            phoneNumberEncrypted = AesUtil.encrypt(request.phoneNumber());
+        }
+
+        user.setPhoneNumber(phoneNumberEncrypted);
+        user.setPosition(request.position());
+        user.setIsSubscribedToNewsletter(request.isSubscribedToNewsletter());
+
+        return userRepository.save(user);
     }
 }
