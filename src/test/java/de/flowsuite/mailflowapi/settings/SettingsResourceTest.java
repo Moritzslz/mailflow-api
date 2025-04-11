@@ -114,6 +114,8 @@ class SettingsResourceTest {
                         false,
                         true,
                         300,
+                        null,
+                        null,
                         "imap.updated.com",
                         "smtp.updated.com",
                         995,
