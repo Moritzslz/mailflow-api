@@ -13,6 +13,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.ZonedDateTime;
+
 @RestController
 @RequestMapping("/customers")
 class SettingsResource {
@@ -66,6 +68,8 @@ class SettingsResource {
             boolean isAutoReplyEnabled,
             boolean isResponseRatingEnabled,
             @Min(168) @Max(744) int crawlFrequencyInHours,
+            ZonedDateTime lastCrawlAt,
+            ZonedDateTime nextCrawlAt,
             String imapHost,
             String smtpHost,
             Integer imapPort,

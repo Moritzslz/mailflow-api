@@ -1,6 +1,6 @@
 package de.flowsuite.mailflowapi.common.util;
 
-import de.flowsuite.mailflowapi.common.entity.Authorities;
+import de.flowsuite.mailflowapi.common.auth.Authorities;
 import de.flowsuite.mailflowapi.common.exception.IdorException;
 
 import org.slf4j.Logger;
@@ -14,7 +14,7 @@ public class AuthorisationUtil {
     public static final String CLAIM_SUB = "sub";
     public static final String CLAIM_CUSTOMER_ID = "customerId";
 
-    public static void validateAccess(long entityId, Jwt jwt, String claim) {
+    private static void validateAccess(long entityId, Jwt jwt, String claim) {
         String scope = jwt.getClaim(CLAIM_SCOPE);
 
         LOG.debug("Scope: {}", scope);

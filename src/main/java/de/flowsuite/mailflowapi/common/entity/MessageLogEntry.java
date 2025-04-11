@@ -34,7 +34,7 @@ public class MessageLogEntry {
     @NotBlank private String language;
 
     @Column(name = "from_email_address_encrypted")
-    private String fromEmailAddress; // TODO check if valid email & encrypt
+    private String fromEmailAddress; // TODO check if email.toLowerCase is valid & encrypt
 
     private String subject;
     @NotNull private ZonedDateTime receivedAt;

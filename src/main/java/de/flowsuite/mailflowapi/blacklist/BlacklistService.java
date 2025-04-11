@@ -1,6 +1,7 @@
 package de.flowsuite.mailflowapi.blacklist;
 
 import de.flowsuite.mailflowapi.common.entity.BlacklistEntry;
+import de.flowsuite.mailflowapi.common.exception.EntityAlreadyExistsException;
 import de.flowsuite.mailflowapi.common.exception.EntityNotFoundException;
 import de.flowsuite.mailflowapi.common.exception.IdConflictException;
 import de.flowsuite.mailflowapi.common.exception.IdorException;
@@ -32,12 +33,18 @@ class BlacklistService {
             throw new IdConflictException();
         }
 
-        Util.validateEmailAddress(blacklistEntry.getBlacklistedEmailAddress());
+        String emailAddress = blacklistEntry.getBlacklistedEmailAddress().toLowerCase();
+        String emailAddressHash = HmacUtil.hash(emailAddress);
 
-        blacklistEntry.setBlacklistedEmailAddressHash(
-                HmacUtil.hash(blacklistEntry.getBlacklistedEmailAddress()));
-        blacklistEntry.setBlacklistedEmailAddress(
-                AesUtil.encrypt(blacklistEntry.getBlacklistedEmailAddress()));
+        Util.validateEmailAddress(emailAddress);
+
+        if (blacklistRepository.existsByUserIdAndBlacklistedEmailAddressHash(
+                userId, emailAddressHash)) {
+            throw new EntityAlreadyExistsException(BlacklistEntry.class.getSimpleName());
+        }
+
+        blacklistEntry.setBlacklistedEmailAddressHash(emailAddressHash);
+        blacklistEntry.setBlacklistedEmailAddress(AesUtil.encrypt(emailAddress));
 
         return blacklistRepository.save(blacklistEntry);
     }

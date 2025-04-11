@@ -20,19 +20,19 @@ class MailServiceTest {
     @Test
     @Disabled
     void testSendDoubleOptInEmail() {
-        mailService.sendDoubleOptInEmail(USER_ID, FIRST_NAME, EMAIL_ADDRESS, TOKEN, 6);
+        mailService.sendDoubleOptInEmail(FIRST_NAME, EMAIL_ADDRESS, TOKEN, 6);
     }
 
     @Test
     @Disabled
-    void testSendResetPasswordEmail() {
-        mailService.sendResetPasswordEmail(USER_ID, FIRST_NAME, EMAIL_ADDRESS, TOKEN, 30);
+    void testSendPasswordResetEmail() {
+        mailService.sendPasswordResetEmail(USER_ID, FIRST_NAME, EMAIL_ADDRESS, TOKEN, 30);
     }
 
     @Test
     @Disabled
-    void testSendResetPasswordExpiredEmail() {
-        mailService.sendResetPasswordExpiredEmail(USER_ID, FIRST_NAME, EMAIL_ADDRESS);
+    void testSendPasswordResetExpiredEmail() {
+        mailService.sendPasswordResetExpiredEmail(USER_ID, FIRST_NAME, EMAIL_ADDRESS);
     }
 
     @Test

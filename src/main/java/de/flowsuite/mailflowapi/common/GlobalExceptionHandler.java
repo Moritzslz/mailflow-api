@@ -1,4 +1,4 @@
-package de.flowsuite.mailflowapi.common.exception;
+package de.flowsuite.mailflowapi.common;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
