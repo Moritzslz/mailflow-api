@@ -35,10 +35,8 @@ class ReCaptchaFilter extends OncePerRequestFilter {
             HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         try {
-            if (request.getMethod().equals("POST")) {
-                String recaptcha = request.getHeader(reCaptchaHttpHeader);
-                reCaptchaService.verifyToken(recaptcha);
-            }
+            String recaptcha = request.getHeader(reCaptchaHttpHeader);
+            reCaptchaService.verifyToken(recaptcha);
             filterChain.doFilter(request, response);
         } catch (InvalidReCaptchaTokenException
                 | MissingReCaptchaTokenException
