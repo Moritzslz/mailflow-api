@@ -6,6 +6,9 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.ZonedDateTime;
+import java.util.Date;
+
 @RestController
 @RequestMapping("/api/v1/customers")
 class MessageLogResource {
@@ -50,11 +53,11 @@ class MessageLogResource {
     @GetMapping("{customerId}/message-log/analytics")
     ResponseEntity<?> getMessageLogAnalytics(
             @PathVariable long customerId,
-            @RequestParam(required = false) String start_date,
-            @RequestParam(required = false) String end_date,
+            @RequestParam(required = false) Date startDate,
+            @RequestParam(required = false) Date endDate,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String timeframe) {
         return ResponseEntity.ok(
-                messageLogService.getMessageLogAnalytics(customerId, start_date, end_date, category, timeframe));
+                messageLogService.getMessageLogAnalytics(customerId, startDate, endDate, category, timeframe));
     }
 }
