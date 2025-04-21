@@ -6,8 +6,8 @@ import de.flowsuite.mailflowapi.common.entity.Client;
 import de.flowsuite.mailflowapi.common.entity.User;
 import de.flowsuite.mailflowapi.common.exception.AuthenticationFailedException;
 import de.flowsuite.mailflowapi.common.exception.InvalidRefreshTokenException;
-
 import de.flowsuite.mailflowapi.user.UserService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -42,7 +42,8 @@ class AuthenticationService {
     AuthenticationService(
             JwtEncoder jwtEncoder,
             @Qualifier("userAuthenticationManager") AuthenticationManager userAuthenticationManager,
-            @Qualifier("clientAuthenticationManager") AuthenticationManager clientAuthenticationManager, UserService userService) {
+            @Qualifier("clientAuthenticationManager") AuthenticationManager clientAuthenticationManager,
+            UserService userService) {
         this.jwtEncoder = jwtEncoder;
         this.userAuthenticationManager = userAuthenticationManager;
         this.clientAuthenticationManager = clientAuthenticationManager;
