@@ -4,39 +4,30 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import de.flowsuite.mailflowapi.BaseServiceTest;
 import de.flowsuite.mailflowapi.common.auth.Authorities;
 import de.flowsuite.mailflowapi.common.dto.Message;
 import de.flowsuite.mailflowapi.common.entity.User;
 import de.flowsuite.mailflowapi.common.exception.IdConflictException;
 import de.flowsuite.mailflowapi.common.exception.IdorException;
 import de.flowsuite.mailflowapi.common.util.AesUtil;
-import de.flowsuite.mailflowapi.common.util.AuthorisationUtil;
-import de.flowsuite.mailflowapi.common.util.HmacUtil;
 import de.flowsuite.mailflowapi.mail.MailService;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
-class UserServiceTest {
-
-    private static final String ENCRYPTED_VALUE = "encrypted-value";
-    private static final String DECRYPTED_VALUE = "decrypted-value";
-    private static final String HASHED_VALUE = "hashed-value";
-    private static final String VERIFICATION_TOKEN = "verification-token";
+class UserServiceTest extends BaseServiceTest {
 
     @Mock private UserRepository userRepository;
     @Mock private PasswordEncoder passwordEncoder;
@@ -44,10 +35,6 @@ class UserServiceTest {
 
     @InjectMocks private UserService userService;
 
-    private MockedStatic<AesUtil> aesUtilMock;
-    private MockedStatic<AuthorisationUtil> authUtilMock;
-    private MockedStatic<HmacUtil> hmacUtilMock;
-    private Jwt jwtMock;
     private User testUser;
 
     private static final UserResource.CreateUserRequest createUserRequest =
@@ -72,38 +59,26 @@ class UserServiceTest {
     private User buildTestUser() {
         return User.builder()
                 .id(100L)
-                .customerId(createUserRequest.customerId())
+                .customerId(100L)
                 .firstName(ENCRYPTED_VALUE)
                 .lastName(ENCRYPTED_VALUE)
                 .emailAddressHash(HASHED_VALUE)
                 .emailAddress(ENCRYPTED_VALUE)
                 .password(HASHED_VALUE)
                 .phoneNumber(ENCRYPTED_VALUE)
-                .position(createUserRequest.position())
+                .position(null)
                 .role(Authorities.USER.getAuthority())
                 .isAccountLocked(false)
                 .isAccountEnabled(false)
-                .isSubscribedToNewsletter(createUserRequest.isSubscribedToNewsletter())
+                .isSubscribedToNewsletter(true)
                 .verificationToken(VERIFICATION_TOKEN)
                 .tokenExpiresAt(ZonedDateTime.now().plusMinutes(30))
                 .build();
     }
 
     @BeforeEach
-    void setup() {
+    void setupTestUser() {
         testUser = buildTestUser();
-        aesUtilMock = mockStatic(AesUtil.class);
-        hmacUtilMock = mockStatic(HmacUtil.class);
-        jwtMock = mock(Jwt.class);
-        when(AesUtil.encrypt(anyString())).thenReturn(ENCRYPTED_VALUE);
-        when(AesUtil.decrypt(anyString())).thenReturn(DECRYPTED_VALUE);
-        when(HmacUtil.hash(anyString())).thenReturn(HASHED_VALUE);
-    }
-
-    @AfterEach
-    void tearDown() {
-        aesUtilMock.close();
-        hmacUtilMock.close();
     }
 
     @Test
@@ -328,22 +303,14 @@ class UserServiceTest {
     @Test
     void testGetUser_success() {
         when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-        when(jwtMock.getClaim(AuthorisationUtil.CLAIM_SCOPE))
-                .thenReturn(Authorities.USER.getAuthority());
-        when(jwtMock.getSubject()).thenReturn(String.valueOf(testUser.getId()));
-        when(jwtMock.getClaim(AuthorisationUtil.CLAIM_CUSTOMER_ID))
-                .thenReturn(testUser.getCustomerId());
+        mockJwtForUser(testUser);
         User user = userService.getUser(testUser.getCustomerId(), testUser.getId(), jwtMock);
         assertEquals(testUser, user);
     }
 
     @Test
     void testGetUser_idor() {
-        when(jwtMock.getClaim(AuthorisationUtil.CLAIM_SCOPE))
-                .thenReturn(Authorities.USER.getAuthority());
-        when(jwtMock.getSubject()).thenReturn(String.valueOf(testUser.getId()));
-        when(jwtMock.getClaim(AuthorisationUtil.CLAIM_CUSTOMER_ID))
-                .thenReturn(testUser.getCustomerId());
+        mockJwtForUser(testUser);
         assertThrows(
                 IdorException.class,
                 () -> userService.getUser(testUser.getCustomerId() + 1, testUser.getId(), jwtMock));
@@ -355,11 +322,7 @@ class UserServiceTest {
     @Test
     void testUpdateUser_success() {
         when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-        when(jwtMock.getClaim(AuthorisationUtil.CLAIM_SCOPE))
-                .thenReturn(Authorities.USER.getAuthority());
-        when(jwtMock.getSubject()).thenReturn(String.valueOf(testUser.getId()));
-        when(jwtMock.getClaim(AuthorisationUtil.CLAIM_CUSTOMER_ID))
-                .thenReturn(testUser.getCustomerId());
+        mockJwtForUser(testUser);
 
         UserResource.UpdateUserRequest updateUserRequest =
                 new UserResource.UpdateUserRequest(
@@ -387,11 +350,7 @@ class UserServiceTest {
 
     @Test
     void testUpdateUser_idConflict() {
-        when(jwtMock.getClaim(AuthorisationUtil.CLAIM_SCOPE))
-                .thenReturn(Authorities.USER.getAuthority());
-        when(jwtMock.getSubject()).thenReturn(String.valueOf(testUser.getId()));
-        when(jwtMock.getClaim(AuthorisationUtil.CLAIM_CUSTOMER_ID))
-                .thenReturn(testUser.getCustomerId());
+        mockJwtForUser(testUser);
 
         UserResource.UpdateUserRequest updateUserRequest =
                 new UserResource.UpdateUserRequest(
@@ -415,11 +374,8 @@ class UserServiceTest {
 
     @Test
     void testUpdateUser_idor() {
-        when(jwtMock.getClaim(AuthorisationUtil.CLAIM_SCOPE))
-                .thenReturn(Authorities.USER.getAuthority());
-        when(jwtMock.getSubject()).thenReturn(String.valueOf(testUser.getId()));
-        when(jwtMock.getClaim(AuthorisationUtil.CLAIM_CUSTOMER_ID))
-                .thenReturn(testUser.getCustomerId());
+        mockJwtForUser(testUser);
+
         assertThrows(
                 IdorException.class,
                 () -> userService.getUser(testUser.getCustomerId() + 1, testUser.getId(), jwtMock));
