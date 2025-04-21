@@ -7,6 +7,7 @@ import de.flowsuite.mailflowapi.common.entity.User;
 import de.flowsuite.mailflowapi.common.exception.AuthenticationFailedException;
 import de.flowsuite.mailflowapi.common.exception.InvalidRefreshTokenException;
 
+import de.flowsuite.mailflowapi.user.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,17 +32,21 @@ class AuthenticationService {
     private static final String JWT_ISSUER_LOCATION = "self";
     private static final String CLAIM_TYPE = "type";
     private static final String CLAIM_TYPE_REFRESH = "refresh";
+    private static final int JWT_TTL_HOURS = 1;
+    private static final int JWT_TTL_DAYS = 2;
     private final JwtEncoder jwtEncoder;
     private final AuthenticationManager userAuthenticationManager;
     private final AuthenticationManager clientAuthenticationManager;
+    private final UserService userService;
 
     AuthenticationService(
             JwtEncoder jwtEncoder,
             @Qualifier("userAuthenticationManager") AuthenticationManager userAuthenticationManager,
-            @Qualifier("clientAuthenticationManager") AuthenticationManager clientAuthenticationManager) {
+            @Qualifier("clientAuthenticationManager") AuthenticationManager clientAuthenticationManager, UserService userService) {
         this.jwtEncoder = jwtEncoder;
         this.userAuthenticationManager = userAuthenticationManager;
         this.clientAuthenticationManager = clientAuthenticationManager;
+        this.userService = userService;
     }
 
     String generateAccessToken(String subject, String scope, long customerId) {
@@ -50,7 +55,7 @@ class AuthenticationService {
                 JwtClaimsSet.builder()
                         .issuer(JWT_ISSUER_LOCATION)
                         .issuedAt(now.toInstant())
-                        .expiresAt(now.plusHours(1).toInstant())
+                        .expiresAt(now.plusHours(JWT_TTL_HOURS).toInstant())
                         .subject(subject)
                         .claim(CLAIM_SCOPE, scope)
                         .claim(CLAIM_CUSTOMER_ID, customerId)
@@ -67,7 +72,7 @@ class AuthenticationService {
                 JwtClaimsSet.builder()
                         .issuer(JWT_ISSUER_LOCATION)
                         .issuedAt(now.toInstant())
-                        .expiresAt(now.plusDays(2).toInstant())
+                        .expiresAt(now.plusDays(JWT_TTL_DAYS).toInstant())
                         .subject(subject)
                         .claim(CLAIM_TYPE, CLAIM_TYPE_REFRESH)
                         .build();
@@ -120,6 +125,9 @@ class AuthenticationService {
                         .collect(Collectors.joining(" "));
         String accessToken =
                 generateAccessToken(String.valueOf(user.getId()), scope, user.getCustomerId());
+
+        userService.updateLastLoginAt(user);
+
         return new AuthenticationResource.UserTokenResponse(accessToken, refreshToken);
     }
 

@@ -27,22 +27,19 @@ import java.util.Optional;
 @Service
 public class UserService implements UserDetailsService {
 
-    // spotless:off
     private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
+    private static final ZoneId berlinZone = ZoneId.of("Europe/Berlin");
     static final int TOKEN_TTL_HOURS = 6;
     static final int TOKEN_TTL_MINUTES = 30;
     static final String CREATE_USER_MSG =
             "Your account has been created. Please check your inbox to enable your account.";
-    static final String ENABLE_USER_MSG =
-            "Your account has been enabled.";
-    static final String REQUEST_PASSWORD_RESET_MSG =
-            "A password reset link will be sent shortly.";
+    static final String ENABLE_USER_MSG = "Your account has been enabled.";
+    static final String REQUEST_PASSWORD_RESET_MSG = "A password reset link will be sent shortly.";
     static final String COMPLETE_PASSWORD_RESET_MSG =
             "Your password has been updated successfully.";
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final MailService mailService;
-    // spotless:on
 
     UserService(
             UserRepository userRepository,
@@ -70,6 +67,11 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found."));
     }
 
+    public void updateLastLoginAt(User user) {
+        user.setLastLoginAt(ZonedDateTime.now(berlinZone));
+        userRepository.save(user);
+    }
+
     private String generateVerificationToken() {
         String verificationToken;
         do {
@@ -89,8 +91,7 @@ public class UserService implements UserDetailsService {
             String passwordHash = passwordEncoder.encode(request.password());
 
             String verificationToken = generateVerificationToken();
-            ZonedDateTime tokenExpiresAt =
-                    ZonedDateTime.now(ZoneId.of("Europe/Berlin")).plusHours(TOKEN_TTL_HOURS);
+            ZonedDateTime tokenExpiresAt = ZonedDateTime.now(berlinZone).plusHours(TOKEN_TTL_HOURS);
 
             LOG.debug("Creating new user.");
             LOG.debug("Verification token: {}", verificationToken);
@@ -137,8 +138,7 @@ public class UserService implements UserDetailsService {
 
             LOG.debug("Enabling user: {}", user.getId());
 
-            if (tokenExpiresAt.isBefore(ZonedDateTime.now(ZoneId.of("Europe/Berlin")))
-                    && !isEnabled) {
+            if (tokenExpiresAt.isBefore(ZonedDateTime.now(berlinZone)) && !isEnabled) {
                 // Token expired => delete user account (GDPR data minimisation)
                 userRepository.delete(user);
                 mailService.sendRegistrationExpiredEmail(user.getId(), firstName, emailAddress);
@@ -170,7 +170,7 @@ public class UserService implements UserDetailsService {
 
             String verificationToken = generateVerificationToken();
             ZonedDateTime tokenExpiresAt =
-                    ZonedDateTime.now(ZoneId.of("Europe/Berlin")).plusMinutes(TOKEN_TTL_MINUTES);
+                    ZonedDateTime.now(berlinZone).plusMinutes(TOKEN_TTL_MINUTES);
 
             user.setVerificationToken(verificationToken);
             user.setTokenExpiresAt(tokenExpiresAt);
@@ -193,7 +193,7 @@ public class UserService implements UserDetailsService {
 
             LOG.debug("Updating password for user: {}", user.getId());
 
-            if (tokenExpiresAt.isBefore(ZonedDateTime.now(ZoneId.of("Europe/Berlin")))) {
+            if (tokenExpiresAt.isBefore(ZonedDateTime.now(berlinZone))) {
                 mailService.sendPasswordResetExpiredEmail(user.getId(), firstName, emailAddress);
             } else {
                 UserUtil.validatePassword(request.password(), request.confirmationPassword());
