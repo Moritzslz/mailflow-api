@@ -29,15 +29,15 @@ public class UserService implements UserDetailsService {
 
     // spotless:off
     private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
-    private static final int TOKEN_TTL_HOURS = 6;
-    private static final int TOKEN_TTL_MINUTES = 30;
-    private static final String CREATE_USER_MSG =
+    static final int TOKEN_TTL_HOURS = 6;
+    static final int TOKEN_TTL_MINUTES = 30;
+    static final String CREATE_USER_MSG =
             "Your account has been created. Please check your inbox to enable your account.";
-    private static final String ENABLE_USER_MSG =
+    static final String ENABLE_USER_MSG =
             "Your account has been enabled.";
-    private static final String REQUEST_PASSWORD_RESET_MSG =
+    static final String REQUEST_PASSWORD_RESET_MSG =
             "A password reset link will be sent shortly.";
-    private static final String COMPLETE_PASSWORD_RESET_MSG =
+    static final String COMPLETE_PASSWORD_RESET_MSG =
             "Your password has been updated successfully.";
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -198,7 +198,6 @@ public class UserService implements UserDetailsService {
             } else {
                 UserUtil.validatePassword(request.password(), request.confirmationPassword());
                 String passwordHash = passwordEncoder.encode(request.password());
-
                 user.setPassword(passwordHash);
                 userRepository.save(user);
             }

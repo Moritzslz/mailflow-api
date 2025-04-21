@@ -152,9 +152,10 @@ public class MailService {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
 
-            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true,"UTF-8");
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
             mimeMessageHelper.setText(emailContent, true);
-            mimeMessageHelper.addInline("mailflowLogo", new ClassPathResource("/assets/mailflowLogo.svg"));
+            mimeMessageHelper.addInline(
+                    "mailflowLogo", new ClassPathResource("/assets/mailflowLogo.svg"));
             mimeMessageHelper.setTo(emailAddress);
             mimeMessageHelper.setSubject(subject);
             mimeMessageHelper.setFrom(FROM_EMAIL_ADDRESS, FROM_PERSONAL);
