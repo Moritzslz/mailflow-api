@@ -22,5 +22,15 @@ public record Message(@NotBlank String message) {
             "The password must contain at least one digit.";
     public static final String MISSING_SPECIAL_CHARACTER_MSG =
             "The password must contain at least one special character.";
+    public static final String DOUBLE_OPT_IN_EMAIL_SUBJECT =
+            "Bitte bestätige deine Registrierung 🤝";
+    public static final String REGISTRATION_EXPIRED_SUBJECT =
+            "Deine Registrierung ist abgelaufen ⏳";
+    public static final String RESET_PASSWORD_EMAIL_SUBJECT =
+            "Dein Link zum Zurücksetzen deines Passwort 🔐";
+    public static final String RESET_PASSWORD_EXPIRED_EMAIL_SUBJECT =
+            "Dein Link zum Passwort Zurücksetzen ist abgelaufen ⏳";
+    public static final String WELCOME_EMAIL_SUBJECT =
+            "Willkommen bei mailflow – schön, dass du dabei bist! 🥳";
     // spotless:on
 }

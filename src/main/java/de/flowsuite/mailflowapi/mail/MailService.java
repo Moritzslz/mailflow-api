@@ -18,6 +18,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 
+import static de.flowsuite.mailflowapi.common.constant.Message.*;
+
 @Service
 public class MailService {
 
@@ -30,12 +32,7 @@ public class MailService {
     private static final String RESET_PASSWORD_EMAIL_PATH = "classpath:templates/PasswordResetEmail.html";
     private static final String RESET_PASSWORD_EXPIRED_EMAIL_PATH = "classpath:templates/PasswordResetExpiredEmail.html";
     private static final String WELCOME_EMAIL_PATH = "classpath:templates/WelcomeEmail.html";
-    private static final String DOUBLE_OPT_IN_EMAIL_SUBJECT = "Bitte bestätige deine Registrierung 🤝";
-    private static final String REGISTRATION_EXPIRED_SUBJECT = "Deine Registrierung ist abgelaufen ⏳";
-    private static final String RESET_PASSWORD_EMAIL_SUBJECT = "Dein Link zum Zurücksetzen deines Passwort 🔐";
-    private static final String RESET_PASSWORD_EXPIRED_EMAIL_SUBJECT = "Dein Link zum Passwort Zurücksetzen ist abgelaufen ⏳";
-    private static final String WELCOME_EMAIL_SUBJECT = "Willkommen bei mailflow – schön, dass du dabei bist! 🥳";
-    private final String mailFlowFrontendUrl;
+   private final String mailFlowFrontendUrl;
     private final JavaMailSender mailSender;
     private final String doubleOptInEmail;
     private final String registrationExpiredEmail;
