@@ -1,7 +1,10 @@
 package de.flowsuite.mailflowapi.user;
 
+import static de.flowsuite.mailflowapi.common.constant.Message.*;
+import static de.flowsuite.mailflowapi.common.util.Util.BERLIN_ZONE;
+
 import de.flowsuite.mailflowapi.common.auth.Authorities;
-import de.flowsuite.mailflowapi.common.dto.Message;
+import de.flowsuite.mailflowapi.common.constant.Message;
 import de.flowsuite.mailflowapi.common.entity.User;
 import de.flowsuite.mailflowapi.common.exception.IdConflictException;
 import de.flowsuite.mailflowapi.common.util.AesUtil;
@@ -19,7 +22,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -27,22 +29,12 @@ import java.util.Optional;
 @Service
 public class UserService implements UserDetailsService {
 
-    // spotless:off
     private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
-    private static final int TOKEN_TTL_HOURS = 6;
-    private static final int TOKEN_TTL_MINUTES = 30;
-    private static final String CREATE_USER_MSG =
-            "Your account has been created. Please check your inbox to enable your account.";
-    private static final String ENABLE_USER_MSG =
-            "Your account has been enabled.";
-    private static final String REQUEST_PASSWORD_RESET_MSG =
-            "A password reset link will be sent shortly.";
-    private static final String COMPLETE_PASSWORD_RESET_MSG =
-            "Your password has been updated successfully.";
+    static final int TOKEN_TTL_HOURS = 6;
+    static final int TOKEN_TTL_MINUTES = 30;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final MailService mailService;
-    // spotless:on
 
     UserService(
             UserRepository userRepository,
@@ -70,6 +62,11 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found."));
     }
 
+    public void updateLastLoginAt(User user) {
+        user.setLastLoginAt(ZonedDateTime.now(BERLIN_ZONE));
+        userRepository.save(user);
+    }
+
     private String generateVerificationToken() {
         String verificationToken;
         do {
@@ -90,7 +87,7 @@ public class UserService implements UserDetailsService {
 
             String verificationToken = generateVerificationToken();
             ZonedDateTime tokenExpiresAt =
-                    ZonedDateTime.now(ZoneId.of("Europe/Berlin")).plusHours(TOKEN_TTL_HOURS);
+                    ZonedDateTime.now(BERLIN_ZONE).plusHours(TOKEN_TTL_HOURS);
 
             LOG.debug("Creating new user.");
             LOG.debug("Verification token: {}", verificationToken);
@@ -137,8 +134,7 @@ public class UserService implements UserDetailsService {
 
             LOG.debug("Enabling user: {}", user.getId());
 
-            if (tokenExpiresAt.isBefore(ZonedDateTime.now(ZoneId.of("Europe/Berlin")))
-                    && !isEnabled) {
+            if (tokenExpiresAt.isBefore(ZonedDateTime.now(BERLIN_ZONE)) && !isEnabled) {
                 // Token expired => delete user account (GDPR data minimisation)
                 userRepository.delete(user);
                 mailService.sendRegistrationExpiredEmail(user.getId(), firstName, emailAddress);
@@ -170,7 +166,7 @@ public class UserService implements UserDetailsService {
 
             String verificationToken = generateVerificationToken();
             ZonedDateTime tokenExpiresAt =
-                    ZonedDateTime.now(ZoneId.of("Europe/Berlin")).plusMinutes(TOKEN_TTL_MINUTES);
+                    ZonedDateTime.now(BERLIN_ZONE).plusMinutes(TOKEN_TTL_MINUTES);
 
             user.setVerificationToken(verificationToken);
             user.setTokenExpiresAt(tokenExpiresAt);
@@ -193,12 +189,11 @@ public class UserService implements UserDetailsService {
 
             LOG.debug("Updating password for user: {}", user.getId());
 
-            if (tokenExpiresAt.isBefore(ZonedDateTime.now(ZoneId.of("Europe/Berlin")))) {
+            if (tokenExpiresAt.isBefore(ZonedDateTime.now(BERLIN_ZONE))) {
                 mailService.sendPasswordResetExpiredEmail(user.getId(), firstName, emailAddress);
             } else {
                 UserUtil.validatePassword(request.password(), request.confirmationPassword());
                 String passwordHash = passwordEncoder.encode(request.password());
-
                 user.setPassword(passwordHash);
                 userRepository.save(user);
             }

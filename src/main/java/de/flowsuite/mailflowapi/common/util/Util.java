@@ -3,9 +3,12 @@ package de.flowsuite.mailflowapi.common.util;
 import de.flowsuite.mailflowapi.common.exception.InvalidEmailAddressException;
 
 import java.security.SecureRandom;
+import java.time.ZoneId;
 import java.util.Base64;
 
 public class Util {
+
+    public static final ZoneId BERLIN_ZONE = ZoneId.of("Europe/Berlin");
 
     public static void validateEmailAddress(String emailAddress) {
         if (emailAddress == null
