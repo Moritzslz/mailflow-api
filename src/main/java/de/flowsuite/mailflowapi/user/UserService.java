@@ -1,7 +1,7 @@
 package de.flowsuite.mailflowapi.user;
 
 import de.flowsuite.mailflowapi.common.auth.Authorities;
-import de.flowsuite.mailflowapi.common.dto.Message;
+import de.flowsuite.mailflowapi.common.constant.Message;
 import de.flowsuite.mailflowapi.common.entity.User;
 import de.flowsuite.mailflowapi.common.exception.IdConflictException;
 import de.flowsuite.mailflowapi.common.util.AesUtil;
@@ -12,6 +12,7 @@ import de.flowsuite.mailflowapi.mail.MailService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -24,6 +25,8 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static de.flowsuite.mailflowapi.common.constant.Message.*;
+
 @Service
 public class UserService implements UserDetailsService {
 
@@ -31,12 +34,6 @@ public class UserService implements UserDetailsService {
     private static final ZoneId berlinZone = ZoneId.of("Europe/Berlin");
     static final int TOKEN_TTL_HOURS = 6;
     static final int TOKEN_TTL_MINUTES = 30;
-    static final String CREATE_USER_MSG =
-            "Your account has been created. Please check your inbox to enable your account.";
-    static final String ENABLE_USER_MSG = "Your account has been enabled.";
-    static final String REQUEST_PASSWORD_RESET_MSG = "A password reset link will be sent shortly.";
-    static final String COMPLETE_PASSWORD_RESET_MSG =
-            "Your password has been updated successfully.";
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final MailService mailService;

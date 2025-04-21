@@ -4,17 +4,11 @@ import de.flowsuite.mailflowapi.common.exception.InvalidPasswordException;
 
 import java.util.regex.Pattern;
 
+import static de.flowsuite.mailflowapi.common.constant.Message.*;
+
 class UserUtil {
 
     static final int MIN_PASSWORD_LENGTH = 14;
-    static final String PASSWORDS_DO_NOT_MATCH_MSG = "The passwords do not match.";
-    static final String PASSWORD_TOO_SHORT_MSG =
-            "The password must be at least %d characters long.";
-    static final String MISSING_CASE_MSG =
-            "The password must contain at least one uppercase and one lowercase letter.";
-    static final String MISSING_DIGIT_MSG = "The password must contain at least one digit.";
-    static final String MISSING_SPECIAL_CHARACTER_MSG =
-            "The password must contain at least one special character.";
     private static final Pattern UPPERCASE_PATTERN = Pattern.compile("[A-Z]");
     private static final Pattern LOWERCASE_PATTERN = Pattern.compile("[a-z]");
     private static final Pattern DIGIT_PATTERN = Pattern.compile("[0-9]");

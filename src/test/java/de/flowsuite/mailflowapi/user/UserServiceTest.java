@@ -1,12 +1,13 @@
 package de.flowsuite.mailflowapi.user;
 
+import static de.flowsuite.mailflowapi.common.constant.Message.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import de.flowsuite.mailflowapi.BaseServiceTest;
 import de.flowsuite.mailflowapi.common.auth.Authorities;
-import de.flowsuite.mailflowapi.common.dto.Message;
+import de.flowsuite.mailflowapi.common.constant.Message;
 import de.flowsuite.mailflowapi.common.entity.User;
 import de.flowsuite.mailflowapi.common.exception.IdConflictException;
 import de.flowsuite.mailflowapi.common.exception.IdorException;
@@ -99,7 +100,7 @@ class UserServiceTest extends BaseServiceTest {
                         eq(savedUser.getVerificationToken()),
                         anyInt());
 
-        assertEquals(UserService.CREATE_USER_MSG, message.message());
+        assertEquals(CREATE_USER_MSG, message.message());
         assertFalse(savedUser.isEnabled());
         assertTrue(
                 savedUser
@@ -126,7 +127,7 @@ class UserServiceTest extends BaseServiceTest {
         verify(userRepository, never()).save(any());
         verify(mailService, never()).sendDoubleOptInEmail(any(), any(), any(), anyInt());
 
-        assertEquals(UserService.CREATE_USER_MSG, message.message());
+        assertEquals(CREATE_USER_MSG, message.message());
     }
 
     @Test
@@ -144,7 +145,7 @@ class UserServiceTest extends BaseServiceTest {
         verify(mailService, never())
                 .sendRegistrationExpiredEmail(anyLong(), anyString(), anyString());
 
-        assertEquals(UserService.ENABLE_USER_MSG, message.message());
+        assertEquals(ENABLE_USER_MSG, message.message());
         assertTrue(savedUser.isEnabled());
     }
 
@@ -159,7 +160,7 @@ class UserServiceTest extends BaseServiceTest {
         verify(mailService, never())
                 .sendRegistrationExpiredEmail(anyLong(), anyString(), anyString());
 
-        assertEquals(UserService.ENABLE_USER_MSG, message.message());
+        assertEquals(ENABLE_USER_MSG, message.message());
     }
 
     @Test
@@ -179,7 +180,7 @@ class UserServiceTest extends BaseServiceTest {
         verify(mailService)
                 .sendRegistrationExpiredEmail(savedUser.getId(), DECRYPTED_VALUE, DECRYPTED_VALUE);
 
-        assertEquals(UserService.ENABLE_USER_MSG, message.message());
+        assertEquals(ENABLE_USER_MSG, message.message());
         assertFalse(savedUser.isEnabled());
     }
 
@@ -196,7 +197,7 @@ class UserServiceTest extends BaseServiceTest {
         verify(mailService, never())
                 .sendRegistrationExpiredEmail(anyLong(), anyString(), anyString());
 
-        assertEquals(UserService.ENABLE_USER_MSG, message.message());
+        assertEquals(ENABLE_USER_MSG, message.message());
     }
 
     @Test
@@ -217,7 +218,7 @@ class UserServiceTest extends BaseServiceTest {
                         eq(savedUser.getVerificationToken()),
                         anyInt());
 
-        assertEquals(UserService.REQUEST_PASSWORD_RESET_MSG, message.message());
+        assertEquals(REQUEST_PASSWORD_RESET_MSG, message.message());
         assertTrue(
                 savedUser
                         .getTokenExpiresAt()
@@ -237,7 +238,7 @@ class UserServiceTest extends BaseServiceTest {
         verify(mailService, never())
                 .sendPasswordResetEmail(anyLong(), anyString(), anyString(), anyString(), anyInt());
 
-        assertEquals(UserService.REQUEST_PASSWORD_RESET_MSG, message.message());
+        assertEquals(REQUEST_PASSWORD_RESET_MSG, message.message());
     }
 
     @Test
@@ -256,7 +257,7 @@ class UserServiceTest extends BaseServiceTest {
         verify(mailService, never())
                 .sendPasswordResetExpiredEmail(anyLong(), anyString(), anyString());
 
-        assertEquals(UserService.COMPLETE_PASSWORD_RESET_MSG, message.message());
+        assertEquals(COMPLETE_PASSWORD_RESET_MSG, message.message());
         assertEquals(HASHED_VALUE, savedUser.getPassword());
     }
 
@@ -272,7 +273,7 @@ class UserServiceTest extends BaseServiceTest {
         verify(mailService, never())
                 .sendPasswordResetExpiredEmail(anyLong(), anyString(), anyString());
 
-        assertEquals(UserService.COMPLETE_PASSWORD_RESET_MSG, message.message());
+        assertEquals(COMPLETE_PASSWORD_RESET_MSG, message.message());
     }
 
     @Test
@@ -289,7 +290,7 @@ class UserServiceTest extends BaseServiceTest {
         verify(mailService)
                 .sendPasswordResetExpiredEmail(testUser.getId(), DECRYPTED_VALUE, DECRYPTED_VALUE);
 
-        assertEquals(UserService.COMPLETE_PASSWORD_RESET_MSG, message.message());
+        assertEquals(COMPLETE_PASSWORD_RESET_MSG, message.message());
     }
 
     @Test
