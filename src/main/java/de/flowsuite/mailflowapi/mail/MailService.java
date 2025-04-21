@@ -1,5 +1,7 @@
 package de.flowsuite.mailflowapi.mail;
 
+import static de.flowsuite.mailflowapi.common.constant.Message.*;
+
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
@@ -17,8 +19,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
-
-import static de.flowsuite.mailflowapi.common.constant.Message.*;
 
 @Service
 public class MailService {
