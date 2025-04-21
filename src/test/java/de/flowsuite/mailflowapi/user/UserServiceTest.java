@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
-public class UserServiceTest {
+class UserServiceTest {
 
     private static final String ENCRYPTED_VALUE = "encrypted-value";
     private static final String DECRYPTED_VALUE = "decrypted-value";
@@ -69,23 +69,6 @@ public class UserServiceTest {
             new UserResource.CompletePasswordResetRequest(
                     "strongPassword!123", "strongPassword!123");
 
-    @BeforeEach
-    void setup() {
-        testUser = buildTestUser();
-        aesUtilMock = mockStatic(AesUtil.class);
-        hmacUtilMock = mockStatic(HmacUtil.class);
-        jwtMock = mock(Jwt.class);
-        when(AesUtil.encrypt(anyString())).thenReturn(ENCRYPTED_VALUE);
-        when(AesUtil.decrypt(anyString())).thenReturn(DECRYPTED_VALUE);
-        when(HmacUtil.hash(anyString())).thenReturn(HASHED_VALUE);
-    }
-
-    @AfterEach
-    void tearDown() {
-        aesUtilMock.close();
-        hmacUtilMock.close();
-    }
-
     private User buildTestUser() {
         return User.builder()
                 .id(100L)
@@ -104,6 +87,23 @@ public class UserServiceTest {
                 .verificationToken(VERIFICATION_TOKEN)
                 .tokenExpiresAt(ZonedDateTime.now().plusMinutes(30))
                 .build();
+    }
+
+    @BeforeEach
+    void setup() {
+        testUser = buildTestUser();
+        aesUtilMock = mockStatic(AesUtil.class);
+        hmacUtilMock = mockStatic(HmacUtil.class);
+        jwtMock = mock(Jwt.class);
+        when(AesUtil.encrypt(anyString())).thenReturn(ENCRYPTED_VALUE);
+        when(AesUtil.decrypt(anyString())).thenReturn(DECRYPTED_VALUE);
+        when(HmacUtil.hash(anyString())).thenReturn(HASHED_VALUE);
+    }
+
+    @AfterEach
+    void tearDown() {
+        aesUtilMock.close();
+        hmacUtilMock.close();
     }
 
     @Test
