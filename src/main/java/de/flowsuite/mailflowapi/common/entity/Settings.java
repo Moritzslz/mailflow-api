@@ -1,5 +1,7 @@
 package de.flowsuite.mailflowapi.common.entity;
 
+import static de.flowsuite.mailflowapi.common.util.Util.BERLIN_ZONE;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
@@ -10,7 +12,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 @Entity
@@ -47,12 +48,11 @@ public class Settings {
     @PrePersist
     @PreUpdate
     private void setTimestampsToBerlin() {
-        ZoneId berlinZone = ZoneId.of("Europe/Berlin");
         if (lastCrawlAt != null) {
-            lastCrawlAt = lastCrawlAt.withZoneSameInstant(berlinZone);
+            lastCrawlAt = lastCrawlAt.withZoneSameInstant(BERLIN_ZONE);
         }
         if (nextCrawlAt != null) {
-            nextCrawlAt = nextCrawlAt.withZoneSameInstant(berlinZone);
+            nextCrawlAt = nextCrawlAt.withZoneSameInstant(BERLIN_ZONE);
         }
     }
 }

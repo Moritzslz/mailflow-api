@@ -1,5 +1,7 @@
 package de.flowsuite.mailflowapi.settings;
 
+import static de.flowsuite.mailflowapi.common.util.Util.BERLIN_ZONE;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -23,7 +25,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 @WebMvcTest(SettingsResource.class)
@@ -64,8 +65,8 @@ class SettingsResourceTest {
                         .imapPort(993)
                         .smtpPort(587)
                         .crawlFrequencyInHours(200)
-                        .lastCrawlAt(ZonedDateTime.now(ZoneId.of("Europe/Berlin")))
-                        .nextCrawlAt(ZonedDateTime.now(ZoneId.of("Europe/Berlin")).plusHours(200))
+                        .lastCrawlAt(ZonedDateTime.now(BERLIN_ZONE))
+                        .nextCrawlAt(ZonedDateTime.now(BERLIN_ZONE).plusHours(200))
                         .build();
 
         when(settingsService.createSettings(

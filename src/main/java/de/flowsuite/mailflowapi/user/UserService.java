@@ -1,5 +1,8 @@
 package de.flowsuite.mailflowapi.user;
 
+import static de.flowsuite.mailflowapi.common.constant.Message.*;
+import static de.flowsuite.mailflowapi.common.util.Util.BERLIN_ZONE;
+
 import de.flowsuite.mailflowapi.common.auth.Authorities;
 import de.flowsuite.mailflowapi.common.constant.Message;
 import de.flowsuite.mailflowapi.common.entity.User;
@@ -12,7 +15,6 @@ import de.flowsuite.mailflowapi.mail.MailService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -20,18 +22,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
-
-import static de.flowsuite.mailflowapi.common.constant.Message.*;
 
 @Service
 public class UserService implements UserDetailsService {
 
     private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
-    private static final ZoneId berlinZone = ZoneId.of("Europe/Berlin");
     static final int TOKEN_TTL_HOURS = 6;
     static final int TOKEN_TTL_MINUTES = 30;
     private final UserRepository userRepository;
@@ -65,7 +63,7 @@ public class UserService implements UserDetailsService {
     }
 
     public void updateLastLoginAt(User user) {
-        user.setLastLoginAt(ZonedDateTime.now(berlinZone));
+        user.setLastLoginAt(ZonedDateTime.now(BERLIN_ZONE));
         userRepository.save(user);
     }
 
@@ -88,7 +86,8 @@ public class UserService implements UserDetailsService {
             String passwordHash = passwordEncoder.encode(request.password());
 
             String verificationToken = generateVerificationToken();
-            ZonedDateTime tokenExpiresAt = ZonedDateTime.now(berlinZone).plusHours(TOKEN_TTL_HOURS);
+            ZonedDateTime tokenExpiresAt =
+                    ZonedDateTime.now(BERLIN_ZONE).plusHours(TOKEN_TTL_HOURS);
 
             LOG.debug("Creating new user.");
             LOG.debug("Verification token: {}", verificationToken);
@@ -135,7 +134,7 @@ public class UserService implements UserDetailsService {
 
             LOG.debug("Enabling user: {}", user.getId());
 
-            if (tokenExpiresAt.isBefore(ZonedDateTime.now(berlinZone)) && !isEnabled) {
+            if (tokenExpiresAt.isBefore(ZonedDateTime.now(BERLIN_ZONE)) && !isEnabled) {
                 // Token expired => delete user account (GDPR data minimisation)
                 userRepository.delete(user);
                 mailService.sendRegistrationExpiredEmail(user.getId(), firstName, emailAddress);
@@ -167,7 +166,7 @@ public class UserService implements UserDetailsService {
 
             String verificationToken = generateVerificationToken();
             ZonedDateTime tokenExpiresAt =
-                    ZonedDateTime.now(berlinZone).plusMinutes(TOKEN_TTL_MINUTES);
+                    ZonedDateTime.now(BERLIN_ZONE).plusMinutes(TOKEN_TTL_MINUTES);
 
             user.setVerificationToken(verificationToken);
             user.setTokenExpiresAt(tokenExpiresAt);
@@ -190,7 +189,7 @@ public class UserService implements UserDetailsService {
 
             LOG.debug("Updating password for user: {}", user.getId());
 
-            if (tokenExpiresAt.isBefore(ZonedDateTime.now(berlinZone))) {
+            if (tokenExpiresAt.isBefore(ZonedDateTime.now(BERLIN_ZONE))) {
                 mailService.sendPasswordResetExpiredEmail(user.getId(), firstName, emailAddress);
             } else {
                 UserUtil.validatePassword(request.password(), request.confirmationPassword());

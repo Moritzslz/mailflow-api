@@ -1,6 +1,7 @@
 package de.flowsuite.mailflowapi.security;
 
 import static de.flowsuite.mailflowapi.common.util.AuthorisationUtil.*;
+import static de.flowsuite.mailflowapi.common.util.Util.BERLIN_ZONE;
 
 import de.flowsuite.mailflowapi.common.entity.Client;
 import de.flowsuite.mailflowapi.common.entity.User;
@@ -21,7 +22,6 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
 
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.stream.Collectors;
 
@@ -51,7 +51,7 @@ class AuthenticationService {
     }
 
     String generateAccessToken(String subject, String scope, long customerId) {
-        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Europe/Berlin"));
+        ZonedDateTime now = ZonedDateTime.now(BERLIN_ZONE);
         JwtClaimsSet claims =
                 JwtClaimsSet.builder()
                         .issuer(JWT_ISSUER_LOCATION)
@@ -68,7 +68,7 @@ class AuthenticationService {
     }
 
     public String generateRefreshToken(String subject) {
-        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Europe/Berlin"));
+        ZonedDateTime now = ZonedDateTime.now(BERLIN_ZONE);
         JwtClaimsSet claims =
                 JwtClaimsSet.builder()
                         .issuer(JWT_ISSUER_LOCATION)

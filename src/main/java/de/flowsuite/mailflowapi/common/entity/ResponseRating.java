@@ -1,5 +1,7 @@
 package de.flowsuite.mailflowapi.common.entity;
 
+import static de.flowsuite.mailflowapi.common.util.Util.BERLIN_ZONE;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -10,7 +12,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 @Entity
@@ -35,7 +36,6 @@ public class ResponseRating {
 
     @PrePersist
     protected void onCreate() {
-        ZoneId berlinZone = ZoneId.of("Europe/Berlin");
-        createdAt = ZonedDateTime.now(berlinZone);
+        createdAt = ZonedDateTime.now(BERLIN_ZONE);
     }
 }
