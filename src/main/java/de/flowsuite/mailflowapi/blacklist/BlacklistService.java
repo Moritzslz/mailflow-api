@@ -63,13 +63,13 @@ class BlacklistService {
                 .toList();
     }
 
-    void deleteBlacklistEntry(long customerId, long userId, long blacklistEntryId, Jwt jwt) {
+    void deleteBlacklistEntry(long customerId, long userId, long id, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
         AuthorisationUtil.validateAccessToUser(userId, jwt);
 
         BlacklistEntry blacklistEntry =
                 blacklistRepository
-                        .findById(blacklistEntryId)
+                        .findById(id)
                         .orElseThrow(
                                 () ->
                                         new EntityNotFoundException(

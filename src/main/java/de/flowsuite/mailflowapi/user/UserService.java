@@ -206,21 +206,21 @@ public class UserService implements UserDetailsService {
         return (List<User>) userRepository.findAll();
     }
 
-    User getUser(long customerId, long userId, Jwt jwt) {
+    User getUser(long customerId, long id, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
-        AuthorisationUtil.validateAccessToUser(userId, jwt);
-        return getById(userId);
+        AuthorisationUtil.validateAccessToUser(id, jwt);
+        return getById(id);
     }
 
-    User updateUser(long customerId, long userId, UserResource.UpdateUserRequest request, Jwt jwt) {
+    User updateUser(long customerId, long id, UserResource.UpdateUserRequest request, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
-        AuthorisationUtil.validateAccessToUser(userId, jwt);
+        AuthorisationUtil.validateAccessToUser(id, jwt);
 
-        if (!request.userId().equals(userId) || !request.customerId().equals(customerId)) {
+        if (!request.userId().equals(id) || !request.customerId().equals(customerId)) {
             throw new IdConflictException();
         }
 
-        User user = getById(userId);
+        User user = getById(id);
 
         user.setFirstName(AesUtil.encrypt(request.firstName()));
         user.setLastName(AesUtil.encrypt(request.lastName()));

@@ -52,21 +52,21 @@ class UserResource {
         return ResponseEntity.ok(userService.listUsers());
     }
 
-    @GetMapping("/{customerId}/users/{userId}")
+    @GetMapping("/{customerId}/users/{id}")
     ResponseEntity<User> getUser(
             @PathVariable long customerId,
-            @PathVariable long userId,
+            @PathVariable long id,
             @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(userService.getUser(customerId, userId, jwt));
+        return ResponseEntity.ok(userService.getUser(customerId, id, jwt));
     }
 
-    @PutMapping("/{customerId}/users/{userId}")
+    @PutMapping("/{customerId}/users/{id}")
     ResponseEntity<User> updateUser(
             @PathVariable long customerId,
-            @PathVariable long userId,
+            @PathVariable long id,
             @RequestBody UpdateUserRequest request,
             @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(userService.updateUser(customerId, userId, request, jwt));
+        return ResponseEntity.ok(userService.updateUser(customerId, id, request, jwt));
     }
 
     record CreateUserRequest(
