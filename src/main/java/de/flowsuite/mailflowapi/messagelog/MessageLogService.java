@@ -1,146 +1,202 @@
 package de.flowsuite.mailflowapi.messagelog;
 
+import static de.flowsuite.mailflowapi.common.util.Util.BERLIN_ZONE;
+
 import de.flowsuite.mailflowapi.common.entity.MessageLogEntry;
 import de.flowsuite.mailflowapi.common.exception.EntityNotFoundException;
 import de.flowsuite.mailflowapi.common.exception.IdConflictException;
+import de.flowsuite.mailflowapi.common.exception.IdorException;
+import de.flowsuite.mailflowapi.common.util.AesUtil;
+import de.flowsuite.mailflowapi.common.util.AuthorisationUtil;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import static java.time.temporal.TemporalAdjusters.previousOrSame;
+import java.time.ZonedDateTime;
+import java.util.*;
 
 @Service
 class MessageLogService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(MessageLogService.class);
     private final MessageLogRepository messageLogRepository;
 
     MessageLogService(MessageLogRepository messageLogRepository) {
         this.messageLogRepository = messageLogRepository;
     }
 
-    MessageLogEntry createMessageLogEntry(MessageLogEntry messageLogEntry, long customerId) {
-        if (messageLogEntry.getCustomerId() != customerId) {
+    MessageLogEntry createMessageLogEntry(
+            long customerId, long userId, MessageLogEntry messageLogEntry, Jwt jwt) {
+        AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
+        AuthorisationUtil.validateAccessToUser(userId, jwt);
+
+        if (!messageLogEntry.getCustomerId().equals(customerId)
+                || !messageLogEntry.getUserId().equals(userId)) {
             throw new IdConflictException();
         }
+
+        String emailAddress = messageLogEntry.getFromEmailAddress();
+        if (emailAddress != null) {
+            messageLogEntry.setFromEmailAddress(AesUtil.encrypt(emailAddress.toLowerCase()));
+        }
+
         return messageLogRepository.save(messageLogEntry);
     }
 
-    MessageLogEntry getMessageLogEntryByMessageId(long customerId, long messageId) {
-        MessageLogEntry messageLogEntry = messageLogRepository
-                .findById(messageId)
-                .orElseThrow(
-                        () -> new EntityNotFoundException(MessageLogEntry.class.getSimpleName()));
-        if (messageLogEntry.getCustomerId() != customerId) {
-            throw new IdConflictException();
-        }
-        return messageLogEntry;
-    }
-
-    Iterable<MessageLogEntry> getMessageLogEntriesByCustomerId(long customerId) {
+    List<MessageLogEntry> listMessageLogEntriesByCustomer(long customerId, Jwt jwt) {
+        AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
         return messageLogRepository.findByCustomerId(customerId);
     }
 
-    Iterable<MessageLogEntry> getMessageLogEntries() {
-        return messageLogRepository.findAll();
+    List<MessageLogEntry> listMessageLogEntriesByUser(long customerId, long userId, Jwt jwt) {
+        AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
+        AuthorisationUtil.validateAccessToUser(userId, jwt);
+        return messageLogRepository.findByCustomerIdAndUserId(customerId, userId);
     }
 
-    MessageLogEntry updateMessageLogEntry(long customerId, long messageId, MessageLogEntry messageLogEntry) {
-        MessageLogEntry existingMessageLogEntry = getMessageLogEntryByMessageId(customerId, messageId);
-        if (messageLogEntry.getCustomerId() != customerId) {
-            throw new IdConflictException();
+    MessageLogEntry getMessageLogEntry(long customerId, long userId, long id, Jwt jwt) {
+        AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
+        AuthorisationUtil.validateAccessToUser(userId, jwt);
+
+        MessageLogEntry messageLogEntry =
+                messageLogRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                MessageLogEntry.class.getSimpleName()));
+
+        if (messageLogEntry.getCustomerId() != customerId
+                || messageLogEntry.getUserId() != userId) {
+            throw new IdorException();
         }
-        messageLogEntry.setId(messageId);
-        return messageLogRepository.save(messageLogEntry);
+
+        return messageLogEntry;
     }
 
-    void deleteMessageLogEntry(MessageLogEntry messageLogEntry) {
-        messageLogRepository.delete(messageLogEntry);
+    MessageLogResource.MessageLogAnalyticsResponse getMessageLogAnalyticsForCustomer(
+            long customerId, Date from, Date to, MessageLogResource.Timeframe timeframe, Jwt jwt) {
+        AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
+        ZonedDateTime startDate = null;
+        ZonedDateTime endDate;
+
+        if (from != null) {
+            startDate = ZonedDateTime.ofInstant(from.toInstant(), BERLIN_ZONE);
+        }
+
+        if (to != null) {
+            endDate = ZonedDateTime.ofInstant(to.toInstant(), BERLIN_ZONE);
+        } else {
+            endDate = ZonedDateTime.now(BERLIN_ZONE);
+        }
+
+        if (from != null && to != null && to.before(from)) {
+            throw new IllegalArgumentException("End date must be after start date.");
+        }
+
+        if (timeframe == null) {
+            timeframe = MessageLogResource.Timeframe.DAILY;
+        }
+
+        List<Object[]> queryResult = new ArrayList<>();
+
+        switch (timeframe) {
+            case DAILY -> {
+                if (startDate == null) {
+                    startDate =
+                            ZonedDateTime.now(BERLIN_ZONE)
+                                    .minusDays(7)
+                                    .withHour(0)
+                                    .withMinute(0)
+                                    .withSecond(0)
+                                    .withNano(0);
+                }
+
+                queryResult =
+                        messageLogRepository.findCategoryCountsGroupedByDayAndCustomerId(
+                                customerId, startDate, endDate);
+            }
+            case WEEKLY -> {
+                if (startDate == null) {
+                    startDate =
+                            ZonedDateTime.now(BERLIN_ZONE)
+                                    .minusWeeks(4)
+                                    .withHour(0)
+                                    .withMinute(0)
+                                    .withSecond(0)
+                                    .withNano(0);
+                }
+
+                queryResult =
+                        messageLogRepository.findCategoryCountsGroupedByWeekAndCustomerId(
+                                customerId, startDate, endDate);
+            }
+
+            case MONTHLY -> {
+                if (startDate == null) {
+                    startDate =
+                            ZonedDateTime.now(BERLIN_ZONE)
+                                    .minusMonths(3)
+                                    .withHour(0)
+                                    .withMinute(0)
+                                    .withSecond(0)
+                                    .withNano(0);
+                }
+
+                queryResult =
+                        messageLogRepository.findCategoryCountsGroupedByMonthAndCustomerId(
+                                customerId, startDate, endDate);
+            }
+
+            case YEARLY -> {
+                if (from == null) {
+                    startDate =
+                            ZonedDateTime.now(BERLIN_ZONE)
+                                    .minusYears(1)
+                                    .withHour(0)
+                                    .withMinute(0)
+                                    .withSecond(0)
+                                    .withNano(0);
+                }
+
+                queryResult =
+                        messageLogRepository.findCategoryCountsGroupedByYearAndCustomerId(
+                                customerId, startDate, endDate);
+            }
+        }
+
+        LOG.debug("Query result size: {}", queryResult.size());
+
+        Map<String, Map<String, Long>> grouped = new LinkedHashMap<>();
+
+        for (Object[] row : queryResult) {
+            String period = row[0].toString();
+            String extractedCategory = row[1].toString();
+            Long count = (Long) row[2];
+            LOG.debug("Period: {}, category: {}, count: {}", period, extractedCategory, count);
+            grouped.computeIfAbsent(period, k -> new HashMap<>()).put(extractedCategory, count);
+        }
+
+        double avgProcessingTimeInSeconds =
+                Math.round(
+                        messageLogRepository.findAverageProcessingTimeByCustomerId(
+                                customerId, startDate, endDate));
+        double responseRate =
+                messageLogRepository.getResponseRateBetween(customerId, startDate, endDate);
+
+        return new MessageLogResource.MessageLogAnalyticsResponse(
+                avgProcessingTimeInSeconds, responseRate, grouped);
     }
 
-    public Map<String, Object> getMessageLogAnalytics(
-            long customerId, String startDate, String endDate, String category, String timeframe) {
-        List<MessageLogEntry> entries = (List<MessageLogEntry>) messageLogRepository.findByCustomerId(customerId);
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        if (startDate != null) {
-            LocalDate start = LocalDate.parse(startDate, formatter);
-            entries = entries.stream()
-                    .filter(entry -> !entry.getReceivedAt().toLocalDate().isBefore(start))
-                    .collect(Collectors.toList());
-        }
-
-        if (endDate != null) {
-            LocalDate end = LocalDate.parse(endDate, formatter);
-            entries = entries.stream()
-                    .filter(entry -> !entry.getReceivedAt().toLocalDate().isAfter(end))
-                    .collect(Collectors.toList());
-        }
-
-        if (category != null) {
-            entries = entries.stream()
-                    .filter(entry -> entry.getCategory().equalsIgnoreCase(category))
-                    .collect(Collectors.toList());
-        }
-
-        int totalMessages = entries.size();
-        int totalInputTokens = entries.stream().mapToInt(MessageLogEntry::getInputTokens).sum();
-        int totalOutputTokens = entries.stream().mapToInt(MessageLogEntry::getOutputTokens).sum();
-        double averageProcessingTimeSeconds = entries.stream().mapToInt(MessageLogEntry::getProcessingTimeInSeconds).average().orElse(0);
-
-        Map<String, Long> messagesPerCategory = entries.stream()
-                .collect(Collectors.groupingBy(MessageLogEntry::getCategory, Collectors.counting()));
-
-        Map<LocalDate, Long> messagesPerDay = entries.stream()
-                .collect(Collectors.groupingBy(entry -> entry.getReceivedAt().toLocalDate(), Collectors.counting()));
-
-        Map<LocalDate, Long> messagesPerWeek = entries.stream()
-                .collect(Collectors.groupingBy(entry -> entry.getReceivedAt().toLocalDate().with(previousOrSame(java.time.DayOfWeek.MONDAY)), Collectors.counting()));
-
-        Map<LocalDate, Long> messagesPerMonth = entries.stream()
-                .collect(Collectors.groupingBy(entry -> entry.getReceivedAt().toLocalDate().withDayOfMonth(1), Collectors.counting()));
-
-        List<Map<String, Object>> messagesPerDayList = messagesPerDay.entrySet().stream()
-                .map(entry -> {
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("date", entry.getKey().toString());
-                    map.put("count", entry.getValue());
-                    return map;
-                })
-                .collect(Collectors.toList());
-
-        List<Map<String, Object>> messagesPerWeekList = messagesPerWeek.entrySet().stream()
-                .map(entry -> {
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("week_start_date", entry.getKey().toString());
-                    map.put("count", entry.getValue());
-                    return map;
-                })
-                .collect(Collectors.toList());
-
-        List<Map<String, Object>> messagesPerMonthList = messagesPerMonth.entrySet().stream()
-                .map(entry -> {
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("month", entry.getKey().toString());
-                    map.put("count", entry.getValue());
-                    return map;
-                })
-                .collect(Collectors.toList());
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("total_messages", totalMessages);
-        response.put("total_input_tokens", totalInputTokens);
-        response.put("total_output_tokens", totalOutputTokens);
-        response.put("average_processing_time_seconds", averageProcessingTimeSeconds);
-        response.put("messages_per_category", messagesPerCategory);
-        response.put("messages_per_day", messagesPerDayList);
-        response.put("messages_per_week", messagesPerWeekList);
-        response.put("messages_per_month", messagesPerMonthList);
-
-        return response;
+    MessageLogResource.MessageLogAnalyticsResponse getMessageLogAnalyticsForUser(
+            long customerId,
+            long userId,
+            Date from,
+            Date to,
+            MessageLogResource.Timeframe timeframe,
+            Jwt jwt) {
+        return null;
     }
 }

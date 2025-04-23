@@ -31,11 +31,12 @@ public class MessageLogEntry {
     @Column(updatable = false)
     @NotNull private Long customerId;
 
+    private boolean isReplied;
     @NotBlank private String category;
     @NotBlank private String language;
 
     @Column(name = "from_email_address_encrypted")
-    private String fromEmailAddress; // TODO check if email.toLowerCase is valid & encrypt
+    private String fromEmailAddress;
 
     private String subject;
     @NotNull private ZonedDateTime receivedAt;

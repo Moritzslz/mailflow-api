@@ -105,10 +105,16 @@ class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/customers/*/message-categories").access(hasScope(Authorities.MESSAGE_CATEGORIES_WRITE.getAuthority()))
                         // MessageLog Resource
                         .requestMatchers(HttpMethod.POST, "/customers/*/users/*/message-log").access(hasScope(Authorities.MESSAGE_LOG_WRITE.getAuthority()))
-                        .requestMatchers(HttpMethod.GET, "/customers/*/users/*/message-log").access(hasScope(Authorities.MESSAGE_LOG_LIST.getAuthority()))
+                        .requestMatchers(HttpMethod.GET, "/customers/*/message-log").access(hasScope(Authorities.ADMIN.getAuthority()))
+                        .requestMatchers(HttpMethod.GET, "/customers/*/users/*/message-log").access(hasScope(Authorities.ADMIN.getAuthority()))
+                        .requestMatchers(HttpMethod.GET, "/customers/*/users/*/message-log/*").access(hasScope(Authorities.MESSAGE_LOG_READ.getAuthority()))
+                        .requestMatchers(HttpMethod.GET, "/customers/*/message-log/analytics").access(hasScope(Authorities.MESSAGE_LOG_LIST.getAuthority()))
+                        .requestMatchers(HttpMethod.GET, "/customers/*/users/*/message-log/analytics").access(hasScope(Authorities.MESSAGE_LOG_LIST.getAuthority()))
                         // ResponseRatings Resource
                         .requestMatchers(HttpMethod.POST, "/customers/users/response-ratings").permitAll()
                         .requestMatchers(HttpMethod.GET, "/customers/*/users/*/response-ratings").access(hasScope(Authorities.RESPONSE_RATINGS_LIST.getAuthority()))
+                        .requestMatchers(HttpMethod.GET, "/customers/*/response-ratings/analytics").access(hasScope(Authorities.RESPONSE_RATINGS_LIST.getAuthority()))
+                        .requestMatchers(HttpMethod.GET, "/customers/*/users/*/response-ratings/analytics").access(hasScope(Authorities.RESPONSE_RATINGS_LIST.getAuthority()))
                         // Authenticate any request
                         .anyRequest()
                         .authenticated())
