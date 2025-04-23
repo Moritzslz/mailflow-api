@@ -62,7 +62,7 @@ class MessageCategoryServiceTest {
         long userId = 100L;
         MessageCategory category =
                 MessageCategory.builder()
-                        .userId(userId)
+                        .customerId(customerId)
                         .category("Category A")
                         .isReply(true)
                         .isFunctionCall(false)
@@ -74,7 +74,7 @@ class MessageCategoryServiceTest {
         MessageCategory savedCategory =
                 MessageCategory.builder()
                         .id(10L)
-                        .userId(userId)
+                        .customerId(customerId)
                         .category("Category A")
                         .isReply(true)
                         .isFunctionCall(false)
@@ -83,7 +83,7 @@ class MessageCategoryServiceTest {
         when(messageCategoryRepository.save(any(MessageCategory.class))).thenReturn(savedCategory);
 
         MessageCategory result =
-                messageCategoryService.createMessageCategory(customerId, userId, category, jwt);
+                messageCategoryService.createMessageCategory(customerId, category, jwt);
 
         assertNotNull(result);
         assertEquals(10L, result.getId());
@@ -97,7 +97,7 @@ class MessageCategoryServiceTest {
         // Mismatched userId.
         MessageCategory category =
                 MessageCategory.builder()
-                        .userId(200L)
+                        .customerId(200L)
                         .category("Category A")
                         .isReply(true)
                         .isFunctionCall(false)
@@ -108,9 +108,7 @@ class MessageCategoryServiceTest {
 
         assertThrows(
                 IdConflictException.class,
-                () ->
-                        messageCategoryService.createMessageCategory(
-                                customerId, userId, category, jwt));
+                () -> messageCategoryService.createMessageCategory(customerId, category, jwt));
     }
 
     @Test
@@ -120,19 +118,19 @@ class MessageCategoryServiceTest {
         MessageCategory category =
                 MessageCategory.builder()
                         .id(1L)
-                        .userId(userId)
+                        .customerId(customerId)
                         .category("Category A")
                         .isReply(true)
                         .isFunctionCall(false)
                         .description("Description A")
                         .build();
 
-        when(messageCategoryRepository.findByUserId(userId)).thenReturn(List.of(category));
+        when(messageCategoryRepository.findByCustomerId(customerId)).thenReturn(List.of(category));
 
         setupDefaultAuthUtil();
 
         List<MessageCategory> result =
-                messageCategoryService.listMessageCategories(customerId, userId, jwt);
+                messageCategoryService.listMessageCategories(customerId, jwt);
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals("Category A", result.get(0).getCategory());
@@ -145,7 +143,7 @@ class MessageCategoryServiceTest {
         long categoryId = 10L;
         MessageCategory categoryToUpdate =
                 MessageCategory.builder()
-                        .userId(userId)
+                        .customerId(customerId)
                         .category("Updated Category")
                         .isReply(false)
                         .isFunctionCall(true)
@@ -155,7 +153,7 @@ class MessageCategoryServiceTest {
         MessageCategory existingCategory =
                 MessageCategory.builder()
                         .id(categoryId)
-                        .userId(userId)
+                        .customerId(customerId)
                         .category("Category A")
                         .isReply(true)
                         .isFunctionCall(false)
@@ -169,7 +167,7 @@ class MessageCategoryServiceTest {
         MessageCategory updatedCategory =
                 MessageCategory.builder()
                         .id(categoryId)
-                        .userId(userId)
+                        .customerId(customerId)
                         .category("Updated Category")
                         .isReply(false)
                         .isFunctionCall(true)
@@ -180,7 +178,7 @@ class MessageCategoryServiceTest {
 
         MessageCategory result =
                 messageCategoryService.updateMessageCategory(
-                        customerId, userId, categoryId, categoryToUpdate, jwt);
+                        customerId, categoryId, categoryToUpdate, jwt);
         assertNotNull(result);
         assertEquals("Updated Category", result.getCategory());
     }
@@ -192,7 +190,7 @@ class MessageCategoryServiceTest {
         long categoryId = 10L;
         MessageCategory categoryToUpdate =
                 MessageCategory.builder()
-                        .userId(userId)
+                        .customerId(customerId)
                         .category("Updated Category")
                         .isReply(false)
                         .isFunctionCall(true)
@@ -206,7 +204,7 @@ class MessageCategoryServiceTest {
                 EntityNotFoundException.class,
                 () ->
                         messageCategoryService.updateMessageCategory(
-                                customerId, userId, categoryId, categoryToUpdate, jwt));
+                                customerId, categoryId, categoryToUpdate, jwt));
     }
 
     @Test
@@ -216,18 +214,18 @@ class MessageCategoryServiceTest {
         long categoryId = 10L;
         MessageCategory categoryToUpdate =
                 MessageCategory.builder()
-                        .userId(userId)
+                        .customerId(customerId)
                         .category("Updated Category")
                         .isReply(false)
                         .isFunctionCall(true)
                         .description("Updated description")
                         .build();
 
-        // Existing category belongs to a different user.
+        // Existing category belongs to a different customer.
         MessageCategory existingCategory =
                 MessageCategory.builder()
                         .id(categoryId)
-                        .userId(200L)
+                        .customerId(200L)
                         .category("Category A")
                         .isReply(true)
                         .isFunctionCall(false)
@@ -242,7 +240,7 @@ class MessageCategoryServiceTest {
                 UpdateConflictException.class,
                 () ->
                         messageCategoryService.updateMessageCategory(
-                                customerId, userId, categoryId, categoryToUpdate, jwt));
+                                customerId, categoryId, categoryToUpdate, jwt));
     }
 
     @Test
@@ -253,7 +251,7 @@ class MessageCategoryServiceTest {
         MessageCategory existingCategory =
                 MessageCategory.builder()
                         .id(categoryId)
-                        .userId(userId)
+                        .customerId(userId)
                         .category("Category A")
                         .isReply(true)
                         .isFunctionCall(false)
@@ -266,9 +264,7 @@ class MessageCategoryServiceTest {
         setupDefaultAuthUtil();
 
         assertDoesNotThrow(
-                () ->
-                        messageCategoryService.deleteMessageCategory(
-                                customerId, userId, categoryId, jwt));
+                () -> messageCategoryService.deleteMessageCategory(customerId, categoryId, jwt));
         verify(messageCategoryRepository).delete(existingCategory);
     }
 
@@ -283,9 +279,7 @@ class MessageCategoryServiceTest {
 
         assertThrows(
                 EntityNotFoundException.class,
-                () ->
-                        messageCategoryService.deleteMessageCategory(
-                                customerId, userId, categoryId, jwt));
+                () -> messageCategoryService.deleteMessageCategory(customerId, categoryId, jwt));
     }
 
     @Test
@@ -297,7 +291,7 @@ class MessageCategoryServiceTest {
         MessageCategory existingCategory =
                 MessageCategory.builder()
                         .id(categoryId)
-                        .userId(200L)
+                        .customerId(200L)
                         .category("Category A")
                         .isReply(true)
                         .isFunctionCall(false)
@@ -310,8 +304,6 @@ class MessageCategoryServiceTest {
 
         assertThrows(
                 IdorException.class,
-                () ->
-                        messageCategoryService.deleteMessageCategory(
-                                customerId, userId, categoryId, jwt));
+                () -> messageCategoryService.deleteMessageCategory(customerId, categoryId, jwt));
     }
 }

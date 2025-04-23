@@ -21,45 +21,37 @@ class MessageCategoryResource {
         this.messageCategoryService = messageCategoryService;
     }
 
-    @PostMapping("/{customerId}/users/{userId}/message-categories")
+    @PostMapping("/{customerId}/message-categories")
     ResponseEntity<MessageCategory> createMessageCategory(
             @PathVariable long customerId,
-            @PathVariable long userId,
             @RequestBody @Valid MessageCategory messageCategory,
             @AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity.ok(
-                messageCategoryService.createMessageCategory(
-                        customerId, userId, messageCategory, jwt));
+                messageCategoryService.createMessageCategory(customerId, messageCategory, jwt));
     }
 
-    @GetMapping("/{customerId}/users/{userId}/message-categories")
+    @GetMapping("/{customerId}/message-categories")
     ResponseEntity<List<MessageCategory>> listMessageCategories(
-            @PathVariable long customerId,
-            @PathVariable long userId,
-            @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(
-                messageCategoryService.listMessageCategories(customerId, userId, jwt));
+            @PathVariable long customerId, @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(messageCategoryService.listMessageCategories(customerId, jwt));
     }
 
-    @PutMapping("/{customerId}/users/{userId}/message-categories/{categoryId}")
+    @PutMapping("/{customerId}/message-categories/{id}")
     ResponseEntity<MessageCategory> updateMessageCategory(
             @PathVariable long customerId,
-            @PathVariable long userId,
-            @PathVariable long categoryId,
+            @PathVariable long id,
             @RequestBody @Valid MessageCategory messageCategory,
             @AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity.ok(
-                messageCategoryService.updateMessageCategory(
-                        customerId, userId, categoryId, messageCategory, jwt));
+                messageCategoryService.updateMessageCategory(customerId, id, messageCategory, jwt));
     }
 
-    @DeleteMapping("/{customerId}/users/{userId}/message-categories/{categoryId}")
+    @DeleteMapping("/{customerId}/message-categories/{id}")
     ResponseEntity<Void> deleteMessageCategory(
             @PathVariable long customerId,
-            @PathVariable long userId,
-            @PathVariable long categoryId,
+            @PathVariable long id,
             @AuthenticationPrincipal Jwt jwt) {
-        messageCategoryService.deleteMessageCategory(customerId, userId, categoryId, jwt);
+        messageCategoryService.deleteMessageCategory(customerId, id, jwt);
         return ResponseEntity.noContent().build();
     }
 }
