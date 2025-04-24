@@ -1,8 +1,11 @@
 package de.flowsuite.mailflowapi.messagelog;
 
+import de.flowsuite.mailflowapi.common.constant.Timeframe;
 import de.flowsuite.mailflowapi.common.entity.MessageLogEntry;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +21,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/customers")
 class MessageLogResource {
+
     private final MessageLogService messageLogService;
 
     MessageLogResource(MessageLogService messageLogService) {
@@ -27,10 +32,10 @@ class MessageLogResource {
     ResponseEntity<MessageLogEntry> createMessageLogEntry(
             @PathVariable long customerId,
             @PathVariable long userId,
-            @RequestBody @Valid MessageLogEntry messageLogEntry,
+            @RequestBody @Valid CreateMessageLogEntryRequest request,
             @AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity.ok(
-                messageLogService.createMessageLogEntry(customerId, userId, messageLogEntry, jwt));
+                messageLogService.createMessageLogEntry(customerId, userId, request, jwt));
     }
 
     @GetMapping("/{customerId}/message-log")
@@ -61,7 +66,8 @@ class MessageLogResource {
     @GetMapping("/{customerId}/message-log/analytics")
     ResponseEntity<MessageLogAnalyticsResponse> getMessageLogAnalyticsForCustomer(
             @PathVariable long customerId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+                    Date from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date to,
             @RequestParam(required = false) Timeframe timeframe,
             @AuthenticationPrincipal Jwt jwt) {
@@ -74,7 +80,8 @@ class MessageLogResource {
     ResponseEntity<MessageLogAnalyticsResponse> getMessageLogAnalyticsForUser(
             @PathVariable long customerId,
             @PathVariable long userId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+                    Date from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date to,
             @RequestParam(required = false) Timeframe timeframe,
             @AuthenticationPrincipal Jwt jwt) {
@@ -83,15 +90,24 @@ class MessageLogResource {
                         customerId, userId, from, to, timeframe, jwt));
     }
 
+    record CreateMessageLogEntryRequest(
+            @NotNull Long userId,
+            @NotNull Long customerId,
+            boolean isReplied,
+            @NotBlank String category,
+            @NotBlank String language,
+            String fromEmailAddress,
+            String subject,
+            @NotNull ZonedDateTime receivedAt,
+            @NotNull ZonedDateTime processedAt,
+            @NotNull Integer processingTimeInSeconds,
+            @NotBlank String llmUsed,
+            @NotNull Integer inputTokens,
+            @NotNull Integer outputTokens,
+            @NotNull Integer totalTokens) {}
+
     record MessageLogAnalyticsResponse(
             double avgProcessingTimeInSeconds,
             double responseRate,
             Map<String, Map<String, Long>> messageLogAnalytics) {}
-
-    public enum Timeframe {
-        DAILY,
-        WEEKLY,
-        MONTHLY,
-        YEARLY
-    }
 }
