@@ -7,6 +7,7 @@ import static de.flowsuite.mailflowapi.messagelog.MessageLogService.TOKEN_TTL_DA
 import de.flowsuite.mailflowapi.common.constant.Timeframe;
 import de.flowsuite.mailflowapi.common.entity.MessageLogEntry;
 import de.flowsuite.mailflowapi.common.entity.ResponseRating;
+import de.flowsuite.mailflowapi.common.exception.EntityAlreadyExistsException;
 import de.flowsuite.mailflowapi.common.exception.EntityNotFoundException;
 import de.flowsuite.mailflowapi.common.exception.IdorException;
 import de.flowsuite.mailflowapi.common.exception.TokenExpiredException;
@@ -41,6 +42,10 @@ class ResponseRatingService {
         if (messageLogEntry.getTokenExpiresAt().isBefore(ZonedDateTime.now(BERLIN_ZONE))) {
             throw new TokenExpiredException(
                     String.format(RESPONSE_RATING_EXPIRED_MSG, TOKEN_TTL_DAYS));
+        }
+
+        if (responseRatingRepository.existsByMessageLogId(messageLogEntry.getId())) {
+            throw new EntityAlreadyExistsException(ResponseRating.class.getSimpleName());
         }
 
         ResponseRating responseRating =

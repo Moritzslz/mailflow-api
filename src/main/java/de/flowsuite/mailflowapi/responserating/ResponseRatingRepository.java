@@ -17,6 +17,8 @@ interface ResponseRatingRepository extends CrudRepository<ResponseRating, Long> 
 
     List<ResponseRating> findByUserId(long userId);
 
+    boolean existsByMessageLogId(long messageLogId);
+
     @Query(
             """
             SELECT
