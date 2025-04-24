@@ -61,8 +61,7 @@ class MessageLogResource {
     @GetMapping("/{customerId}/message-log/analytics")
     ResponseEntity<MessageLogAnalyticsResponse> getMessageLogAnalyticsForCustomer(
             @PathVariable long customerId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-                    Date from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date to,
             @RequestParam(required = false) Timeframe timeframe,
             @AuthenticationPrincipal Jwt jwt) {
@@ -75,8 +74,7 @@ class MessageLogResource {
     ResponseEntity<MessageLogAnalyticsResponse> getMessageLogAnalyticsForUser(
             @PathVariable long customerId,
             @PathVariable long userId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-                    Date from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date to,
             @RequestParam(required = false) Timeframe timeframe,
             @AuthenticationPrincipal Jwt jwt) {

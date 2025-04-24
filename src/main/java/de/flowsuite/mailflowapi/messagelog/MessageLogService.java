@@ -1,7 +1,5 @@
 package de.flowsuite.mailflowapi.messagelog;
 
-import static de.flowsuite.mailflowapi.common.util.Util.BERLIN_ZONE;
-
 import de.flowsuite.mailflowapi.common.entity.MessageLogEntry;
 import de.flowsuite.mailflowapi.common.exception.EntityNotFoundException;
 import de.flowsuite.mailflowapi.common.exception.IdConflictException;
@@ -79,115 +77,36 @@ class MessageLogService {
     MessageLogResource.MessageLogAnalyticsResponse getMessageLogAnalyticsForCustomer(
             long customerId, Date from, Date to, MessageLogResource.Timeframe timeframe, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
-        ZonedDateTime startDate = null;
-        ZonedDateTime endDate;
-
-        if (from != null) {
-            startDate = ZonedDateTime.ofInstant(from.toInstant(), BERLIN_ZONE);
-        }
-
-        if (to != null) {
-            endDate = ZonedDateTime.ofInstant(to.toInstant(), BERLIN_ZONE);
-        } else {
-            endDate = ZonedDateTime.now(BERLIN_ZONE);
-        }
-
-        if (from != null && to != null && to.before(from)) {
-            throw new IllegalArgumentException("End date must be after start date.");
-        }
 
         if (timeframe == null) {
             timeframe = MessageLogResource.Timeframe.DAILY;
         }
 
-        List<Object[]> queryResult = new ArrayList<>();
+        ZonedDateTime startDate = MessageLogUtil.resolveStartDate(from, timeframe);
+        ZonedDateTime endDate = MessageLogUtil.resolveEndDate(to);
 
-        switch (timeframe) {
-            case DAILY -> {
-                if (startDate == null) {
-                    startDate =
-                            ZonedDateTime.now(BERLIN_ZONE)
-                                    .minusDays(7)
-                                    .withHour(0)
-                                    .withMinute(0)
-                                    .withSecond(0)
-                                    .withNano(0);
-                }
+        MessageLogUtil.validateDateRange(startDate, endDate);
 
-                queryResult =
-                        messageLogRepository.findCategoryCountsGroupedByDayAndCustomerId(
-                                customerId, startDate, endDate);
-            }
-            case WEEKLY -> {
-                if (startDate == null) {
-                    startDate =
-                            ZonedDateTime.now(BERLIN_ZONE)
-                                    .minusWeeks(4)
-                                    .withHour(0)
-                                    .withMinute(0)
-                                    .withSecond(0)
-                                    .withNano(0);
-                }
+        String truncUnit = MessageLogUtil.getTruncUnitForTimeframe(timeframe);
 
-                queryResult =
-                        messageLogRepository.findCategoryCountsGroupedByWeekAndCustomerId(
-                                customerId, startDate, endDate);
-            }
+        List<Object[]> categoryCountRows =
+                messageLogRepository.aggregateCategoryCountsByCustomer(
+                        truncUnit, customerId, startDate, endDate);
 
-            case MONTHLY -> {
-                if (startDate == null) {
-                    startDate =
-                            ZonedDateTime.now(BERLIN_ZONE)
-                                    .minusMonths(3)
-                                    .withHour(0)
-                                    .withMinute(0)
-                                    .withSecond(0)
-                                    .withNano(0);
-                }
+        Map<String, Map<String, Long>> categoryCountsByPeriod =
+                MessageLogUtil.groupCategoryCountsByPeriod(categoryCountRows);
 
-                queryResult =
-                        messageLogRepository.findCategoryCountsGroupedByMonthAndCustomerId(
-                                customerId, startDate, endDate);
-            }
+        Object[] analyticsRow =
+                messageLogRepository
+                        .aggregateAvgProcessingTimeAndResponseRateByCustomer(
+                                customerId, startDate, endDate)
+                        .get(0);
 
-            case YEARLY -> {
-                if (from == null) {
-                    startDate =
-                            ZonedDateTime.now(BERLIN_ZONE)
-                                    .minusYears(1)
-                                    .withHour(0)
-                                    .withMinute(0)
-                                    .withSecond(0)
-                                    .withNano(0);
-                }
-
-                queryResult =
-                        messageLogRepository.findCategoryCountsGroupedByYearAndCustomerId(
-                                customerId, startDate, endDate);
-            }
-        }
-
-        LOG.debug("Query result size: {}", queryResult.size());
-
-        Map<String, Map<String, Long>> grouped = new LinkedHashMap<>();
-
-        for (Object[] row : queryResult) {
-            String period = row[0].toString();
-            String extractedCategory = row[1].toString();
-            Long count = (Long) row[2];
-            LOG.debug("Period: {}, category: {}, count: {}", period, extractedCategory, count);
-            grouped.computeIfAbsent(period, k -> new HashMap<>()).put(extractedCategory, count);
-        }
-
-        double avgProcessingTimeInSeconds =
-                Math.round(
-                        messageLogRepository.findAverageProcessingTimeByCustomerId(
-                                customerId, startDate, endDate));
-        double responseRate =
-                messageLogRepository.getResponseRateBetween(customerId, startDate, endDate);
+        double averageProcessingTimeInSeconds = (Double) analyticsRow[0];
+        double responseRate = (Double) analyticsRow[1];
 
         return new MessageLogResource.MessageLogAnalyticsResponse(
-                avgProcessingTimeInSeconds, responseRate, grouped);
+                averageProcessingTimeInSeconds, responseRate, categoryCountsByPeriod);
     }
 
     MessageLogResource.MessageLogAnalyticsResponse getMessageLogAnalyticsForUser(
@@ -197,6 +116,37 @@ class MessageLogService {
             Date to,
             MessageLogResource.Timeframe timeframe,
             Jwt jwt) {
-        return null;
+        AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
+        AuthorisationUtil.validateAccessToUser(userId, jwt);
+
+        if (timeframe == null) {
+            timeframe = MessageLogResource.Timeframe.DAILY;
+        }
+
+        ZonedDateTime startDate = MessageLogUtil.resolveStartDate(from, timeframe);
+        ZonedDateTime endDate = MessageLogUtil.resolveEndDate(to);
+
+        MessageLogUtil.validateDateRange(startDate, endDate);
+
+        String truncUnit = MessageLogUtil.getTruncUnitForTimeframe(timeframe);
+
+        List<Object[]> categoryCountRows =
+                messageLogRepository.aggregateCategoryCountsByUser(
+                        truncUnit, userId, startDate, endDate);
+
+        Map<String, Map<String, Long>> categoryCountsByPeriod =
+                MessageLogUtil.groupCategoryCountsByPeriod(categoryCountRows);
+
+        Object[] analyticsRow =
+                messageLogRepository
+                        .aggregateAvgProcessingTimeAndResponseRateByUser(
+                                userId, startDate, endDate)
+                        .get(0);
+
+        double averageProcessingTimeInSeconds = (Double) analyticsRow[0];
+        double responseRate = (Double) analyticsRow[1];
+
+        return new MessageLogResource.MessageLogAnalyticsResponse(
+                averageProcessingTimeInSeconds, responseRate, categoryCountsByPeriod);
     }
 }

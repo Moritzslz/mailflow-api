@@ -17,99 +17,64 @@ interface MessageLogRepository extends CrudRepository<MessageLogEntry, Long> {
     List<MessageLogEntry> findByCustomerIdAndUserId(long customerId, long userId);
 
     @Query(
-            value =
-                    """
-    SELECT
-        DATE(m.receivedAt),
-        m.category AS category,
-        COUNT(m) AS count
-    FROM MessageLogEntry m
-    WHERE m.customerId = :customerId
-        AND m.receivedAt BETWEEN :from AND :to
-    GROUP BY DATE(m.receivedAt), m.category
-    ORDER BY DATE(m.receivedAt) ASC
-""")
-    List<Object[]> findCategoryCountsGroupedByDayAndCustomerId(
-            @Param("customerId") Long customerId,
-            @Param("from") ZonedDateTime from,
-            @Param("to") ZonedDateTime to);
-
-    @Query(
-            value =
-                    """
-    SELECT
-        WEEK(m.receivedAt),
-        m.category AS category,
-        COUNT(m) AS count
-    FROM MessageLogEntry m
-    WHERE m.customerId = :customerId
-        AND m.receivedAt BETWEEN :from AND :to
-    GROUP BY WEEK(m.receivedAt), m.category
-    ORDER BY WEEK(m.receivedAt) ASC
-""")
-    List<Object[]> findCategoryCountsGroupedByWeekAndCustomerId(
-            @Param("customerId") Long customerId,
-            @Param("from") ZonedDateTime from,
-            @Param("to") ZonedDateTime to);
-
-    @Query(
-            value =
-                    """
-    SELECT
-        MONTH(m.receivedAt),
-        m.category AS category,
-        COUNT(m) AS count
-    FROM MessageLogEntry m
-    WHERE m.customerId = :customerId
-        AND m.receivedAt BETWEEN :from AND :to
-    GROUP BY MONTH(m.receivedAt), m.category
-    ORDER BY MONTH(m.receivedAt) ASC
-""")
-    List<Object[]> findCategoryCountsGroupedByMonthAndCustomerId(
-            @Param("customerId") Long customerId,
-            @Param("from") ZonedDateTime from,
-            @Param("to") ZonedDateTime to);
-
-    @Query(
-            value =
-                    """
-    SELECT
-        YEAR(m.receivedAt),
-        m.category AS category,
-        COUNT(m) AS count
-    FROM MessageLogEntry m
-    WHERE m.customerId = :customerId
-        AND m.receivedAt BETWEEN :from AND :to
-    GROUP BY YEAR(m.receivedAt), m.category
-    ORDER BY YEAR(m.receivedAt) ASC
-""")
-    List<Object[]> findCategoryCountsGroupedByYearAndCustomerId(
-            @Param("customerId") Long customerId,
+            """
+            SELECT
+                DATE_TRUNC(:truncUnit, m.receivedAt) AS period,
+                m.category AS category,
+                COUNT(m) AS count
+            FROM MessageLogEntry m
+            WHERE m.customerId = :customerId
+                AND m.receivedAt BETWEEN :from AND :to
+            GROUP BY period, m.category
+            """)
+    List<Object[]> aggregateCategoryCountsByCustomer(
+            @Param("truncUnit") String truncUnit,
+            @Param("customerId") long customerId,
             @Param("from") ZonedDateTime from,
             @Param("to") ZonedDateTime to);
 
     @Query(
             """
-    SELECT AVG(m.processingTimeInSeconds)
-    FROM MessageLogEntry m
-    WHERE m.customerId = :customerId
-      AND m.receivedAt BETWEEN :from AND :to
-""")
-    double findAverageProcessingTimeByCustomerId(
-            @Param("customerId") Long customerId,
+            SELECT
+                AVG(m.processingTimeInSeconds) AS avgProcessingTime,
+                COUNT(CASE WHEN m.isReplied THEN 1 END) * 1.0 / COUNT(m) AS responseRate
+            FROM MessageLogEntry m
+            WHERE m.customerId = :customerId
+              AND m.receivedAt BETWEEN :from AND :to
+            """)
+    List<Object[]> aggregateAvgProcessingTimeAndResponseRateByCustomer(
+            @Param("customerId") long customerId,
             @Param("from") ZonedDateTime from,
             @Param("to") ZonedDateTime to);
 
     @Query(
             """
-    SELECT
-        COUNT(CASE WHEN m.isReplied THEN 1 END) * 1.0 / COUNT(*) AS responseRate
-    FROM MessageLogEntry m
-    WHERE m.customerId = :customerId
-      AND m.receivedAt BETWEEN :from AND :to
-""")
-    double getResponseRateBetween(
-            @Param("customerId") Long customerId,
+            SELECT
+                DATE_TRUNC(:truncUnit, m.receivedAt) AS period,
+                m.category AS category,
+                COUNT(m) AS count
+            FROM MessageLogEntry m
+            WHERE m.userId = :userId
+                AND m.receivedAt BETWEEN :from AND :to
+            GROUP BY period, m.category
+            """)
+    List<Object[]> aggregateCategoryCountsByUser(
+            @Param("truncUnit") String truncUnit,
+            @Param("customerId") long userId,
+            @Param("from") ZonedDateTime from,
+            @Param("to") ZonedDateTime to);
+
+    @Query(
+            """
+            SELECT
+                AVG(m.processingTimeInSeconds) AS avgProcessingTime,
+                COUNT(CASE WHEN m.isReplied THEN 1 END) * 1.0 / COUNT(m) AS responseRate
+            FROM MessageLogEntry m
+            WHERE m.customerId = :userId
+              AND m.receivedAt BETWEEN :from AND :to
+            """)
+    List<Object[]> aggregateAvgProcessingTimeAndResponseRateByUser(
+            @Param("customerId") long userId,
             @Param("from") ZonedDateTime from,
             @Param("to") ZonedDateTime to);
 }
