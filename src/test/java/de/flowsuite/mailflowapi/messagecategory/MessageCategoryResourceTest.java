@@ -40,10 +40,9 @@ class MessageCategoryResourceTest {
     @Test
     void testCreateMessageCategory() throws Exception {
         long customerId = 1L;
-        long userId = 100L;
         MessageCategory category =
                 MessageCategory.builder()
-                        .userId(userId)
+                        .customerId(customerId)
                         .category("Category A")
                         .isReply(true)
                         .isFunctionCall(false)
@@ -53,7 +52,7 @@ class MessageCategoryResourceTest {
         MessageCategory savedCategory =
                 MessageCategory.builder()
                         .id(10L)
-                        .userId(userId)
+                        .customerId(customerId)
                         .category("Category A")
                         .isReply(true)
                         .isFunctionCall(false)
@@ -61,17 +60,11 @@ class MessageCategoryResourceTest {
                         .build();
 
         when(messageCategoryService.createMessageCategory(
-                        eq(customerId),
-                        eq(userId),
-                        any(MessageCategory.class),
-                        nullable(Jwt.class)))
+                        eq(customerId), any(MessageCategory.class), nullable(Jwt.class)))
                 .thenReturn(savedCategory);
 
         mockMvc.perform(
-                        post(
-                                        "/customers/{customerId}/users/{userId}/message-categories",
-                                        customerId,
-                                        userId)
+                        post("/customers/{customerId}/message-categories", customerId)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(category)))
                 .andExpect(status().isOk())
@@ -85,26 +78,20 @@ class MessageCategoryResourceTest {
     @Test
     void testListMessageCategories() throws Exception {
         long customerId = 1L;
-        long userId = 100L;
         MessageCategory category =
                 MessageCategory.builder()
                         .id(1L)
-                        .userId(userId)
+                        .customerId(customerId)
                         .category("Category A")
                         .isReply(true)
                         .isFunctionCall(false)
                         .description("Description A")
                         .build();
 
-        when(messageCategoryService.listMessageCategories(
-                        eq(customerId), eq(userId), nullable(Jwt.class)))
+        when(messageCategoryService.listMessageCategories(eq(customerId), nullable(Jwt.class)))
                 .thenReturn(List.of(category));
 
-        mockMvc.perform(
-                        get(
-                                "/customers/{customerId}/users/{userId}/message-categories",
-                                customerId,
-                                userId))
+        mockMvc.perform(get("/customers/{customerId}/message-categories", customerId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1L))
                 .andExpect(jsonPath("$[0].category").value("Category A"))
@@ -116,11 +103,10 @@ class MessageCategoryResourceTest {
     @Test
     void testUpdateMessageCategory() throws Exception {
         long customerId = 1L;
-        long userId = 100L;
         long categoryId = 10L;
         MessageCategory category =
                 MessageCategory.builder()
-                        .userId(userId)
+                        .customerId(customerId)
                         .category("Updated Category")
                         .isReply(false)
                         .isFunctionCall(true)
@@ -130,7 +116,7 @@ class MessageCategoryResourceTest {
         MessageCategory updatedCategory =
                 MessageCategory.builder()
                         .id(categoryId)
-                        .userId(userId)
+                        .customerId(customerId)
                         .category("Updated Category")
                         .isReply(false)
                         .isFunctionCall(true)
@@ -139,7 +125,6 @@ class MessageCategoryResourceTest {
 
         when(messageCategoryService.updateMessageCategory(
                         eq(customerId),
-                        eq(userId),
                         eq(categoryId),
                         any(MessageCategory.class),
                         nullable(Jwt.class)))
@@ -147,9 +132,8 @@ class MessageCategoryResourceTest {
 
         mockMvc.perform(
                         put(
-                                        "/customers/{customerId}/users/{userId}/message-categories/{categoryId}",
+                                        "/customers/{customerId}/message-categories/{categoryId}",
                                         customerId,
-                                        userId,
                                         categoryId)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(category)))
@@ -164,14 +148,12 @@ class MessageCategoryResourceTest {
     @Test
     void testDeleteMessageCategory() throws Exception {
         long customerId = 1L;
-        long userId = 100L;
         long categoryId = 10L;
 
         mockMvc.perform(
                         delete(
-                                "/customers/{customerId}/users/{userId}/message-categories/{categoryId}",
+                                "/customers/{customerId}/message-categories/{categoryId}",
                                 customerId,
-                                userId,
                                 categoryId))
                 .andExpect(status().isNoContent());
     }

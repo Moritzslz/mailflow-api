@@ -1,5 +1,7 @@
 package de.flowsuite.mailflowapi.common.entity;
 
+import static de.flowsuite.mailflowapi.common.util.Util.BERLIN_ZONE;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -9,7 +11,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 @Entity
@@ -30,11 +31,12 @@ public class MessageLogEntry {
     @Column(updatable = false)
     @NotNull private Long customerId;
 
+    private boolean isReplied;
     @NotBlank private String category;
     @NotBlank private String language;
 
     @Column(name = "from_email_address_encrypted")
-    private String fromEmailAddress; // TODO check if email.toLowerCase is valid & encrypt
+    private String fromEmailAddress;
 
     private String subject;
     @NotNull private ZonedDateTime receivedAt;
@@ -48,12 +50,11 @@ public class MessageLogEntry {
     @PrePersist
     @PreUpdate
     private void setTimestampsToBerlin() {
-        ZoneId berlinZone = ZoneId.of("Europe/Berlin");
         if (receivedAt != null) {
-            receivedAt = receivedAt.withZoneSameInstant(berlinZone);
+            receivedAt = receivedAt.withZoneSameInstant(BERLIN_ZONE);
         }
         if (processedAt != null) {
-            processedAt = processedAt.withZoneSameInstant(berlinZone);
+            processedAt = processedAt.withZoneSameInstant(BERLIN_ZONE);
         }
     }
 }

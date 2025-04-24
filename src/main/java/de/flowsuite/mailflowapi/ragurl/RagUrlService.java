@@ -36,12 +36,12 @@ class RagUrlService {
         return ragUrlRepository.findByCustomerId(customerId);
     }
 
-    void deleteRagUrl(long customerId, long ragUrlId, Jwt jwt) {
+    void deleteRagUrl(long customerId, long id, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
 
         RagUrl ragUrl =
                 ragUrlRepository
-                        .findById(ragUrlId)
+                        .findById(id)
                         .orElseThrow(
                                 () -> new EntityNotFoundException(RagUrl.class.getSimpleName()));
 

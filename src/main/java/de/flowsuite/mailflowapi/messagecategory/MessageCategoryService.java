@@ -22,65 +22,57 @@ class MessageCategoryService {
     }
 
     MessageCategory createMessageCategory(
-            long customerId, long userId, MessageCategory messageCategory, Jwt jwt) {
+            long customerId, MessageCategory messageCategory, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
-        AuthorisationUtil.validateAccessToUser(userId, jwt);
 
-        if (!messageCategory.getUserId().equals(userId)) {
+        if (!messageCategory.getCustomerId().equals(customerId)) {
             throw new IdConflictException();
         }
 
         return messageCategoryRepository.save(messageCategory);
     }
 
-    List<MessageCategory> listMessageCategories(long customerId, long userId, Jwt jwt) {
+    List<MessageCategory> listMessageCategories(long customerId, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
-        AuthorisationUtil.validateAccessToUser(userId, jwt);
 
-        return messageCategoryRepository.findByUserId(userId);
+        return messageCategoryRepository.findByCustomerId(customerId);
     }
 
     MessageCategory updateMessageCategory(
-            long customerId,
-            long userId,
-            long categoryId,
-            MessageCategory messageCategory,
-            Jwt jwt) {
+            long customerId, long id, MessageCategory messageCategory, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
-        AuthorisationUtil.validateAccessToUser(userId, jwt);
 
-        if (!messageCategory.getUserId().equals(userId)) {
+        if (!messageCategory.getCustomerId().equals(customerId)) {
             throw new IdConflictException();
         }
 
         MessageCategory existingCategory =
                 messageCategoryRepository
-                        .findById(categoryId)
+                        .findById(id)
                         .orElseThrow(
                                 () ->
                                         new EntityNotFoundException(
                                                 MessageCategory.class.getSimpleName()));
 
-        if (!existingCategory.getUserId().equals(userId)) {
+        if (!existingCategory.getCustomerId().equals(customerId)) {
             throw new UpdateConflictException();
         }
 
         return messageCategoryRepository.save(messageCategory);
     }
 
-    void deleteMessageCategory(long customerId, long userId, long categoryId, Jwt jwt) {
+    void deleteMessageCategory(long customerId, long id, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
-        AuthorisationUtil.validateAccessToUser(userId, jwt);
 
         MessageCategory messageCategory =
                 messageCategoryRepository
-                        .findById(categoryId)
+                        .findById(id)
                         .orElseThrow(
                                 () ->
                                         new EntityNotFoundException(
                                                 MessageCategory.class.getSimpleName()));
 
-        if (!messageCategory.getUserId().equals(userId)) {
+        if (!messageCategory.getCustomerId().equals(customerId)) {
             throw new IdorException();
         }
 

@@ -1,5 +1,7 @@
 package de.flowsuite.mailflowapi.mail;
 
+import static de.flowsuite.mailflowapi.common.constant.Message.*;
+
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
@@ -30,12 +32,7 @@ public class MailService {
     private static final String RESET_PASSWORD_EMAIL_PATH = "classpath:templates/PasswordResetEmail.html";
     private static final String RESET_PASSWORD_EXPIRED_EMAIL_PATH = "classpath:templates/PasswordResetExpiredEmail.html";
     private static final String WELCOME_EMAIL_PATH = "classpath:templates/WelcomeEmail.html";
-    private static final String DOUBLE_OPT_IN_EMAIL_SUBJECT = "Bitte bestätige deine Registrierung 🤝";
-    private static final String REGISTRATION_EXPIRED_SUBJECT = "Deine Registrierung ist abgelaufen ⏳";
-    private static final String RESET_PASSWORD_EMAIL_SUBJECT = "Dein Link zum Zurücksetzen deines Passwort 🔐";
-    private static final String RESET_PASSWORD_EXPIRED_EMAIL_SUBJECT = "Dein Link zum Passwort Zurücksetzen ist abgelaufen ⏳";
-    private static final String WELCOME_EMAIL_SUBJECT = "Willkommen bei mailflow – schön, dass du dabei bist! 🥳";
-    private final String mailFlowFrontendUrl;
+   private final String mailFlowFrontendUrl;
     private final JavaMailSender mailSender;
     private final String doubleOptInEmail;
     private final String registrationExpiredEmail;
@@ -152,9 +149,10 @@ public class MailService {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
 
-            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true,"UTF-8");
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
             mimeMessageHelper.setText(emailContent, true);
-            mimeMessageHelper.addInline("mailflowLogo", new ClassPathResource("/assets/mailflowLogo.svg"));
+            mimeMessageHelper.addInline(
+                    "mailflowLogo", new ClassPathResource("/assets/mailflowLogo.svg"));
             mimeMessageHelper.setTo(emailAddress);
             mimeMessageHelper.setSubject(subject);
             mimeMessageHelper.setFrom(FROM_EMAIL_ADDRESS, FROM_PERSONAL);

@@ -39,13 +39,13 @@ class BlacklistResource {
         return ResponseEntity.ok(blacklistService.listBlacklistEntries(customerId, userId, jwt));
     }
 
-    @DeleteMapping("/{customerId}/users/{userId}/blacklist/{blacklistEntryId}")
+    @DeleteMapping("/{customerId}/users/{userId}/blacklist/{id}")
     ResponseEntity<Void> deleteBlacklistEntry(
             @PathVariable long customerId,
             @PathVariable long userId,
-            @PathVariable long blacklistEntryId,
+            @PathVariable long id,
             @AuthenticationPrincipal Jwt jwt) {
-        blacklistService.deleteBlacklistEntry(customerId, userId, blacklistEntryId, jwt);
+        blacklistService.deleteBlacklistEntry(customerId, userId, id, jwt);
         return ResponseEntity.noContent().build();
     }
 }

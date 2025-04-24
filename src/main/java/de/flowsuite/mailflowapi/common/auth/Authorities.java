@@ -22,6 +22,7 @@ public enum Authorities {
     MESSAGE_CATEGORIES_LIST("message_categories:list"),
     MESSAGE_CATEGORIES_WRITE("message_categories:write"),
     MESSAGE_LOG_LIST("message_log:list"),
+    MESSAGE_LOG_READ("message_log:read"),
     MESSAGE_LOG_WRITE("message_log:write"),
     RESPONSE_RATINGS_LIST("response_ratings:list");
 

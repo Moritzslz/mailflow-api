@@ -1,5 +1,7 @@
 package de.flowsuite.mailflowapi.common.entity;
 
+import static de.flowsuite.mailflowapi.common.util.Util.BERLIN_ZONE;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import de.flowsuite.mailflowapi.common.auth.Authorities;
@@ -17,7 +19,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -73,20 +74,18 @@ public class User implements UserDetails {
 
     @PrePersist
     protected void onCreate() {
-        ZoneId berlinZone = ZoneId.of("Europe/Berlin");
-        createdAt = ZonedDateTime.now(berlinZone);
+        createdAt = ZonedDateTime.now(BERLIN_ZONE);
         updatedAt = createdAt;
     }
 
     @PreUpdate
     protected void onUpdate() {
-        ZoneId berlinZone = ZoneId.of("Europe/Berlin");
-        updatedAt = ZonedDateTime.now(berlinZone);
+        updatedAt = ZonedDateTime.now(BERLIN_ZONE);
         if (tokenExpiresAt != null) {
-            tokenExpiresAt = tokenExpiresAt.withZoneSameInstant(berlinZone);
+            tokenExpiresAt = tokenExpiresAt.withZoneSameInstant(BERLIN_ZONE);
         }
         if (lastLoginAt != null) {
-            lastLoginAt = lastLoginAt.withZoneSameInstant(berlinZone);
+            lastLoginAt = lastLoginAt.withZoneSameInstant(BERLIN_ZONE);
         }
     }
 
@@ -115,6 +114,7 @@ public class User implements UserDetails {
         authorities.add(new SimpleGrantedAuthority(Authorities.BLACKLIST_WRITE.getAuthority()));
         authorities.add(new SimpleGrantedAuthority(Authorities.MESSAGE_CATEGORIES_LIST.getAuthority()));
         authorities.add(new SimpleGrantedAuthority(Authorities.MESSAGE_CATEGORIES_WRITE.getAuthority()));
+        authorities.add(new SimpleGrantedAuthority(Authorities.MESSAGE_LOG_READ.getAuthority()));
         authorities.add(new SimpleGrantedAuthority(Authorities.MESSAGE_LOG_LIST.getAuthority()));
         authorities.add(new SimpleGrantedAuthority(Authorities.RESPONSE_RATINGS_LIST.getAuthority()));
 

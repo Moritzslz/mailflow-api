@@ -35,12 +35,12 @@ class RagUrlResource {
         return ResponseEntity.ok(ragUrlService.listRagUrls(customerId, jwt));
     }
 
-    @DeleteMapping("/{customerId}/rag-urls/{ragUrlId}")
+    @DeleteMapping("/{customerId}/rag-urls/{id}")
     ResponseEntity<Void> deleteRagUrl(
             @PathVariable long customerId,
-            @PathVariable long ragUrlId,
+            @PathVariable long id,
             @AuthenticationPrincipal Jwt jwt) {
-        ragUrlService.deleteRagUrl(customerId, ragUrlId, jwt);
+        ragUrlService.deleteRagUrl(customerId, id, jwt);
         return ResponseEntity.noContent().build();
     }
 }
