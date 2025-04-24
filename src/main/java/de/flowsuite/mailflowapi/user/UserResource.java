@@ -43,7 +43,7 @@ class UserResource {
     @PutMapping("/users/password-reset")
     ResponseEntity<Message> completePasswordReset(
             @RequestParam @NotBlank String token,
-            @RequestBody @Valid UserResource.CompletePasswordResetRequest request) {
+            @RequestBody @Valid CompletePasswordResetRequest request) {
         return ResponseEntity.ok(userService.completePasswordReset(token, request));
     }
 
