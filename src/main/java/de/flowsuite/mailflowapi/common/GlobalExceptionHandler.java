@@ -46,7 +46,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleException(Exception ex, WebRequest request) {
-        LOG.error(ex.getMessage());
+        LOG.error("Exception at [{}]:", request.getDescription(false), ex);
 
         HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         if (AnnotationUtils.findAnnotation(ex.getClass(), ResponseStatus.class) != null) {
