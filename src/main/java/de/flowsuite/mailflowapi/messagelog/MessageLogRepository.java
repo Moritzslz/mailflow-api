@@ -60,7 +60,7 @@ interface MessageLogRepository extends CrudRepository<MessageLogEntry, Long> {
             """)
     List<Object[]> aggregateCategoryCountsByUser(
             @Param("truncUnit") String truncUnit,
-            @Param("customerId") long userId,
+            @Param("userId") long userId,
             @Param("from") ZonedDateTime from,
             @Param("to") ZonedDateTime to);
 
@@ -70,11 +70,11 @@ interface MessageLogRepository extends CrudRepository<MessageLogEntry, Long> {
                 AVG(m.processingTimeInSeconds) AS avgProcessingTime,
                 COUNT(CASE WHEN m.isReplied THEN 1 END) * 1.0 / COUNT(m) AS responseRate
             FROM MessageLogEntry m
-            WHERE m.customerId = :userId
+            WHERE m.userId = :userId
               AND m.receivedAt BETWEEN :from AND :to
             """)
     List<Object[]> aggregateAvgProcessingTimeAndResponseRateByUser(
-            @Param("customerId") long userId,
+            @Param("userId") long userId,
             @Param("from") ZonedDateTime from,
             @Param("to") ZonedDateTime to);
 }
