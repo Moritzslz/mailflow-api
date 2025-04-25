@@ -28,7 +28,17 @@ class RagUrlService {
             throw new IdConflictException();
         }
 
-        if (ragUrlRepository.existsByUrl(ragUrl.getUrl().toLowerCase())) {
+        String url = ragUrl.getUrl();
+
+        if (!url.contains("://")) {
+            url = "https://" + url;
+        } else if (url.toLowerCase().startsWith("http://")){
+            url = "https://" + url.substring(7);
+        }
+
+        ragUrl.setUrl(url);
+
+        if (ragUrlRepository.existsByCustomerIdAndUrl(customerId, url)) {
             throw new EntityAlreadyExistsException(RagUrl.class.getSimpleName());
         }
 

@@ -12,5 +12,5 @@ interface RagUrlRepository extends CrudRepository<RagUrl, Long> {
 
     List<RagUrl> findByCustomerId(long customerId);
 
-    boolean existsByUrl(String url);
+    boolean existsByCustomerIdAndUrl(long customerId, String url);
 }
