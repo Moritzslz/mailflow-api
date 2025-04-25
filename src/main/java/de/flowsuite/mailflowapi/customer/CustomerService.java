@@ -23,7 +23,8 @@ class CustomerService {
     }
 
     Customer createCustomer(Customer customer) {
-        if (customerRepository.existsByCompanyAndPostalCode(customer.getCompany(), customer.getPostalCode())) {
+        if (customerRepository.existsByCompanyAndPostalCode(
+                customer.getCompany(), customer.getPostalCode())) {
             throw new EntityAlreadyExistsException(Customer.class.getSimpleName());
         }
 

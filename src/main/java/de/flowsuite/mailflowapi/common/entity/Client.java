@@ -33,7 +33,8 @@ public class Client implements UserDetails {
     @NotBlank private String clientName;
 
     @Column(name = "client_secret_hash")
-    @JsonIgnore @NotBlank private String clientSecret;
+    @JsonIgnore
+    @NotBlank private String clientSecret;
 
     @NotBlank private String scope;
 

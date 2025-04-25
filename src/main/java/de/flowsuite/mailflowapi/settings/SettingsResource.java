@@ -34,12 +34,14 @@ class SettingsResource {
             @RequestBody @Valid Settings settings,
             @AuthenticationPrincipal Jwt jwt,
             UriComponentsBuilder uriBuilder) {
-         Settings createdSettings  = settingsService.createSettings(customerId, userId, settings, jwt);
+        Settings createdSettings =
+                settingsService.createSettings(customerId, userId, settings, jwt);
 
         URI location =
                 uriBuilder
                         .path("/customers/{customerId}/users/{userId}")
-                        .buildAndExpand(createdSettings.getCustomerId(), createdSettings.getUserId())
+                        .buildAndExpand(
+                                createdSettings.getCustomerId(), createdSettings.getUserId())
                         .toUri();
 
         return ResponseEntity.created(location).body(createdSettings);

@@ -24,14 +24,12 @@ class CustomerResource {
     }
 
     @PostMapping
-    ResponseEntity<Customer> createCustomer(@RequestBody @Valid Customer customer, UriComponentsBuilder uriBuilder) {
+    ResponseEntity<Customer> createCustomer(
+            @RequestBody @Valid Customer customer, UriComponentsBuilder uriBuilder) {
         Customer createdCustomer = customerService.createCustomer(customer);
 
         URI location =
-                uriBuilder
-                        .path("/customers/{id}")
-                        .buildAndExpand(createdCustomer.getId())
-                        .toUri();
+                uriBuilder.path("/customers/{id}").buildAndExpand(createdCustomer.getId()).toUri();
 
         return ResponseEntity.created(location).body(createdCustomer);
     }

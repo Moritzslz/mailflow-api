@@ -22,14 +22,12 @@ class ClientResource {
     }
 
     @PostMapping
-    ResponseEntity<Client> createClient(@RequestBody @Valid Client client, UriComponentsBuilder uriBuilder) {
+    ResponseEntity<Client> createClient(
+            @RequestBody @Valid Client client, UriComponentsBuilder uriBuilder) {
         Client createdClient = clientService.createClient(client);
 
         URI location =
-                uriBuilder
-                        .path("/clients/{id}")
-                        .buildAndExpand(createdClient.getId())
-                        .toUri();
+                uriBuilder.path("/clients/{id}").buildAndExpand(createdClient.getId()).toUri();
 
         return ResponseEntity.created(location).body(createdClient);
     }

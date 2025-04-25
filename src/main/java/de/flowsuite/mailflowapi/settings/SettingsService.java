@@ -31,7 +31,7 @@ class SettingsService {
         }
 
         if (settingsRepository.existsByUserId(userId)) {
-            throw  new EntityAlreadyExistsException(Settings.class.getSimpleName());
+            throw new EntityAlreadyExistsException(Settings.class.getSimpleName());
         }
 
         settings.setMailboxPasswordHash(HmacUtil.hash(settings.getMailboxPassword()));
