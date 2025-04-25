@@ -28,7 +28,7 @@ class RagUrlService {
             throw new IdConflictException();
         }
 
-        if(ragUrlRepository.existsByUrl(ragUrl.getUrl().toLowerCase())) {
+        if (ragUrlRepository.existsByUrl(ragUrl.getUrl().toLowerCase())) {
             throw new EntityAlreadyExistsException(RagUrl.class.getSimpleName());
         }
 
