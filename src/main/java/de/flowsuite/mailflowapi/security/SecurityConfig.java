@@ -98,6 +98,7 @@ class SecurityConfig {
                         // Blacklist Resource
                         .requestMatchers(HttpMethod.POST, "/customers/*/users/*/blacklist").access(hasAnyScope(Authorities.BLACKLIST_WRITE.getAuthority(), Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.GET, "/customers/*/users/*/blacklist").access(hasAnyScope(Authorities.BLACKLIST_LIST.getAuthority(), Authorities.ADMIN.getAuthority()))
+                        .requestMatchers(HttpMethod.GET, "/customers/*/users/*/blacklist/*").access(hasAnyScope(Authorities.BLACKLIST_READ.getAuthority(), Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.DELETE, "/customers/*/users/*/blacklist/*").access(hasAnyScope(Authorities.BLACKLIST_WRITE.getAuthority(), Authorities.ADMIN.getAuthority()))
                         // MessageCategories Resource
                         .requestMatchers(HttpMethod.POST, "/customers/*/message-categories").access(hasAnyScope(Authorities.MESSAGE_CATEGORIES_WRITE.getAuthority(), Authorities.ADMIN.getAuthority()))
