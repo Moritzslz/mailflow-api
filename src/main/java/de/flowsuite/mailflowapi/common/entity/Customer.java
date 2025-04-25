@@ -3,6 +3,7 @@ package de.flowsuite.mailflowapi.common.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 import lombok.AllArgsConstructor;
@@ -27,6 +28,7 @@ public class Customer {
     @NotBlank private String houseNumber;
     @NotBlank private String postalCode;
     @NotBlank private String city;
+    @Email @NotBlank String billingEmailAddress;
 
     @Column(name = "openai_api_key_encrypted", updatable = false)
     @NotBlank private String openaiApiKey;
@@ -35,4 +37,7 @@ public class Customer {
     private String websiteUrl;
     private String privacyPolicyUrl;
     private String ctaUrl;
+
+    @Column(updatable = false)
+    @NotBlank private String registrationToken;
 }

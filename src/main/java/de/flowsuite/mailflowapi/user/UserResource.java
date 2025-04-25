@@ -70,7 +70,7 @@ class UserResource {
     }
 
     record CreateUserRequest(
-            @NotNull Long customerId,
+            @NotNull String registrationToken,
             @NotBlank String firstName,
             @NotBlank String lastName,
             @NotBlank String emailAddress,

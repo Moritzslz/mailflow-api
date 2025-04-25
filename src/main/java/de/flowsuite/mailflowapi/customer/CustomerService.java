@@ -7,14 +7,16 @@ import de.flowsuite.mailflowapi.common.exception.IdConflictException;
 import de.flowsuite.mailflowapi.common.exception.UpdateConflictException;
 import de.flowsuite.mailflowapi.common.util.AesUtil;
 import de.flowsuite.mailflowapi.common.util.AuthorisationUtil;
+import de.flowsuite.mailflowapi.common.util.Util;
 
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
-class CustomerService {
+public class CustomerService {
 
     private final CustomerRepository customerRepository;
 
@@ -22,13 +24,44 @@ class CustomerService {
         this.customerRepository = customerRepository;
     }
 
-    Customer createCustomer(Customer customer) {
-        if (customerRepository.existsByCompanyAndPostalCode(
-                customer.getCompany(), customer.getPostalCode())) {
+    public Optional<Customer> getByRegistrationToken(String registrationToken) {
+        return customerRepository.findByRegistrationToken(registrationToken);
+    }
+
+    private String generateRegistrationToken() {
+        String registrationToken;
+        do {
+            registrationToken = Util.generateRandomUrlSafeToken();
+        } while (customerRepository.existsByRegistrationToken(registrationToken));
+        return registrationToken;
+    }
+
+    Customer createCustomer(CustomerResource.CreateCustomerRequest request) {
+        String billingEmailAddress = request.billingEmailAddress().toLowerCase();
+        Util.validateEmailAddress(billingEmailAddress);
+
+        if (customerRepository.existsByBillingEmailAddress(billingEmailAddress)) {
             throw new EntityAlreadyExistsException(Customer.class.getSimpleName());
         }
 
-        customer.setOpenaiApiKey(AesUtil.encrypt(customer.getOpenaiApiKey()));
+        String registrationToken = generateRegistrationToken();
+
+        Customer customer =
+                Customer.builder()
+                        .company(request.company())
+                        .street(request.street())
+                        .houseNumber(request.houseNumber())
+                        .postalCode(request.postalCode())
+                        .city(request.city())
+                        .billingEmailAddress(request.billingEmailAddress())
+                        .openaiApiKey(AesUtil.encrypt(request.openaiApiKey()))
+                        .sourceOfContact(request.sourceOfContact())
+                        .websiteUrl(request.websiteUrl())
+                        .privacyPolicyUrl(request.privacyPolicyUrl())
+                        .ctaUrl(request.ctaUrl())
+                        .registrationToken(registrationToken)
+                        .build();
+
         return customerRepository.save(customer);
     }
 
