@@ -8,7 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -25,9 +27,25 @@ class MessageCategoryResource {
     ResponseEntity<MessageCategory> createMessageCategory(
             @PathVariable long customerId,
             @RequestBody @Valid MessageCategory messageCategory,
-            @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(
-                messageCategoryService.createMessageCategory(customerId, messageCategory, jwt));
+            @AuthenticationPrincipal Jwt jwt,
+            UriComponentsBuilder uriBuilder) {
+
+        MessageCategory createdMessageCategory = messageCategoryService.createMessageCategory(customerId, messageCategory, jwt);
+
+        URI location =
+                uriBuilder
+                        .path("/customers/{customerId}/message-categories/{id}")
+                        .buildAndExpand(
+                                createdMessageCategory.getCustomerId(), createdMessageCategory.getId())
+                        .toUri();
+
+        return ResponseEntity.created(location).body(createdMessageCategory);
+    }
+
+    @GetMapping("/{customerId}/message-categories/{id}")
+    ResponseEntity<MessageCategory> getMessageCategory(
+            @PathVariable long customerId, @PathVariable long id, @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(messageCategoryService.getMessageCategory(customerId, id, jwt));
     }
 
     @GetMapping("/{customerId}/message-categories")
