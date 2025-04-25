@@ -11,4 +11,6 @@ import java.util.List;
 interface RagUrlRepository extends CrudRepository<RagUrl, Long> {
 
     List<RagUrl> findByCustomerId(long customerId);
+
+    boolean existsByUrl(String url);
 }

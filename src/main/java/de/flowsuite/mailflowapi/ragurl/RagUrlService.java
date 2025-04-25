@@ -1,6 +1,7 @@
 package de.flowsuite.mailflowapi.ragurl;
 
 import de.flowsuite.mailflowapi.common.entity.RagUrl;
+import de.flowsuite.mailflowapi.common.exception.EntityAlreadyExistsException;
 import de.flowsuite.mailflowapi.common.exception.EntityNotFoundException;
 import de.flowsuite.mailflowapi.common.exception.IdConflictException;
 import de.flowsuite.mailflowapi.common.exception.IdorException;
@@ -25,6 +26,10 @@ class RagUrlService {
 
         if (!ragUrl.getCustomerId().equals(customerId)) {
             throw new IdConflictException();
+        }
+
+        if(ragUrlRepository.existsByUrl(ragUrl.getUrl().toLowerCase())) {
+            throw new EntityAlreadyExistsException(RagUrl.class.getSimpleName());
         }
 
         return ragUrlRepository.save(ragUrl);
