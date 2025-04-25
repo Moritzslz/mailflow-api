@@ -109,6 +109,7 @@ public class User implements UserDetails {
         authorities.add(new SimpleGrantedAuthority(Authorities.SETTINGS_READ.getAuthority()));
         authorities.add(new SimpleGrantedAuthority(Authorities.SETTINGS_WRITE.getAuthority()));
         authorities.add(new SimpleGrantedAuthority(Authorities.RAG_URLS_LIST.getAuthority()));
+        authorities.add(new SimpleGrantedAuthority(Authorities.RAG_URLS_READ.getAuthority()));
         authorities.add(new SimpleGrantedAuthority(Authorities.RAG_URLS_WRITE.getAuthority()));
         authorities.add(new SimpleGrantedAuthority(Authorities.BLACKLIST_LIST.getAuthority()));
         authorities.add(new SimpleGrantedAuthority(Authorities.BLACKLIST_READ.getAuthority()));
