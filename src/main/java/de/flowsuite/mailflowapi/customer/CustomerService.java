@@ -1,6 +1,7 @@
 package de.flowsuite.mailflowapi.customer;
 
 import de.flowsuite.mailflowapi.common.entity.Customer;
+import de.flowsuite.mailflowapi.common.exception.EntityAlreadyExistsException;
 import de.flowsuite.mailflowapi.common.exception.EntityNotFoundException;
 import de.flowsuite.mailflowapi.common.exception.IdConflictException;
 import de.flowsuite.mailflowapi.common.exception.UpdateConflictException;
@@ -22,6 +23,10 @@ class CustomerService {
     }
 
     Customer createCustomer(Customer customer) {
+        if (customerRepository.existsByCompanyAndPostalCode(customer.getCompany(), customer.getPostalCode())) {
+            throw new EntityAlreadyExistsException(Customer.class.getSimpleName());
+        }
+
         customer.setOpenaiApiKey(AesUtil.encrypt(customer.getOpenaiApiKey()));
         return customerRepository.save(customer);
     }
