@@ -12,7 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.util.Date;
 import java.util.List;
 
@@ -28,11 +30,24 @@ class ResponseRatingResource {
 
     @PostMapping("/users/response-ratings")
     ResponseEntity<ResponseRating> createResponseRating(
-            @RequestParam String token, @RequestBody @Valid CreateResponseRatingRequest request) {
-        return ResponseEntity.ok(responseRatingService.createResponseRating(token, request));
+            @RequestParam String token,
+            @RequestBody @Valid CreateResponseRatingRequest request,
+            UriComponentsBuilder uriBuilder) {
+        ResponseRating createdResponseRating =
+                responseRatingService.createResponseRating(token, request);
+
+        URI location =
+                uriBuilder
+                        .path("/customers/{customerId}/response-ratings/{id}")
+                        .buildAndExpand(
+                                createdResponseRating.getCustomerId(),
+                                createdResponseRating.getMessageLogId())
+                        .toUri();
+
+        return ResponseEntity.created(location).body(createdResponseRating);
     }
 
-    @GetMapping("/{customerId}/users/response-ratings/{id}")
+    @GetMapping("/{customerId}/response-ratings/{id}")
     ResponseEntity<ResponseRating> getResponseRatings(
             @PathVariable long customerId,
             @PathVariable long id,

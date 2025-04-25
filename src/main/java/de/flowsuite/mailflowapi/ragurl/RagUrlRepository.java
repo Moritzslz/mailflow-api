@@ -9,5 +9,8 @@ import java.util.List;
 
 @Repository
 interface RagUrlRepository extends CrudRepository<RagUrl, Long> {
+
     List<RagUrl> findByCustomerId(long customerId);
+
+    boolean existsByCustomerIdAndUrl(long customerId, String url);
 }

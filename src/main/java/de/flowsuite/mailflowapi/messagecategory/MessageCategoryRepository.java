@@ -9,5 +9,8 @@ import java.util.List;
 
 @Repository
 interface MessageCategoryRepository extends CrudRepository<MessageCategory, Long> {
+
     List<MessageCategory> findByCustomerId(long customerId);
+
+    boolean existsByCategory(String category);
 }

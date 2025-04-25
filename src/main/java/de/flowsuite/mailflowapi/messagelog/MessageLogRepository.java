@@ -13,6 +13,7 @@ import java.util.Optional;
 
 @Repository
 interface MessageLogRepository extends CrudRepository<MessageLogEntry, Long> {
+
     List<MessageLogEntry> findByCustomerId(long customerId);
 
     List<MessageLogEntry> findByCustomerIdAndUserId(long customerId, long userId);

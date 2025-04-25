@@ -12,7 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.time.ZonedDateTime;
 
 @RestController
@@ -30,8 +32,19 @@ class SettingsResource {
             @PathVariable long customerId,
             @PathVariable long userId,
             @RequestBody @Valid Settings settings,
-            @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(settingsService.createSettings(customerId, userId, settings, jwt));
+            @AuthenticationPrincipal Jwt jwt,
+            UriComponentsBuilder uriBuilder) {
+        Settings createdSettings =
+                settingsService.createSettings(customerId, userId, settings, jwt);
+
+        URI location =
+                uriBuilder
+                        .path("/customers/{customerId}/users/{userId}")
+                        .buildAndExpand(
+                                createdSettings.getCustomerId(), createdSettings.getUserId())
+                        .toUri();
+
+        return ResponseEntity.created(location).body(createdSettings);
     }
 
     @GetMapping("/{customerId}/users/{userId}/settings")

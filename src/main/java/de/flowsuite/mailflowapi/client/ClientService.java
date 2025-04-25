@@ -1,6 +1,8 @@
 package de.flowsuite.mailflowapi.client;
 
 import de.flowsuite.mailflowapi.common.entity.Client;
+import de.flowsuite.mailflowapi.common.exception.EntityAlreadyExistsException;
+import de.flowsuite.mailflowapi.common.exception.EntityNotFoundException;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -33,8 +35,19 @@ public class ClientService implements UserDetailsService {
     }
 
     Client createClient(Client client) {
+        if (clientRepository.existsByClientName(client.getClientName())) {
+            throw new EntityAlreadyExistsException(Client.class.getSimpleName());
+        }
+
         client.setClientSecret(passwordEncoder.encode(client.getPassword()));
+
         return clientRepository.save(client);
+    }
+
+    Client getClient(long id) {
+        return clientRepository
+                .findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(Client.class.getSimpleName()));
     }
 
     List<Client> listClients() {

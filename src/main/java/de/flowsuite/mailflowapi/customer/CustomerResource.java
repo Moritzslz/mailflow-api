@@ -8,7 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -22,18 +24,24 @@ class CustomerResource {
     }
 
     @PostMapping
-    ResponseEntity<Customer> createCustomer(@RequestBody @Valid Customer customer) {
-        return ResponseEntity.ok(customerService.createCustomer(customer));
-    }
+    ResponseEntity<Customer> createCustomer(
+            @RequestBody @Valid Customer customer, UriComponentsBuilder uriBuilder) {
+        Customer createdCustomer = customerService.createCustomer(customer);
 
-    @GetMapping()
-    ResponseEntity<List<Customer>> listCustomers() {
-        return ResponseEntity.ok(customerService.listCustomers());
+        URI location =
+                uriBuilder.path("/customers/{id}").buildAndExpand(createdCustomer.getId()).toUri();
+
+        return ResponseEntity.created(location).body(createdCustomer);
     }
 
     @GetMapping("/{id}")
     ResponseEntity<Customer> getCustomer(@PathVariable long id, @AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity.ok(customerService.getCustomer(id, jwt));
+    }
+
+    @GetMapping()
+    ResponseEntity<List<Customer>> listCustomers() {
+        return ResponseEntity.ok(customerService.listCustomers());
     }
 
     @PutMapping("/{id}")

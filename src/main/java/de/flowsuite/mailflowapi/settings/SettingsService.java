@@ -2,6 +2,7 @@ package de.flowsuite.mailflowapi.settings;
 
 import de.flowsuite.mailflowapi.common.entity.Customer;
 import de.flowsuite.mailflowapi.common.entity.Settings;
+import de.flowsuite.mailflowapi.common.exception.EntityAlreadyExistsException;
 import de.flowsuite.mailflowapi.common.exception.EntityNotFoundException;
 import de.flowsuite.mailflowapi.common.exception.IdConflictException;
 import de.flowsuite.mailflowapi.common.exception.UpdateConflictException;
@@ -27,6 +28,10 @@ class SettingsService {
 
         if (!settings.getUserId().equals(userId) || !settings.getCustomerId().equals(customerId)) {
             throw new IdConflictException();
+        }
+
+        if (settingsRepository.existsByUserId(userId)) {
+            throw new EntityAlreadyExistsException(Settings.class.getSimpleName());
         }
 
         settings.setMailboxPasswordHash(HmacUtil.hash(settings.getMailboxPassword()));

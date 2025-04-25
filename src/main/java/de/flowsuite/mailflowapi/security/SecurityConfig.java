@@ -73,6 +73,7 @@ class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/auth/**").permitAll()
                         // Microservice Resource
                         .requestMatchers(HttpMethod.POST, "/clients").access(hasScope(Authorities.ADMIN.getAuthority()))
+                        .requestMatchers(HttpMethod.GET, "/clients/*").access(hasScope(Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.GET, "/clients").access(hasScope(Authorities.ADMIN.getAuthority()))
                         // Customer Resource
                         .requestMatchers(HttpMethod.POST, "/customers").access(hasScope(Authorities.ADMIN.getAuthority()))
@@ -94,15 +95,19 @@ class SecurityConfig {
                         // RagUrls Resource
                         .requestMatchers(HttpMethod.POST, "/customers/*/rag-urls").access(hasAnyScope(Authorities.RAG_URLS_WRITE.getAuthority(), Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.GET, "/customers/*/rag-urls").access(hasAnyScope(Authorities.RAG_URLS_LIST.getAuthority(), Authorities.ADMIN.getAuthority()))
-                        .requestMatchers(HttpMethod.PUT, "/customers/*/rag-urls").access(hasAnyScope(Authorities.RAG_URLS_WRITE.getAuthority(), Authorities.ADMIN.getAuthority()))
+                        .requestMatchers(HttpMethod.GET, "/customers/*/rag-urls/*").access(hasAnyScope(Authorities.RAG_URLS_READ.getAuthority(), Authorities.ADMIN.getAuthority()))
+                        .requestMatchers(HttpMethod.DELETE, "/customers/*/rag-urls/*").access(hasAnyScope(Authorities.RAG_URLS_WRITE.getAuthority(), Authorities.ADMIN.getAuthority()))
                         // Blacklist Resource
                         .requestMatchers(HttpMethod.POST, "/customers/*/users/*/blacklist").access(hasAnyScope(Authorities.BLACKLIST_WRITE.getAuthority(), Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.GET, "/customers/*/users/*/blacklist").access(hasAnyScope(Authorities.BLACKLIST_LIST.getAuthority(), Authorities.ADMIN.getAuthority()))
+                        .requestMatchers(HttpMethod.GET, "/customers/*/users/*/blacklist/*").access(hasAnyScope(Authorities.BLACKLIST_READ.getAuthority(), Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.DELETE, "/customers/*/users/*/blacklist/*").access(hasAnyScope(Authorities.BLACKLIST_WRITE.getAuthority(), Authorities.ADMIN.getAuthority()))
                         // MessageCategories Resource
                         .requestMatchers(HttpMethod.POST, "/customers/*/message-categories").access(hasAnyScope(Authorities.MESSAGE_CATEGORIES_WRITE.getAuthority(), Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.GET, "/customers/*/message-categories").access(hasAnyScope(Authorities.MESSAGE_CATEGORIES_LIST.getAuthority(), Authorities.ADMIN.getAuthority()))
+                        .requestMatchers(HttpMethod.GET, "/customers/*/message-categories/*").access(hasAnyScope(Authorities.MESSAGE_CATEGORIES_READ.getAuthority(), Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.PUT, "/customers/*/message-categories").access(hasAnyScope(Authorities.MESSAGE_CATEGORIES_WRITE.getAuthority(), Authorities.ADMIN.getAuthority()))
+                        .requestMatchers(HttpMethod.DELETE, "/customers/*/message-categories").access(hasAnyScope(Authorities.MESSAGE_CATEGORIES_WRITE.getAuthority(), Authorities.ADMIN.getAuthority()))
                         // MessageLog Resource
                         .requestMatchers(HttpMethod.POST, "/customers/*/users/*/message-log").access(hasAnyScope(Authorities.MESSAGE_LOG_WRITE.getAuthority(), Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.GET, "/customers/*/message-log").access(hasScope(Authorities.ADMIN.getAuthority()))

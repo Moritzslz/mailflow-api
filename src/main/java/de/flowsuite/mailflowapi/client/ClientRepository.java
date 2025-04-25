@@ -10,5 +10,7 @@ import java.util.Optional;
 @Repository
 interface ClientRepository extends CrudRepository<Client, Long> {
 
-    Optional<Client> findByClientName(String serviceName);
+    Optional<Client> findByClientName(String clientName);
+
+    boolean existsByClientName(String clientName);
 }

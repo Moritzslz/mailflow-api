@@ -12,7 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
@@ -33,9 +35,22 @@ class MessageLogResource {
             @PathVariable long customerId,
             @PathVariable long userId,
             @RequestBody @Valid CreateMessageLogEntryRequest request,
-            @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(
-                messageLogService.createMessageLogEntry(customerId, userId, request, jwt));
+            @AuthenticationPrincipal Jwt jwt,
+            UriComponentsBuilder uriBuilder) {
+
+        MessageLogEntry createdMessageLogEntry =
+                messageLogService.createMessageLogEntry(customerId, userId, request, jwt);
+
+        URI location =
+                uriBuilder
+                        .path("/customers/{customerId}/users/{userId}/message-log/{id}")
+                        .buildAndExpand(
+                                createdMessageLogEntry.getCustomerId(),
+                                createdMessageLogEntry.getUserId(),
+                                createdMessageLogEntry.getId())
+                        .toUri();
+
+        return ResponseEntity.created(location).body(createdMessageLogEntry);
     }
 
     @GetMapping("/{customerId}/message-log")

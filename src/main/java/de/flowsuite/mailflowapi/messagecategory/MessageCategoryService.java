@@ -1,10 +1,7 @@
 package de.flowsuite.mailflowapi.messagecategory;
 
 import de.flowsuite.mailflowapi.common.entity.MessageCategory;
-import de.flowsuite.mailflowapi.common.exception.EntityNotFoundException;
-import de.flowsuite.mailflowapi.common.exception.IdConflictException;
-import de.flowsuite.mailflowapi.common.exception.IdorException;
-import de.flowsuite.mailflowapi.common.exception.UpdateConflictException;
+import de.flowsuite.mailflowapi.common.exception.*;
 import de.flowsuite.mailflowapi.common.util.AuthorisationUtil;
 
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -29,7 +26,29 @@ class MessageCategoryService {
             throw new IdConflictException();
         }
 
+        if (messageCategoryRepository.existsByCategory(messageCategory.getCategory())) {
+            throw new EntityAlreadyExistsException(MessageCategory.class.getSimpleName());
+        }
+
         return messageCategoryRepository.save(messageCategory);
+    }
+
+    MessageCategory getMessageCategory(long customerId, long id, Jwt jwt) {
+        AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
+
+        MessageCategory messageCategory =
+                messageCategoryRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                MessageCategory.class.getSimpleName()));
+
+        if (!messageCategory.getCustomerId().equals(customerId)) {
+            throw new IdorException();
+        }
+
+        return messageCategory;
     }
 
     List<MessageCategory> listMessageCategories(long customerId, Jwt jwt) {
@@ -42,7 +61,8 @@ class MessageCategoryService {
             long customerId, long id, MessageCategory messageCategory, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
 
-        if (!messageCategory.getCustomerId().equals(customerId)) {
+        if (!messageCategory.getCustomerId().equals(customerId)
+                || !messageCategory.getId().equals(id)) {
             throw new IdConflictException();
         }
 
