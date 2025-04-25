@@ -35,12 +35,12 @@ public class ClientService implements UserDetailsService {
     }
 
     Client createClient(Client client) {
-        client.setClientSecret(passwordEncoder.encode(client.getPassword()));
-
         if (clientRepository.existsByClientName(client.getClientName())) {
             throw new EntityAlreadyExistsException(Client.class.getSimpleName());
         }
 
+        client.setClientSecret(passwordEncoder.encode(client.getPassword()));
+        
         return clientRepository.save(client);
     }
 
