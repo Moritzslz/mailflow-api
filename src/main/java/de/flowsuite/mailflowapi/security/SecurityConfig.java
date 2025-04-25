@@ -73,6 +73,7 @@ class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/auth/**").permitAll()
                         // Microservice Resource
                         .requestMatchers(HttpMethod.POST, "/clients").access(hasScope(Authorities.ADMIN.getAuthority()))
+                        .requestMatchers(HttpMethod.GET, "/clients/*").access(hasScope(Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.GET, "/clients").access(hasScope(Authorities.ADMIN.getAuthority()))
                         // Customer Resource
                         .requestMatchers(HttpMethod.POST, "/customers").access(hasScope(Authorities.ADMIN.getAuthority()))

@@ -2,6 +2,7 @@ package de.flowsuite.mailflowapi.client;
 
 import de.flowsuite.mailflowapi.common.entity.Client;
 
+import de.flowsuite.mailflowapi.common.exception.EntityNotFoundException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -35,6 +36,10 @@ public class ClientService implements UserDetailsService {
     Client createClient(Client client) {
         client.setClientSecret(passwordEncoder.encode(client.getPassword()));
         return clientRepository.save(client);
+    }
+
+    Client getClient(long id) {
+        return clientRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(Client.class.getSimpleName()));
     }
 
     List<Client> listClients() {
