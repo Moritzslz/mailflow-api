@@ -6,4 +6,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-interface SettingsRepository extends CrudRepository<Settings, Long> {}
+interface SettingsRepository extends CrudRepository<Settings, Long> {
+
+    boolean existsByUserId(long userId);
+}
