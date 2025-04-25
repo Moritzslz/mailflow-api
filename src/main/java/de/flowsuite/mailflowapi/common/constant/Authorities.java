@@ -18,6 +18,7 @@ public enum Authorities {
     RAG_URLS_LIST("rag_urls:read"),
     RAG_URLS_WRITE("rag_urls:write"),
     BLACKLIST_LIST("blacklist:list"),
+    BLACKLIST_READ("blacklist:read"),
     BLACKLIST_WRITE("blacklist:write"),
     MESSAGE_CATEGORIES_LIST("message_categories:list"),
     MESSAGE_CATEGORIES_WRITE("message_categories:write"),
