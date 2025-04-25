@@ -36,7 +36,13 @@ class MessageCategoryService {
     MessageCategory getMessageCategory(long customerId, long id, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
 
-        MessageCategory messageCategory = messageCategoryRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(MessageCategory.class.getSimpleName()));
+        MessageCategory messageCategory =
+                messageCategoryRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                MessageCategory.class.getSimpleName()));
 
         if (!messageCategory.getCustomerId().equals(customerId)) {
             throw new IdorException();
@@ -55,7 +61,8 @@ class MessageCategoryService {
             long customerId, long id, MessageCategory messageCategory, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
 
-        if (!messageCategory.getCustomerId().equals(customerId) || !messageCategory.getId().equals(id)) {
+        if (!messageCategory.getCustomerId().equals(customerId)
+                || !messageCategory.getId().equals(id)) {
             throw new IdConflictException();
         }
 

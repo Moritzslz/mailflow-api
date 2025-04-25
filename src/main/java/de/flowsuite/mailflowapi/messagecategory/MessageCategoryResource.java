@@ -30,13 +30,15 @@ class MessageCategoryResource {
             @AuthenticationPrincipal Jwt jwt,
             UriComponentsBuilder uriBuilder) {
 
-        MessageCategory createdMessageCategory = messageCategoryService.createMessageCategory(customerId, messageCategory, jwt);
+        MessageCategory createdMessageCategory =
+                messageCategoryService.createMessageCategory(customerId, messageCategory, jwt);
 
         URI location =
                 uriBuilder
                         .path("/customers/{customerId}/message-categories/{id}")
                         .buildAndExpand(
-                                createdMessageCategory.getCustomerId(), createdMessageCategory.getId())
+                                createdMessageCategory.getCustomerId(),
+                                createdMessageCategory.getId())
                         .toUri();
 
         return ResponseEntity.created(location).body(createdMessageCategory);
@@ -44,7 +46,9 @@ class MessageCategoryResource {
 
     @GetMapping("/{customerId}/message-categories/{id}")
     ResponseEntity<MessageCategory> getMessageCategory(
-            @PathVariable long customerId, @PathVariable long id, @AuthenticationPrincipal Jwt jwt) {
+            @PathVariable long customerId,
+            @PathVariable long id,
+            @AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity.ok(messageCategoryService.getMessageCategory(customerId, id, jwt));
     }
 

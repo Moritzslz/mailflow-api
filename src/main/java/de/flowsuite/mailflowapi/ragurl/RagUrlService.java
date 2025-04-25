@@ -32,7 +32,7 @@ class RagUrlService {
 
         if (!url.contains("://")) {
             url = "https://" + url;
-        } else if (url.toLowerCase().startsWith("http://")){
+        } else if (url.toLowerCase().startsWith("http://")) {
             url = "https://" + url.substring(7);
         }
 
@@ -48,7 +48,11 @@ class RagUrlService {
     RagUrl getRagUrl(long customerId, long id, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
 
-        RagUrl ragUrl = ragUrlRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(RagUrl.class.getSimpleName()));
+        RagUrl ragUrl =
+                ragUrlRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () -> new EntityNotFoundException(RagUrl.class.getSimpleName()));
 
         if (!ragUrl.getCustomerId().equals(customerId)) {
             throw new IdorException();

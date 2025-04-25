@@ -34,8 +34,7 @@ class RagUrlResource {
         URI location =
                 uriBuilder
                         .path("/customers/{customerId}/rag-urls/{id}")
-                        .buildAndExpand(
-                                createdRagUrl.getCustomerId(), createdRagUrl.getId())
+                        .buildAndExpand(createdRagUrl.getCustomerId(), createdRagUrl.getId())
                         .toUri();
 
         return ResponseEntity.created(location).body(createdRagUrl);
@@ -43,7 +42,9 @@ class RagUrlResource {
 
     @GetMapping("/{customerId}/rag-urls/{id}")
     ResponseEntity<RagUrl> getRagUrl(
-            @PathVariable long customerId, @PathVariable long id, @AuthenticationPrincipal Jwt jwt) {
+            @PathVariable long customerId,
+            @PathVariable long id,
+            @AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity.ok(ragUrlService.getRagUrl(customerId, id, jwt));
     }
 
