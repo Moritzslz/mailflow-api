@@ -30,12 +30,14 @@ class BlacklistResource {
             @RequestBody @Valid BlacklistEntry blacklistEntry,
             @AuthenticationPrincipal Jwt jwt,
             UriComponentsBuilder uriBuilder) {
-        BlacklistEntry createdBlacklistEntry = blacklistService.createBlacklistEntry(customerId, userId, blacklistEntry, jwt);
+        BlacklistEntry createdBlacklistEntry =
+                blacklistService.createBlacklistEntry(customerId, userId, blacklistEntry, jwt);
 
-        URI location = uriBuilder
-                .path("/customers/{customerId}/users/{userId}/blacklist/{id}")
-                .buildAndExpand(customerId, userId, createdBlacklistEntry.getId())
-                .toUri();
+        URI location =
+                uriBuilder
+                        .path("/customers/{customerId}/users/{userId}/blacklist/{id}")
+                        .buildAndExpand(customerId, userId, createdBlacklistEntry.getId())
+                        .toUri();
 
         return ResponseEntity.created(location).body(createdBlacklistEntry);
     }

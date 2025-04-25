@@ -53,16 +53,22 @@ class BlacklistService {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
         AuthorisationUtil.validateAccessToUser(userId, jwt);
 
-        BlacklistEntry blacklistEntry =  blacklistRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(BlacklistEntry.class.getSimpleName()));
+        BlacklistEntry blacklistEntry =
+                blacklistRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                BlacklistEntry.class.getSimpleName()));
 
         if (!blacklistEntry.getUserId().equals(userId)) {
             throw new IdorException();
         }
 
-        blacklistEntry.setBlacklistedEmailAddress(AesUtil.decrypt(blacklistEntry.getBlacklistedEmailAddress()));
+        blacklistEntry.setBlacklistedEmailAddress(
+                AesUtil.decrypt(blacklistEntry.getBlacklistedEmailAddress()));
 
         return blacklistEntry;
-
     }
 
     List<BlacklistEntry> listBlacklistEntries(long customerId, long userId, Jwt jwt) {
