@@ -95,6 +95,7 @@ class SecurityConfig {
                         // RagUrls Resource
                         .requestMatchers(HttpMethod.POST, "/customers/*/rag-urls").access(hasAnyScope(Authorities.RAG_URLS_WRITE.getAuthority(), Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.GET, "/customers/*/rag-urls").access(hasAnyScope(Authorities.RAG_URLS_LIST.getAuthority(), Authorities.ADMIN.getAuthority()))
+                        .requestMatchers(HttpMethod.GET, "/customers/*/rag-urls/*").access(hasAnyScope(Authorities.RAG_URLS_READ.getAuthority(), Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.PUT, "/customers/*/rag-urls").access(hasAnyScope(Authorities.RAG_URLS_WRITE.getAuthority(), Authorities.ADMIN.getAuthority()))
                         // Blacklist Resource
                         .requestMatchers(HttpMethod.POST, "/customers/*/users/*/blacklist").access(hasAnyScope(Authorities.BLACKLIST_WRITE.getAuthority(), Authorities.ADMIN.getAuthority()))

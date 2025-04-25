@@ -35,6 +35,18 @@ class RagUrlService {
         return ragUrlRepository.save(ragUrl);
     }
 
+    RagUrl getRagUrl(long customerId, long id, Jwt jwt) {
+        AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
+
+        RagUrl ragUrl = ragUrlRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(RagUrl.class.getSimpleName()));
+
+        if (!ragUrl.getCustomerId().equals(customerId)) {
+            throw new IdorException();
+        }
+
+        return ragUrl;
+    }
+
     List<RagUrl> listRagUrls(long customerId, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
 

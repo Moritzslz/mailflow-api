@@ -8,7 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -25,8 +27,24 @@ class RagUrlResource {
     ResponseEntity<RagUrl> createRagUrl(
             @PathVariable long customerId,
             @RequestBody @Valid RagUrl ragUrl,
-            @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(ragUrlService.createRagUrl(customerId, ragUrl, jwt));
+            @AuthenticationPrincipal Jwt jwt,
+            UriComponentsBuilder uriBuilder) {
+        RagUrl createdRagUrl = ragUrlService.createRagUrl(customerId, ragUrl, jwt);
+
+        URI location =
+                uriBuilder
+                        .path("/customers/{customerId}/rag-urls/{id}")
+                        .buildAndExpand(
+                                createdRagUrl.getCustomerId(), createdRagUrl.getId())
+                        .toUri();
+
+        return ResponseEntity.created(location).body(createdRagUrl);
+    }
+
+    @GetMapping("/{customerId}/rag-urls/{id}")
+    ResponseEntity<RagUrl> getRagUrl(
+            @PathVariable long customerId, @PathVariable long id, @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(ragUrlService.getRagUrl(customerId, id, jwt));
     }
 
     @GetMapping("/{customerId}/rag-urls")
