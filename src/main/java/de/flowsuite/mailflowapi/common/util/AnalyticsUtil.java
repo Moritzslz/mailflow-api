@@ -1,6 +1,8 @@
-package de.flowsuite.mailflowapi.messagelog;
+package de.flowsuite.mailflowapi.common.util;
 
 import static de.flowsuite.mailflowapi.common.util.Util.BERLIN_ZONE;
+
+import de.flowsuite.mailflowapi.common.constant.Timeframe;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,10 +10,10 @@ import org.slf4j.LoggerFactory;
 import java.time.ZonedDateTime;
 import java.util.*;
 
-class MessageLogUtil {
-    private static final Logger LOG = LoggerFactory.getLogger(MessageLogUtil.class);
+public class AnalyticsUtil {
+    private static final Logger LOG = LoggerFactory.getLogger(AnalyticsUtil.class);
 
-    static ZonedDateTime resolveStartDate(Date from, MessageLogResource.Timeframe timeframe) {
+    public static ZonedDateTime resolveStartDate(Date from, Timeframe timeframe) {
         if (from != null) return ZonedDateTime.ofInstant(from.toInstant(), BERLIN_ZONE);
 
         ZonedDateTime now =
@@ -24,18 +26,18 @@ class MessageLogUtil {
         };
     }
 
-    static ZonedDateTime resolveEndDate(Date to) {
+    public static ZonedDateTime resolveEndDate(Date to) {
         return (to != null)
                 ? ZonedDateTime.ofInstant(to.toInstant(), BERLIN_ZONE)
                 : ZonedDateTime.now(BERLIN_ZONE);
     }
 
-    static void validateDateRange(ZonedDateTime start, ZonedDateTime end) {
+    public static void validateDateRange(ZonedDateTime start, ZonedDateTime end) {
         if (end.isBefore(start))
             throw new IllegalArgumentException("End date must be after start date.");
     }
 
-    static String getTruncUnitForTimeframe(MessageLogResource.Timeframe timeframe) {
+    public static String getTruncUnitForTimeframe(Timeframe timeframe) {
         return switch (timeframe) {
             case DAILY -> "day";
             case WEEKLY -> "week";
@@ -44,7 +46,7 @@ class MessageLogUtil {
         };
     }
 
-    static Map<String, Map<String, Long>> groupCategoryCountsByPeriod(
+    public static Map<String, Map<String, Long>> groupCategoryCountsByPeriod(
             List<Object[]> categoryCountRows) {
         Map<String, Map<String, Long>> categoryCountsByPeriod = new LinkedHashMap<>();
         for (Object[] row : categoryCountRows) {

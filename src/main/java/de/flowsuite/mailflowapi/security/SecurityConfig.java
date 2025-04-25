@@ -11,7 +11,7 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 
 import de.flowsuite.mailflowapi.client.ClientService;
-import de.flowsuite.mailflowapi.common.auth.Authorities;
+import de.flowsuite.mailflowapi.common.constant.Authorities;
 import de.flowsuite.mailflowapi.user.UserService;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -112,6 +112,8 @@ class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/customers/*/users/*/message-log/analytics").access(hasAnyScope(Authorities.MESSAGE_LOG_LIST.getAuthority(), Authorities.ADMIN.getAuthority()))
                         // ResponseRatings Resource
                         .requestMatchers(HttpMethod.POST, "/customers/users/response-ratings").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/customers/*/response-ratings/*").access(hasAnyScope(Authorities.RESPONSE_RATINGS_READ.getAuthority(), Authorities.ADMIN.getAuthority()))
+                        .requestMatchers(HttpMethod.GET, "/customers/*/response-ratings").access(hasAnyScope(Authorities.RESPONSE_RATINGS_LIST.getAuthority(), Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.GET, "/customers/*/users/*/response-ratings").access(hasAnyScope(Authorities.RESPONSE_RATINGS_LIST.getAuthority(), Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.GET, "/customers/*/response-ratings/analytics").access(hasAnyScope(Authorities.RESPONSE_RATINGS_LIST.getAuthority(), Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.GET, "/customers/*/users/*/response-ratings/analytics").access(hasAnyScope(Authorities.RESPONSE_RATINGS_LIST.getAuthority(), Authorities.ADMIN.getAuthority()))
@@ -131,7 +133,7 @@ class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowCredentials(true);
+        configuration.setAllowCredentials(false);
         configuration.setAllowedOrigins(
                 List.of(
                         "http://localhost:*",

@@ -22,6 +22,8 @@ public record Message(@NotBlank String message) {
             "The password must contain at least one digit.";
     public static final String MISSING_SPECIAL_CHARACTER_MSG =
             "The password must contain at least one special character.";
+    public static final String RESPONSE_RATING_EXPIRED_MSG =
+            "This message is no longer eligible for rating. Feedback can only be submitted within %s days of the interaction.";
     public static final String DOUBLE_OPT_IN_EMAIL_SUBJECT =
             "Bitte bestätige deine Registrierung 🤝";
     public static final String REGISTRATION_EXPIRED_SUBJECT =

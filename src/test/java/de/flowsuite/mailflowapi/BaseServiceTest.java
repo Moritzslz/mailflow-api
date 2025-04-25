@@ -2,7 +2,7 @@ package de.flowsuite.mailflowapi;
 
 import static org.mockito.Mockito.*;
 
-import de.flowsuite.mailflowapi.common.auth.Authorities;
+import de.flowsuite.mailflowapi.common.constant.Authorities;
 import de.flowsuite.mailflowapi.common.entity.User;
 import de.flowsuite.mailflowapi.common.util.AesUtil;
 import de.flowsuite.mailflowapi.common.util.AuthorisationUtil;

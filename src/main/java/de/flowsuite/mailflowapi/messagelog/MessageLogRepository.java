@@ -9,12 +9,21 @@ import org.springframework.stereotype.Repository;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 interface MessageLogRepository extends CrudRepository<MessageLogEntry, Long> {
     List<MessageLogEntry> findByCustomerId(long customerId);
 
     List<MessageLogEntry> findByCustomerIdAndUserId(long customerId, long userId);
+
+    Optional<MessageLogEntry> findByToken(String token);
+
+    boolean existsByToken(String token);
+
+    int countByCustomerId(long customerId);
+
+    int countByUserId(long userId);
 
     @Query(
             """

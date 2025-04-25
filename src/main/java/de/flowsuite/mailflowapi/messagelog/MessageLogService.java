@@ -1,11 +1,16 @@
 package de.flowsuite.mailflowapi.messagelog;
 
+import static de.flowsuite.mailflowapi.common.util.Util.BERLIN_ZONE;
+
+import de.flowsuite.mailflowapi.common.constant.Timeframe;
 import de.flowsuite.mailflowapi.common.entity.MessageLogEntry;
 import de.flowsuite.mailflowapi.common.exception.EntityNotFoundException;
 import de.flowsuite.mailflowapi.common.exception.IdConflictException;
 import de.flowsuite.mailflowapi.common.exception.IdorException;
 import de.flowsuite.mailflowapi.common.util.AesUtil;
+import de.flowsuite.mailflowapi.common.util.AnalyticsUtil;
 import de.flowsuite.mailflowapi.common.util.AuthorisationUtil;
+import de.flowsuite.mailflowapi.common.util.Util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,29 +21,78 @@ import java.time.ZonedDateTime;
 import java.util.*;
 
 @Service
-class MessageLogService {
+public class MessageLogService {
 
     private static final Logger LOG = LoggerFactory.getLogger(MessageLogService.class);
+    public static final int TOKEN_TTL_DAYS = 7;
     private final MessageLogRepository messageLogRepository;
 
     MessageLogService(MessageLogRepository messageLogRepository) {
         this.messageLogRepository = messageLogRepository;
     }
 
+    public MessageLogEntry getByToken(String token) {
+        return messageLogRepository
+                .findByToken(token)
+                .orElseThrow(
+                        () -> new EntityNotFoundException(MessageLogEntry.class.getSimpleName()));
+    }
+
+    public int countByCustomerId(long customerId) {
+        return messageLogRepository.countByCustomerId(customerId);
+    }
+
+    public int countByUserId(long userId) {
+        return messageLogRepository.countByCustomerId(userId);
+    }
+
+    private String generateToken() {
+        String token;
+        do {
+            token = Util.generateRandomUrlSafeToken();
+        } while (messageLogRepository.existsByToken(token));
+        return token;
+    }
+
     MessageLogEntry createMessageLogEntry(
-            long customerId, long userId, MessageLogEntry messageLogEntry, Jwt jwt) {
+            long customerId,
+            long userId,
+            MessageLogResource.CreateMessageLogEntryRequest request,
+            Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
         AuthorisationUtil.validateAccessToUser(userId, jwt);
 
-        if (!messageLogEntry.getCustomerId().equals(customerId)
-                || !messageLogEntry.getUserId().equals(userId)) {
+        if (!request.customerId().equals(customerId) || !request.userId().equals(userId)) {
             throw new IdConflictException();
         }
 
-        String emailAddress = messageLogEntry.getFromEmailAddress();
+        MessageLogEntry messageLogEntry =
+                MessageLogEntry.builder()
+                        .userId(request.userId())
+                        .customerId(request.customerId())
+                        .isReplied(request.isReplied())
+                        .category(request.category())
+                        .language(request.language())
+                        .subject(request.subject())
+                        .receivedAt(request.receivedAt())
+                        .processedAt(request.processedAt())
+                        .processingTimeInSeconds(request.processingTimeInSeconds())
+                        .llmUsed(request.llmUsed())
+                        .inputTokens(request.inputTokens())
+                        .outputTokens(request.outputTokens())
+                        .totalTokens(request.totalTokens())
+                        .build();
+
+        String emailAddress = request.fromEmailAddress();
         if (emailAddress != null) {
             messageLogEntry.setFromEmailAddress(AesUtil.encrypt(emailAddress.toLowerCase()));
         }
+
+        String token = generateToken();
+        ZonedDateTime tokenExpiresAt = ZonedDateTime.now(BERLIN_ZONE).plusDays(TOKEN_TTL_DAYS);
+
+        messageLogEntry.setToken(token);
+        messageLogEntry.setTokenExpiresAt(tokenExpiresAt);
 
         return messageLogRepository.save(messageLogEntry);
     }
@@ -66,8 +120,8 @@ class MessageLogService {
                                         new EntityNotFoundException(
                                                 MessageLogEntry.class.getSimpleName()));
 
-        if (messageLogEntry.getCustomerId() != customerId
-                || messageLogEntry.getUserId() != userId) {
+        if (!messageLogEntry.getCustomerId().equals(customerId)
+                || !messageLogEntry.getUserId().equals(userId)) {
             throw new IdorException();
         }
 
@@ -75,26 +129,26 @@ class MessageLogService {
     }
 
     MessageLogResource.MessageLogAnalyticsResponse getMessageLogAnalyticsForCustomer(
-            long customerId, Date from, Date to, MessageLogResource.Timeframe timeframe, Jwt jwt) {
+            long customerId, Date from, Date to, Timeframe timeframe, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
 
         if (timeframe == null) {
-            timeframe = MessageLogResource.Timeframe.DAILY;
+            timeframe = Timeframe.DAILY;
         }
 
-        ZonedDateTime startDate = MessageLogUtil.resolveStartDate(from, timeframe);
-        ZonedDateTime endDate = MessageLogUtil.resolveEndDate(to);
+        ZonedDateTime startDate = AnalyticsUtil.resolveStartDate(from, timeframe);
+        ZonedDateTime endDate = AnalyticsUtil.resolveEndDate(to);
 
-        MessageLogUtil.validateDateRange(startDate, endDate);
+        AnalyticsUtil.validateDateRange(startDate, endDate);
 
-        String truncUnit = MessageLogUtil.getTruncUnitForTimeframe(timeframe);
+        String truncUnit = AnalyticsUtil.getTruncUnitForTimeframe(timeframe);
 
         List<Object[]> categoryCountRows =
                 messageLogRepository.aggregateCategoryCountsByCustomer(
                         truncUnit, customerId, startDate, endDate);
 
         Map<String, Map<String, Long>> categoryCountsByPeriod =
-                MessageLogUtil.groupCategoryCountsByPeriod(categoryCountRows);
+                AnalyticsUtil.groupCategoryCountsByPeriod(categoryCountRows);
 
         Object[] analyticsRow =
                 messageLogRepository
@@ -102,49 +156,45 @@ class MessageLogService {
                                 customerId, startDate, endDate)
                         .get(0);
 
-        double averageProcessingTimeInSeconds = (Double) analyticsRow[0];
-        double responseRate = (Double) analyticsRow[1];
+        double averageProcessingTimeInSeconds =
+                (double) Math.round((double) analyticsRow[0] * 100) / 100;
+        double responseRate = (double) Math.round((double) analyticsRow[1] * 100) / 100;
 
         return new MessageLogResource.MessageLogAnalyticsResponse(
                 averageProcessingTimeInSeconds, responseRate, categoryCountsByPeriod);
     }
 
     MessageLogResource.MessageLogAnalyticsResponse getMessageLogAnalyticsForUser(
-            long customerId,
-            long userId,
-            Date from,
-            Date to,
-            MessageLogResource.Timeframe timeframe,
-            Jwt jwt) {
+            long customerId, long userId, Date from, Date to, Timeframe timeframe, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
         AuthorisationUtil.validateAccessToUser(userId, jwt);
 
         if (timeframe == null) {
-            timeframe = MessageLogResource.Timeframe.DAILY;
+            timeframe = Timeframe.DAILY;
         }
 
-        ZonedDateTime startDate = MessageLogUtil.resolveStartDate(from, timeframe);
-        ZonedDateTime endDate = MessageLogUtil.resolveEndDate(to);
+        ZonedDateTime startDate = AnalyticsUtil.resolveStartDate(from, timeframe);
+        ZonedDateTime endDate = AnalyticsUtil.resolveEndDate(to);
 
-        MessageLogUtil.validateDateRange(startDate, endDate);
+        AnalyticsUtil.validateDateRange(startDate, endDate);
 
-        String truncUnit = MessageLogUtil.getTruncUnitForTimeframe(timeframe);
+        String truncUnit = AnalyticsUtil.getTruncUnitForTimeframe(timeframe);
 
         List<Object[]> categoryCountRows =
                 messageLogRepository.aggregateCategoryCountsByUser(
                         truncUnit, userId, startDate, endDate);
 
         Map<String, Map<String, Long>> categoryCountsByPeriod =
-                MessageLogUtil.groupCategoryCountsByPeriod(categoryCountRows);
+                AnalyticsUtil.groupCategoryCountsByPeriod(categoryCountRows);
 
         Object[] analyticsRow =
                 messageLogRepository
-                        .aggregateAvgProcessingTimeAndResponseRateByUser(
-                                userId, startDate, endDate)
+                        .aggregateAvgProcessingTimeAndResponseRateByUser(userId, startDate, endDate)
                         .get(0);
 
-        double averageProcessingTimeInSeconds = (Double) analyticsRow[0];
-        double responseRate = (Double) analyticsRow[1];
+        double averageProcessingTimeInSeconds =
+                (double) Math.round((double) analyticsRow[0] * 100) / 100;
+        double responseRate = (double) Math.round((double) analyticsRow[1] * 100) / 100;
 
         return new MessageLogResource.MessageLogAnalyticsResponse(
                 averageProcessingTimeInSeconds, responseRate, categoryCountsByPeriod);

@@ -4,7 +4,7 @@ import static de.flowsuite.mailflowapi.common.util.Util.BERLIN_ZONE;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import de.flowsuite.mailflowapi.common.auth.Authorities;
+import de.flowsuite.mailflowapi.common.constant.Authorities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -117,6 +117,7 @@ public class User implements UserDetails {
         authorities.add(new SimpleGrantedAuthority(Authorities.MESSAGE_LOG_READ.getAuthority()));
         authorities.add(new SimpleGrantedAuthority(Authorities.MESSAGE_LOG_LIST.getAuthority()));
         authorities.add(new SimpleGrantedAuthority(Authorities.RESPONSE_RATINGS_LIST.getAuthority()));
+        authorities.add(new SimpleGrantedAuthority(Authorities.RESPONSE_RATINGS_READ.getAuthority()));
 
         return authorities;
     }

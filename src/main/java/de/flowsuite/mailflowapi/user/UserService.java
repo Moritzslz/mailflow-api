@@ -3,7 +3,7 @@ package de.flowsuite.mailflowapi.user;
 import static de.flowsuite.mailflowapi.common.constant.Message.*;
 import static de.flowsuite.mailflowapi.common.util.Util.BERLIN_ZONE;
 
-import de.flowsuite.mailflowapi.common.auth.Authorities;
+import de.flowsuite.mailflowapi.common.constant.Authorities;
 import de.flowsuite.mailflowapi.common.constant.Message;
 import de.flowsuite.mailflowapi.common.entity.User;
 import de.flowsuite.mailflowapi.common.exception.IdConflictException;
