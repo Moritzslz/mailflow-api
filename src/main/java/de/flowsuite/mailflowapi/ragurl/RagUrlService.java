@@ -28,7 +28,7 @@ class RagUrlService {
             throw new IdConflictException();
         }
 
-        String url = ragUrl.getUrl();
+        String url = ragUrl.getUrl().trim();
 
         if (!url.contains("://")) {
             url = "https://" + url;
