@@ -104,6 +104,7 @@ class SecurityConfig {
                         // MessageCategories Resource
                         .requestMatchers(HttpMethod.POST, "/customers/*/message-categories").access(hasAnyScope(Authorities.MESSAGE_CATEGORIES_WRITE.getAuthority(), Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.GET, "/customers/*/message-categories").access(hasAnyScope(Authorities.MESSAGE_CATEGORIES_LIST.getAuthority(), Authorities.ADMIN.getAuthority()))
+                        .requestMatchers(HttpMethod.GET, "/customers/*/message-categories/*").access(hasAnyScope(Authorities.MESSAGE_CATEGORIES_READ.getAuthority(), Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.PUT, "/customers/*/message-categories").access(hasAnyScope(Authorities.MESSAGE_CATEGORIES_WRITE.getAuthority(), Authorities.ADMIN.getAuthority()))
                         // MessageLog Resource
                         .requestMatchers(HttpMethod.POST, "/customers/*/users/*/message-log").access(hasAnyScope(Authorities.MESSAGE_LOG_WRITE.getAuthority(), Authorities.ADMIN.getAuthority()))

@@ -21,6 +21,7 @@ public enum Authorities {
     BLACKLIST_READ("blacklist:read"),
     BLACKLIST_WRITE("blacklist:write"),
     MESSAGE_CATEGORIES_LIST("message_categories:list"),
+    MESSAGE_CATEGORIES_READ("message_categories:read"),
     MESSAGE_CATEGORIES_WRITE("message_categories:write"),
     MESSAGE_LOG_LIST("message_log:list"),
     MESSAGE_LOG_READ("message_log:read"),
