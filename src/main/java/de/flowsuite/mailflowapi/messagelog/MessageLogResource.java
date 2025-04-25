@@ -38,7 +38,8 @@ class MessageLogResource {
             @AuthenticationPrincipal Jwt jwt,
             UriComponentsBuilder uriBuilder) {
 
-        MessageLogEntry createdMessageLogEntry = messageLogService.createMessageLogEntry(customerId, userId, request, jwt);
+        MessageLogEntry createdMessageLogEntry =
+                messageLogService.createMessageLogEntry(customerId, userId, request, jwt);
 
         URI location =
                 uriBuilder

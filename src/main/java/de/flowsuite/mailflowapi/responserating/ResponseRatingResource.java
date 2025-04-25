@@ -30,13 +30,18 @@ class ResponseRatingResource {
 
     @PostMapping("/users/response-ratings")
     ResponseEntity<ResponseRating> createResponseRating(
-            @RequestParam String token, @RequestBody @Valid CreateResponseRatingRequest request, UriComponentsBuilder uriBuilder) {
-        ResponseRating createdResponseRating = responseRatingService.createResponseRating(token, request);
+            @RequestParam String token,
+            @RequestBody @Valid CreateResponseRatingRequest request,
+            UriComponentsBuilder uriBuilder) {
+        ResponseRating createdResponseRating =
+                responseRatingService.createResponseRating(token, request);
 
         URI location =
                 uriBuilder
                         .path("/customers/{customerId}/response-ratings/{id}")
-                        .buildAndExpand(createdResponseRating.getCustomerId(), createdResponseRating.getMessageLogId())
+                        .buildAndExpand(
+                                createdResponseRating.getCustomerId(),
+                                createdResponseRating.getMessageLogId())
                         .toUri();
 
         return ResponseEntity.created(location).body(createdResponseRating);
