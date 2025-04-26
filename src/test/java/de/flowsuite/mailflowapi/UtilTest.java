@@ -1,11 +1,12 @@
 package de.flowsuite.mailflowapi;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import de.flowsuite.mailflowapi.common.exception.InvalidEmailAddressException;
 import de.flowsuite.mailflowapi.common.exception.InvalidUrlException;
 import de.flowsuite.mailflowapi.common.util.Util;
-import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 class UtilTest {
 
@@ -20,13 +21,24 @@ class UtilTest {
     void testValidateEmailAddress_invalidEmails() {
         assertThrows(InvalidEmailAddressException.class, () -> Util.validateEmailAddress(null));
         assertThrows(InvalidEmailAddressException.class, () -> Util.validateEmailAddress(""));
-        assertThrows(InvalidEmailAddressException.class, () -> Util.validateEmailAddress("noatsymbol.com"));
-        assertThrows(InvalidEmailAddressException.class, () -> Util.validateEmailAddress("nodomain@"));
-        assertThrows(InvalidEmailAddressException.class, () -> Util.validateEmailAddress("@nodomain"));
-        assertThrows(InvalidEmailAddressException.class, () -> Util.validateEmailAddress("blank@.com"));
-        assertThrows(InvalidEmailAddressException.class, () -> Util.validateEmailAddress("blank@domain."));
-        assertThrows(InvalidEmailAddressException.class, () -> Util.validateEmailAddress("blank@domain..com"));
-        assertThrows(InvalidEmailAddressException.class, () -> Util.validateEmailAddress("blank@.domain.com"));
+        assertThrows(
+                InvalidEmailAddressException.class,
+                () -> Util.validateEmailAddress("noatsymbol.com"));
+        assertThrows(
+                InvalidEmailAddressException.class, () -> Util.validateEmailAddress("nodomain@"));
+        assertThrows(
+                InvalidEmailAddressException.class, () -> Util.validateEmailAddress("@nodomain"));
+        assertThrows(
+                InvalidEmailAddressException.class, () -> Util.validateEmailAddress("blank@.com"));
+        assertThrows(
+                InvalidEmailAddressException.class,
+                () -> Util.validateEmailAddress("blank@domain."));
+        assertThrows(
+                InvalidEmailAddressException.class,
+                () -> Util.validateEmailAddress("blank@domain..com"));
+        assertThrows(
+                InvalidEmailAddressException.class,
+                () -> Util.validateEmailAddress("blank@.domain.com"));
     }
 
     @Test
