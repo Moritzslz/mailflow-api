@@ -39,7 +39,7 @@ class ClientServiceTest extends BaseServiceTest {
     }
 
     @BeforeEach
-    void setupTestClient() {
+    void setup() {
         testClient = buildTestClient();
     }
 

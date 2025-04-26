@@ -63,7 +63,7 @@ class UserServiceTest extends BaseServiceTest {
                     "strongPassword!123", "strongPassword!123");
 
     @BeforeEach
-    void setupTestUser() {
+    void setup() {
         testUser = buildTestUser();
     }
 
