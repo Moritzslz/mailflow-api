@@ -61,11 +61,7 @@ class AuthenticationResource {
 
     record UserLoginRequest(@NotBlank String username, @NotBlank String password) {}
 
-    record UserTokenResponse(
-            long userId,
-            long customerId,
-            @NotBlank String accessToken,
-            @NotBlank String refreshToken) {}
+    record UserTokenResponse(@NotBlank String accessToken, @NotBlank String refreshToken) {}
 
     record RefreshTokenRequest(@NotBlank String refreshToken) {}
 
