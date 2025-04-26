@@ -307,8 +307,8 @@ class UserServiceTest extends BaseServiceTest {
 
     @Test
     void testGetUser_success() {
-        when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
         mockJwtForUser(testUser);
+        when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
         User user = userService.getUser(testUser.getCustomerId(), testUser.getId(), jwtMock);
         assertEquals(testUser, user);
     }
@@ -326,8 +326,8 @@ class UserServiceTest extends BaseServiceTest {
 
     @Test
     void testUpdateUser_success() {
-        when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
         mockJwtForUser(testUser);
+        when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
 
         UserResource.UpdateUserRequest updateUserRequest =
                 new UserResource.UpdateUserRequest(
