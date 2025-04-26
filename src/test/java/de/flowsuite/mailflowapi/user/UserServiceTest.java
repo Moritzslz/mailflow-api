@@ -13,7 +13,7 @@ import de.flowsuite.mailflowapi.common.entity.Customer;
 import de.flowsuite.mailflowapi.common.entity.User;
 import de.flowsuite.mailflowapi.common.exception.IdConflictException;
 import de.flowsuite.mailflowapi.common.exception.IdorException;
-import de.flowsuite.mailflowapi.common.util.AesUtil;
+import de.flowsuite.mailflowapi.common.util.Util;
 import de.flowsuite.mailflowapi.customer.CustomerService;
 import de.flowsuite.mailflowapi.mail.MailService;
 
@@ -77,6 +77,8 @@ class UserServiceTest extends BaseServiceTest {
         when(customerService.getByRegistrationToken(anyString()))
                 .thenReturn(Optional.of(testCustomer));
 
+        assertDoesNotThrow(() -> Util.validateEmailAddress(createUserRequest.emailAddress()));
+
         Message message = userService.createUser(createUserRequest);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
@@ -113,6 +115,8 @@ class UserServiceTest extends BaseServiceTest {
     void testCreateUser_alreadyExists() {
         when(userRepository.existsByEmailAddressHash(anyString())).thenReturn(true);
 
+        assertDoesNotThrow(() -> Util.validateEmailAddress(createUserRequest.emailAddress()));
+
         Message message = userService.createUser(createUserRequest);
 
         verify(userRepository, never()).save(any());
@@ -125,6 +129,8 @@ class UserServiceTest extends BaseServiceTest {
     void testCreateUser_invalidRegistrationToken() {
         when(userRepository.existsByEmailAddressHash(anyString())).thenReturn(false);
         when(customerService.getByRegistrationToken(anyString())).thenReturn(Optional.empty());
+
+        assertDoesNotThrow(() -> Util.validateEmailAddress(createUserRequest.emailAddress()));
 
         Message message = userService.createUser(createUserRequest);
 
@@ -318,7 +324,9 @@ class UserServiceTest extends BaseServiceTest {
     void testGetUser_notFound() {
         mockJwtForUser(testUser);
         when(userRepository.findById(testUser.getId())).thenReturn(Optional.empty());
-        assertThrows(UsernameNotFoundException.class, () -> userService.getUser(testUser.getCustomerId(), testUser.getId(), jwtMock));
+        assertThrows(
+                UsernameNotFoundException.class,
+                () -> userService.getUser(testUser.getCustomerId(), testUser.getId(), jwtMock));
     }
 
     @Test
