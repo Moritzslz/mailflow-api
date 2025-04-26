@@ -129,7 +129,8 @@ class AuthenticationService {
 
         userService.updateLastLoginAt(user);
 
-        return new AuthenticationResource.UserTokenResponse(accessToken, refreshToken);
+        return new AuthenticationResource.UserTokenResponse(
+                user.getId(), user.getCustomerId(), accessToken, refreshToken);
     }
 
     AuthenticationResource.ClientTokenResponse generateClientAccessToken(Client client) {
