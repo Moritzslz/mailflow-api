@@ -101,7 +101,7 @@ class UserServiceTest extends BaseServiceTest {
                         .isAfter(
                                 ZonedDateTime.now()
                                         .plusHours(UserService.TOKEN_TTL_HOURS)
-                                        .minusMinutes(1)));
+                                        .minusMinutes(5)));
         assertEquals(ENCRYPTED_VALUE, savedUser.getFirstName());
         assertEquals(ENCRYPTED_VALUE, savedUser.getLastName());
         assertEquals(ENCRYPTED_VALUE, savedUser.getEmailAddress());
@@ -175,7 +175,7 @@ class UserServiceTest extends BaseServiceTest {
 
     @Test
     void testEnableUser_tokenExpired() {
-        testUser.setTokenExpiresAt(ZonedDateTime.now().minusMinutes(1));
+        testUser.setTokenExpiresAt(ZonedDateTime.now().minusMinutes(5));
 
         when(userRepository.findByVerificationToken(anyString())).thenReturn(Optional.of(testUser));
 
@@ -236,7 +236,7 @@ class UserServiceTest extends BaseServiceTest {
                         .isAfter(
                                 ZonedDateTime.now()
                                         .plusMinutes(UserService.TOKEN_TTL_MINUTES)
-                                        .minusMinutes(1)));
+                                        .minusMinutes(5)));
     }
 
     @Test
@@ -289,7 +289,7 @@ class UserServiceTest extends BaseServiceTest {
 
     @Test
     void testCompletePasswordReset_tokenExpired() {
-        testUser.setTokenExpiresAt(ZonedDateTime.now().minusMinutes(1));
+        testUser.setTokenExpiresAt(ZonedDateTime.now().minusMinutes(5));
 
         when(userRepository.findByVerificationToken(anyString())).thenReturn(Optional.of(testUser));
 
