@@ -9,10 +9,12 @@ import static org.mockito.Mockito.*;
 import de.flowsuite.mailflowapi.BaseServiceTest;
 import de.flowsuite.mailflowapi.common.constant.Authorities;
 import de.flowsuite.mailflowapi.common.constant.Message;
+import de.flowsuite.mailflowapi.common.entity.Customer;
 import de.flowsuite.mailflowapi.common.entity.User;
 import de.flowsuite.mailflowapi.common.exception.IdConflictException;
 import de.flowsuite.mailflowapi.common.exception.IdorException;
 import de.flowsuite.mailflowapi.common.util.AesUtil;
+import de.flowsuite.mailflowapi.customer.CustomerService;
 import de.flowsuite.mailflowapi.mail.MailService;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +36,7 @@ class UserServiceTest extends BaseServiceTest {
     @Mock private UserRepository userRepository;
     @Mock private PasswordEncoder passwordEncoder;
     @Mock private MailService mailService;
+    @Mock private CustomerService customerService;
 
     @InjectMocks private UserService userService;
 
@@ -41,7 +44,7 @@ class UserServiceTest extends BaseServiceTest {
 
     private static final UserResource.CreateUserRequest createUserRequest =
             new UserResource.CreateUserRequest(
-                    100L,
+                    "someToken",
                     "Rick",
                     "Sanchez",
                     "rick.sanchez@test.de",
@@ -58,26 +61,6 @@ class UserServiceTest extends BaseServiceTest {
             new UserResource.CompletePasswordResetRequest(
                     "strongPassword!123", "strongPassword!123");
 
-    private User buildTestUser() {
-        return User.builder()
-                .id(100L)
-                .customerId(100L)
-                .firstName(ENCRYPTED_VALUE)
-                .lastName(ENCRYPTED_VALUE)
-                .emailAddressHash(HASHED_VALUE)
-                .emailAddress(ENCRYPTED_VALUE)
-                .password(HASHED_VALUE)
-                .phoneNumber(ENCRYPTED_VALUE)
-                .position(null)
-                .role(Authorities.USER.getAuthority())
-                .isAccountLocked(false)
-                .isAccountEnabled(false)
-                .isSubscribedToNewsletter(true)
-                .verificationToken(VERIFICATION_TOKEN)
-                .tokenExpiresAt(ZonedDateTime.now().plusMinutes(30))
-                .build();
-    }
-
     @BeforeEach
     void setupTestUser() {
         testUser = buildTestUser();
@@ -85,8 +68,12 @@ class UserServiceTest extends BaseServiceTest {
 
     @Test
     void testCreateUser_success() {
+        long customerId = 10L;
+        Customer testCustomer = Customer.builder().id(customerId).build();
+
         when(passwordEncoder.encode(anyString())).thenReturn(HASHED_VALUE);
         when(userRepository.existsByEmailAddressHash(anyString())).thenReturn(false);
+        when(customerService.getByRegistrationToken(anyString())).thenReturn(Optional.of(testCustomer));
 
         Message message = userService.createUser(createUserRequest);
 
@@ -102,6 +89,7 @@ class UserServiceTest extends BaseServiceTest {
                         anyInt());
 
         assertEquals(CREATE_USER_MSG, message.message());
+        assertEquals(customerId, savedUser.getCustomerId());
         assertFalse(savedUser.isEnabled());
         assertTrue(
                 savedUser
@@ -122,6 +110,19 @@ class UserServiceTest extends BaseServiceTest {
     @Test
     void testCreateUser_alreadyExists() {
         when(userRepository.existsByEmailAddressHash(anyString())).thenReturn(true);
+
+        Message message = userService.createUser(createUserRequest);
+
+        verify(userRepository, never()).save(any());
+        verify(mailService, never()).sendDoubleOptInEmail(any(), any(), any(), anyInt());
+
+        assertEquals(CREATE_USER_MSG, message.message());
+    }
+
+    @Test
+    void testCreateUser_invalidRegistrationToken() {
+        when(userRepository.existsByEmailAddressHash(anyString())).thenReturn(false);
+        when(customerService.getByRegistrationToken(anyString())).thenReturn(Optional.empty());
 
         Message message = userService.createUser(createUserRequest);
 
