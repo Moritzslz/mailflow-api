@@ -93,7 +93,7 @@ class BlacklistServiceTest extends BaseServiceTest {
                                 testBlacklistEntry,
                                 jwtMock));
 
-        verify(blacklistRepository, never()).save(any());
+        verify(blacklistRepository, never()).save(any(BlacklistEntry.class));
     }
 
     @Test
@@ -122,7 +122,7 @@ class BlacklistServiceTest extends BaseServiceTest {
                                 testBlacklistEntry,
                                 jwtMock));
 
-        verify(blacklistRepository, never()).save(any());
+        verify(blacklistRepository, never()).save(any(BlacklistEntry.class));
     }
 
     @Test
@@ -144,7 +144,7 @@ class BlacklistServiceTest extends BaseServiceTest {
                                 testBlacklistEntry,
                                 jwtMock));
 
-        verify(blacklistRepository, never()).save(any());
+        verify(blacklistRepository, never()).save(any(BlacklistEntry.class));
     }
 
     @Test
@@ -262,12 +262,12 @@ class BlacklistServiceTest extends BaseServiceTest {
     @Test
     void testDeleteBlacklistEntry_notFound() {
         testGetBlacklistEntry_notFound();
-        verify(blacklistRepository, never()).delete(any());
+        verify(blacklistRepository, never()).delete(any(BlacklistEntry.class));
     }
 
     @Test
     void testDeleteBlacklistEntry_idor() {
         testGetBlacklistEntry_idor();
-        verify(blacklistRepository, never()).delete(any());
+        verify(blacklistRepository, never()).delete(any(BlacklistEntry.class));
     }
 }

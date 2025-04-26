@@ -119,8 +119,8 @@ class UserServiceTest extends BaseServiceTest {
 
         Message message = userService.createUser(createUserRequest);
 
-        verify(userRepository, never()).save(any());
-        verify(mailService, never()).sendDoubleOptInEmail(any(), any(), any(), anyInt());
+        verify(userRepository, never()).save(any(User.class));
+        verify(mailService, never()).sendDoubleOptInEmail(anyString(), anyString(), anyString(), anyInt());
 
         assertEquals(CREATE_USER_MSG, message.message());
     }
@@ -134,8 +134,8 @@ class UserServiceTest extends BaseServiceTest {
 
         Message message = userService.createUser(createUserRequest);
 
-        verify(userRepository, never()).save(any());
-        verify(mailService, never()).sendDoubleOptInEmail(any(), any(), any(), anyInt());
+        verify(userRepository, never()).save(any(User.class));
+        verify(mailService, never()).sendDoubleOptInEmail(anyString(), anyString(), anyString(), anyInt());
 
         assertEquals(CREATE_USER_MSG, message.message());
     }
@@ -165,7 +165,7 @@ class UserServiceTest extends BaseServiceTest {
 
         Message message = userService.enableUser(testUser.getVerificationToken());
 
-        verify(userRepository, never()).save(any());
+        verify(userRepository, never()).save(any(User.class));
         verify(mailService, never()).sendWelcomeEmail(anyLong(), anyString(), anyString());
         verify(mailService, never())
                 .sendRegistrationExpiredEmail(anyLong(), anyString(), anyString());
@@ -185,7 +185,7 @@ class UserServiceTest extends BaseServiceTest {
         verify(userRepository).delete(userCaptor.capture());
         User savedUser = userCaptor.getValue();
 
-        verify(userRepository, never()).save(any());
+        verify(userRepository, never()).save(any(User.class));
         verify(mailService, never()).sendWelcomeEmail(anyLong(), anyString(), anyString());
         verify(mailService)
                 .sendRegistrationExpiredEmail(savedUser.getId(), DECRYPTED_VALUE, DECRYPTED_VALUE);
@@ -202,8 +202,8 @@ class UserServiceTest extends BaseServiceTest {
 
         Message message = userService.enableUser(testUser.getVerificationToken());
 
-        verify(userRepository, never()).save(any());
-        verify(userRepository, never()).delete(any());
+        verify(userRepository, never()).save(any(User.class));
+        verify(userRepository, never()).delete(any(User.class));
         verify(mailService, never()).sendWelcomeEmail(anyLong(), anyString(), anyString());
         verify(mailService, never())
                 .sendRegistrationExpiredEmail(anyLong(), anyString(), anyString());
@@ -245,7 +245,7 @@ class UserServiceTest extends BaseServiceTest {
 
         Message message = userService.requestPasswordReset(requestPasswordResetRequest);
 
-        verify(userRepository, never()).save(any());
+        verify(userRepository, never()).save(any(User.class));
         verify(mailService, never())
                 .sendPasswordResetEmail(anyLong(), anyString(), anyString(), anyString(), anyInt());
 
@@ -280,7 +280,7 @@ class UserServiceTest extends BaseServiceTest {
                 userService.completePasswordReset(
                         testUser.getVerificationToken(), completePasswordResetRequest);
 
-        verify(userRepository, never()).save(any());
+        verify(userRepository, never()).save(any(User.class));
         verify(mailService, never())
                 .sendPasswordResetExpiredEmail(anyLong(), anyString(), anyString());
 
@@ -297,7 +297,7 @@ class UserServiceTest extends BaseServiceTest {
                 userService.completePasswordReset(
                         testUser.getVerificationToken(), completePasswordResetRequest);
 
-        verify(userRepository, never()).save(any());
+        verify(userRepository, never()).save(any(User.class));
         verify(mailService)
                 .sendPasswordResetExpiredEmail(testUser.getId(), DECRYPTED_VALUE, DECRYPTED_VALUE);
 
@@ -338,7 +338,7 @@ class UserServiceTest extends BaseServiceTest {
         assertThrows(
                 IdorException.class,
                 () -> userService.getUser(testUser.getCustomerId(), testUser.getId() + 1, jwtMock));
-        verify(userRepository, never()).findById(any());
+        verify(userRepository, never()).findById(anyLong());
     }
 
     @Test
@@ -414,7 +414,7 @@ class UserServiceTest extends BaseServiceTest {
                                 updateUserRequest2,
                                 jwtMock));
 
-        verify(userRepository, never()).save(any());
+        verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
@@ -428,6 +428,6 @@ class UserServiceTest extends BaseServiceTest {
                 IdorException.class,
                 () -> userService.getUser(testUser.getCustomerId(), testUser.getId() + 1, jwtMock));
 
-        verify(userRepository, never()).save(any());
+        verify(userRepository, never()).save(any(User.class));
     }
 }
