@@ -9,8 +9,9 @@ import de.flowsuite.mailflowapi.common.entity.User;
 import de.flowsuite.mailflowapi.common.exception.EntityAlreadyExistsException;
 import de.flowsuite.mailflowapi.common.exception.EntityNotFoundException;
 import de.flowsuite.mailflowapi.common.exception.IdConflictException;
-
 import de.flowsuite.mailflowapi.common.exception.IdorException;
+import de.flowsuite.mailflowapi.common.util.Util;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,22 +43,28 @@ class BlacklistServiceTest extends BaseServiceTest {
 
     @BeforeEach
     void setupTestUser() {
+        mockJwtForUser(testUser);
         testBlacklistEntry = buildTestBlacklistEntry();
     }
 
     @Test
     void testCreateBlacklistEntry_success() {
-        mockJwtForUser(testUser);
-        when(blacklistRepository.existsByUserIdAndBlacklistedEmailAddressHash(testUser.getId(), HASHED_VALUE)).thenReturn(false);
+        when(blacklistRepository.existsByUserIdAndBlacklistedEmailAddressHash(
+                        testUser.getId(), HASHED_VALUE))
+                .thenReturn(false);
 
         testBlacklistEntry.setId(null);
         assertNull(testBlacklistEntry.getId());
 
+        assertDoesNotThrow(
+                () -> Util.validateEmailAddress(testBlacklistEntry.getBlacklistedEmailAddress()));
+
         blacklistService.createBlacklistEntry(
                 testUser.getCustomerId(), testUser.getId(), testBlacklistEntry, jwtMock);
 
-        ArgumentCaptor<BlacklistEntry> blacklistEntryCaptor = ArgumentCaptor.forClass(BlacklistEntry.class);
-        verify(blacklistRepository).save(blacklistEntryCaptor.capture());
+        ArgumentCaptor<BlacklistEntry> blacklistEntryCaptor =
+                ArgumentCaptor.forClass(BlacklistEntry.class);
+        verify(blacklistRepository).save(testBlacklistEntry);
         BlacklistEntry savedBlacklistEntry = blacklistEntryCaptor.getValue();
 
         assertEquals(ENCRYPTED_VALUE, savedBlacklistEntry.getBlacklistedEmailAddress());
@@ -67,21 +74,32 @@ class BlacklistServiceTest extends BaseServiceTest {
 
     @Test
     void testCreateBlacklistEntry_alreadyExists() {
-        mockJwtForUser(testUser);
-        when(blacklistRepository.existsByUserIdAndBlacklistedEmailAddressHash(testUser.getId(), HASHED_VALUE)).thenReturn(true);
+        when(blacklistRepository.existsByUserIdAndBlacklistedEmailAddressHash(
+                        testUser.getId(), HASHED_VALUE))
+                .thenReturn(true);
 
         testBlacklistEntry.setId(null);
         assertNull(testBlacklistEntry.getId());
 
-        assertThrows(EntityAlreadyExistsException.class, () -> blacklistService.createBlacklistEntry(
-                testUser.getCustomerId(), testUser.getId(), testBlacklistEntry, jwtMock));
+        assertDoesNotThrow(
+                () -> Util.validateEmailAddress(testBlacklistEntry.getBlacklistedEmailAddress()));
+
+        assertThrows(
+                EntityAlreadyExistsException.class,
+                () ->
+                        blacklistService.createBlacklistEntry(
+                                testUser.getCustomerId(),
+                                testUser.getId(),
+                                testBlacklistEntry,
+                                jwtMock));
 
         verify(blacklistRepository, never()).save(any());
     }
 
     @Test
     void testCreateBlacklistEntry_idConflict() {
-        mockJwtForUser(testUser);
+        assertDoesNotThrow(
+                () -> Util.validateEmailAddress(testBlacklistEntry.getBlacklistedEmailAddress()));
 
         assertThrows(
                 IdConflictException.class,
@@ -109,7 +127,6 @@ class BlacklistServiceTest extends BaseServiceTest {
 
     @Test
     void testCreateBlacklistEntry_idor() {
-        mockJwtForUser(testUser);
         assertThrows(
                 IdorException.class,
                 () ->
@@ -132,51 +149,78 @@ class BlacklistServiceTest extends BaseServiceTest {
 
     @Test
     void testGetBlacklistEntry_success() {
-        mockJwtForUser(testUser);
-        when(blacklistRepository.findById(testBlacklistEntry.getId())).thenReturn(Optional.of(testBlacklistEntry));
+        when(blacklistRepository.findById(testBlacklistEntry.getId()))
+                .thenReturn(Optional.of(testBlacklistEntry));
 
-        BlacklistEntry blacklistEntry = blacklistService.getBlacklistEntry(testUser.getCustomerId(), testUser.getId(), testBlacklistEntry.getId(), jwtMock);
+        BlacklistEntry blacklistEntry =
+                blacklistService.getBlacklistEntry(
+                        testUser.getCustomerId(),
+                        testUser.getId(),
+                        testBlacklistEntry.getId(),
+                        jwtMock);
 
         assertEquals(DECRYPTED_VALUE, blacklistEntry.getBlacklistedEmailAddress());
     }
 
     @Test
     void testGetBlacklistEntry_notFound() {
-        mockJwtForUser(testUser);
         when(blacklistRepository.findById(testBlacklistEntry.getId())).thenReturn(Optional.empty());
-        assertThrows(EntityNotFoundException.class, () -> blacklistService.getBlacklistEntry(testUser.getCustomerId(), testUser.getId(), testBlacklistEntry.getId(), jwtMock));
+        assertThrows(
+                EntityNotFoundException.class,
+                () ->
+                        blacklistService.getBlacklistEntry(
+                                testUser.getCustomerId(),
+                                testUser.getId(),
+                                testBlacklistEntry.getId(),
+                                jwtMock));
     }
 
     @Test
     void testGetBlacklistEntry_idor() {
-        mockJwtForUser(testUser);
-
         BlacklistEntry testBlacklistEntryIdor = buildTestBlacklistEntry();
         testBlacklistEntryIdor.setId(testBlacklistEntryIdor.getId() + 1);
         testBlacklistEntryIdor.setUserId(testUser.getId() + 1);
 
         long testBlackListEntryId = testBlacklistEntry.getId();
-        long testBlackListEntryIdIdor = testBlacklistEntryIdor.getId() ;
+        long testBlackListEntryIdIdor = testBlacklistEntryIdor.getId();
 
-        when(blacklistRepository.findById(testBlackListEntryIdIdor)).thenReturn(Optional.of(testBlacklistEntryIdor));
+        when(blacklistRepository.findById(testBlackListEntryIdIdor))
+                .thenReturn(Optional.of(testBlacklistEntryIdor));
 
         assertThrows(
                 IdorException.class,
-                () -> blacklistService.getBlacklistEntry(testUser.getCustomerId() + 1, testUser.getId(), testBlackListEntryId, jwtMock));
+                () ->
+                        blacklistService.getBlacklistEntry(
+                                testUser.getCustomerId() + 1,
+                                testUser.getId(),
+                                testBlackListEntryId,
+                                jwtMock));
         assertThrows(
                 IdorException.class,
-                () -> blacklistService.getBlacklistEntry(testUser.getCustomerId(), testUser.getId() + 1, testBlackListEntryId, jwtMock));
+                () ->
+                        blacklistService.getBlacklistEntry(
+                                testUser.getCustomerId(),
+                                testUser.getId() + 1,
+                                testBlackListEntryId,
+                                jwtMock));
         assertThrows(
                 IdorException.class,
-                () -> blacklistService.getBlacklistEntry(testUser.getCustomerId(), testUser.getId(), testBlackListEntryIdIdor, jwtMock));
+                () ->
+                        blacklistService.getBlacklistEntry(
+                                testUser.getCustomerId(),
+                                testUser.getId(),
+                                testBlackListEntryIdIdor,
+                                jwtMock));
     }
 
     @Test
     void testListBlacklistEntries_success() {
-        mockJwtForUser(testUser);
-        when(blacklistRepository.findByUserId(testUser.getId())).thenReturn(List.of(testBlacklistEntry));
+        when(blacklistRepository.findByUserId(testUser.getId()))
+                .thenReturn(List.of(testBlacklistEntry));
 
-        List<BlacklistEntry> blacklistEntries = blacklistService.listBlacklistEntries(testUser.getCustomerId(), testUser.getId(), jwtMock);
+        List<BlacklistEntry> blacklistEntries =
+                blacklistService.listBlacklistEntries(
+                        testUser.getCustomerId(), testUser.getId(), jwtMock);
 
         assertEquals(1, blacklistEntries.size());
         assertEquals(testBlacklistEntry, blacklistEntries.get(0));
@@ -185,33 +229,30 @@ class BlacklistServiceTest extends BaseServiceTest {
 
     @Test
     void testListBlacklistEntries_idor() {
-        mockJwtForUser(testUser);
         assertThrows(
                 IdorException.class,
                 () ->
                         blacklistService.listBlacklistEntries(
-                                testUser.getCustomerId() + 1,
-                                testUser.getId(),
-                                jwtMock));
+                                testUser.getCustomerId() + 1, testUser.getId(), jwtMock));
         assertThrows(
                 IdorException.class,
                 () ->
                         blacklistService.listBlacklistEntries(
-                                testUser.getCustomerId(),
-                                testUser.getId() + 1,
-                                jwtMock));
+                                testUser.getCustomerId(), testUser.getId() + 1, jwtMock));
 
         verify(blacklistRepository, never()).findByUserId(anyLong());
     }
 
     @Test
     void testDeleteBlacklistEntry_success() {
-        mockJwtForUser(testUser);
-        when(blacklistRepository.findById(testBlacklistEntry.getId())).thenReturn(Optional.of(testBlacklistEntry));
+        when(blacklistRepository.findById(testBlacklistEntry.getId()))
+                .thenReturn(Optional.of(testBlacklistEntry));
 
-        blacklistService.deleteBlacklistEntry(testUser.getCustomerId(), testUser.getId(), testBlacklistEntry.getId(), jwtMock);
+        blacklistService.deleteBlacklistEntry(
+                testUser.getCustomerId(), testUser.getId(), testBlacklistEntry.getId(), jwtMock);
 
-        ArgumentCaptor<BlacklistEntry> blacklistEntryCaptor = ArgumentCaptor.forClass(BlacklistEntry.class);
+        ArgumentCaptor<BlacklistEntry> blacklistEntryCaptor =
+                ArgumentCaptor.forClass(BlacklistEntry.class);
         verify(blacklistRepository).delete(blacklistEntryCaptor.capture());
         BlacklistEntry deletedBlacklistEntry = blacklistEntryCaptor.getValue();
 
