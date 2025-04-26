@@ -62,10 +62,11 @@ class CustomerResource {
             @NotBlank String houseNumber,
             @NotBlank String postalCode,
             @NotBlank String city,
+            @Email @NotBlank String billingEmailAddress,
             @NotBlank String openaiApiKey,
             @JsonIgnore String sourceOfContact,
             String websiteUrl,
             String privacyPolicyUrl,
-            String ctaUrl,
-            @Email @NotBlank String billingEmailAddress) {}
+            String ctaUrl
+    ) {}
 }
