@@ -44,6 +44,16 @@ public class CustomerService {
             throw new EntityAlreadyExistsException(Customer.class.getSimpleName());
         }
 
+        if (request.websiteUrl() != null && !request.websiteUrl().isBlank()) {
+            Util.validateUrl(request.websiteUrl());
+        }
+        if (request.privacyPolicyUrl() != null && !request.privacyPolicyUrl().isBlank()) {
+            Util.validateUrl(request.privacyPolicyUrl());
+        }
+        if (request.ctaUrl() != null && !request.ctaUrl().isBlank()) {
+            Util.validateUrl(request.ctaUrl());
+        }
+
         String registrationToken = generateRegistrationToken();
 
         Customer customer =
