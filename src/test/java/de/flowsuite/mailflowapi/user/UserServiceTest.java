@@ -298,7 +298,7 @@ class UserServiceTest extends BaseServiceTest {
     }
 
     @Test
-    void testListUsers() {
+    void testListUsers_success() {
         when(userRepository.findAll()).thenReturn(List.of(testUser));
         List<User> users = userService.listUsers();
         assertEquals(1, users.size());
