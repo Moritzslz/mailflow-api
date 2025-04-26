@@ -4,6 +4,7 @@ import de.flowsuite.mailflowapi.common.entity.Client;
 import de.flowsuite.mailflowapi.common.exception.EntityAlreadyExistsException;
 import de.flowsuite.mailflowapi.common.exception.EntityNotFoundException;
 
+import de.flowsuite.mailflowapi.common.exception.IdConflictException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -35,6 +36,10 @@ public class ClientService implements UserDetailsService {
     }
 
     Client createClient(Client client) {
+        if (client.getId() != null) {
+            throw new IdConflictException();
+        }
+
         if (clientRepository.existsByClientName(client.getClientName())) {
             throw new EntityAlreadyExistsException(Client.class.getSimpleName());
         }

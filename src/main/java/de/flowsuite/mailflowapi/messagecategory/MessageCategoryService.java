@@ -22,7 +22,7 @@ class MessageCategoryService {
             long customerId, MessageCategory messageCategory, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
 
-        if (!messageCategory.getCustomerId().equals(customerId)) {
+        if (messageCategory.getId() != null || !messageCategory.getCustomerId().equals(customerId)) {
             throw new IdConflictException();
         }
 

@@ -24,7 +24,7 @@ class RagUrlService {
     RagUrl createRagUrl(long customerId, RagUrl ragUrl, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
 
-        if (!ragUrl.getCustomerId().equals(customerId)) {
+        if (ragUrl.getId() != null || !ragUrl.getCustomerId().equals(customerId)) {
             throw new IdConflictException();
         }
 

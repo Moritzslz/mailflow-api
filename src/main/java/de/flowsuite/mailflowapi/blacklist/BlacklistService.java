@@ -29,7 +29,7 @@ class BlacklistService {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
         AuthorisationUtil.validateAccessToUser(userId, jwt);
 
-        if (!blacklistEntry.getUserId().equals(userId)) {
+        if (blacklistEntry.getId() != null || !blacklistEntry.getUserId().equals(userId)) {
             throw new IdConflictException();
         }
 
