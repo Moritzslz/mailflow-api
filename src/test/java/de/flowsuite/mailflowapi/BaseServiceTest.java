@@ -13,6 +13,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.mockito.MockedStatic;
 import org.springframework.security.oauth2.jwt.Jwt;
 
+import java.time.ZonedDateTime;
+
 public abstract class BaseServiceTest {
 
     protected static final String ENCRYPTED_VALUE = "encrypted-value";
@@ -23,6 +25,26 @@ public abstract class BaseServiceTest {
     protected MockedStatic<AesUtil> aesUtilMock;
     protected MockedStatic<HmacUtil> hmacUtilMock;
     protected Jwt jwtMock;
+
+    protected User buildTestUser() {
+        return User.builder()
+                .id(100L)
+                .customerId(100L)
+                .firstName(ENCRYPTED_VALUE)
+                .lastName(ENCRYPTED_VALUE)
+                .emailAddressHash(HASHED_VALUE)
+                .emailAddress(ENCRYPTED_VALUE)
+                .password(HASHED_VALUE)
+                .phoneNumber(ENCRYPTED_VALUE)
+                .position(null)
+                .role(Authorities.USER.getAuthority())
+                .isAccountLocked(false)
+                .isAccountEnabled(false)
+                .isSubscribedToNewsletter(true)
+                .verificationToken(VERIFICATION_TOKEN)
+                .tokenExpiresAt(ZonedDateTime.now().plusMinutes(30))
+                .build();
+    }
 
     @BeforeEach
     void baseSetup() {
