@@ -171,7 +171,6 @@ class UserServiceTest extends BaseServiceTest {
     void testEnableUser_tokenExpired() {
         testUser.setTokenExpiresAt(ZonedDateTime.now().minusMinutes(1));
 
-        when(AesUtil.decrypt(anyString())).thenReturn(DECRYPTED_VALUE);
         when(userRepository.findByVerificationToken(anyString())).thenReturn(Optional.of(testUser));
 
         Message message = userService.enableUser(testUser.getVerificationToken());
@@ -180,6 +179,7 @@ class UserServiceTest extends BaseServiceTest {
         verify(userRepository).delete(userCaptor.capture());
         User savedUser = userCaptor.getValue();
 
+        verify(userRepository, never()).save(any());
         verify(mailService, never()).sendWelcomeEmail(anyLong(), anyString(), anyString());
         verify(mailService)
                 .sendRegistrationExpiredEmail(savedUser.getId(), DECRYPTED_VALUE, DECRYPTED_VALUE);
@@ -197,6 +197,7 @@ class UserServiceTest extends BaseServiceTest {
         Message message = userService.enableUser(testUser.getVerificationToken());
 
         verify(userRepository, never()).save(any());
+        verify(userRepository, never()).delete(any());
         verify(mailService, never()).sendWelcomeEmail(anyLong(), anyString(), anyString());
         verify(mailService, never())
                 .sendRegistrationExpiredEmail(anyLong(), anyString(), anyString());
@@ -329,6 +330,7 @@ class UserServiceTest extends BaseServiceTest {
         assertThrows(
                 IdorException.class,
                 () -> userService.getUser(testUser.getCustomerId(), testUser.getId() + 1, jwtMock));
+        verify(userRepository, never()).findById(any());
     }
 
     @Test
@@ -403,6 +405,8 @@ class UserServiceTest extends BaseServiceTest {
                                 testUser.getId(),
                                 updateUserRequest2,
                                 jwtMock));
+
+        verify(userRepository, never()).save(any());
     }
 
     @Test
@@ -415,5 +419,7 @@ class UserServiceTest extends BaseServiceTest {
         assertThrows(
                 IdorException.class,
                 () -> userService.getUser(testUser.getCustomerId(), testUser.getId() + 1, jwtMock));
+
+        verify(userRepository, never()).save(any());
     }
 }
