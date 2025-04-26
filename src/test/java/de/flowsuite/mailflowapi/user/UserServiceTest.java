@@ -314,6 +314,13 @@ class UserServiceTest extends BaseServiceTest {
     }
 
     @Test
+    void testGetUser_notFound() {
+        mockJwtForUser(testUser);
+        when(userRepository.findById(testUser.getId())).thenReturn(Optional.empty());
+        assertThrows(UsernameNotFoundException.class, () -> userService.getUser(testUser.getCustomerId(), testUser.getId(), jwtMock));
+    }
+
+    @Test
     void testGetUser_idor() {
         mockJwtForUser(testUser);
         assertThrows(
