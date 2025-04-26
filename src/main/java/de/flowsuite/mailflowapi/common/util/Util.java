@@ -37,6 +37,12 @@ public class Util {
             throw new InvalidEmailAddressException();
         }
 
+        for (String part : domainParts) {
+            if (part.isBlank()) {
+                throw new InvalidEmailAddressException();
+            }
+        }
+
         String secondLevelDomain = domainParts[0];
         String topLevelDomain = domainParts[1];
 
