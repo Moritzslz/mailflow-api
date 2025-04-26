@@ -120,7 +120,8 @@ class UserServiceTest extends BaseServiceTest {
         Message message = userService.createUser(createUserRequest);
 
         verify(userRepository, never()).save(any(User.class));
-        verify(mailService, never()).sendDoubleOptInEmail(anyString(), anyString(), anyString(), anyInt());
+        verify(mailService, never())
+                .sendDoubleOptInEmail(anyString(), anyString(), anyString(), anyInt());
 
         assertEquals(CREATE_USER_MSG, message.message());
     }
@@ -135,7 +136,8 @@ class UserServiceTest extends BaseServiceTest {
         Message message = userService.createUser(createUserRequest);
 
         verify(userRepository, never()).save(any(User.class));
-        verify(mailService, never()).sendDoubleOptInEmail(anyString(), anyString(), anyString(), anyInt());
+        verify(mailService, never())
+                .sendDoubleOptInEmail(anyString(), anyString(), anyString(), anyInt());
 
         assertEquals(CREATE_USER_MSG, message.message());
     }
