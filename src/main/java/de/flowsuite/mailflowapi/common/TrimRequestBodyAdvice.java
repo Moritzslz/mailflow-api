@@ -1,6 +1,7 @@
 package de.flowsuite.mailflowapi.common;
 
 import de.flowsuite.mailflowapi.common.exception.TrimValidationException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.MethodParameter;
@@ -18,17 +19,26 @@ public class TrimRequestBodyAdvice extends RequestBodyAdviceAdapter {
     private static final Logger LOG = LoggerFactory.getLogger(TrimRequestBodyAdvice.class);
 
     @Override
-    public boolean supports(MethodParameter methodParameter, Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
+    public boolean supports(
+            MethodParameter methodParameter,
+            Type targetType,
+            Class<? extends HttpMessageConverter<?>> converterType) {
         return true;
     }
 
     @Override
-    public Object afterBodyRead(Object body, HttpInputMessage inputMessage, MethodParameter parameter, Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
+    public Object afterBodyRead(
+            Object body,
+            HttpInputMessage inputMessage,
+            MethodParameter parameter,
+            Type targetType,
+            Class<? extends HttpMessageConverter<?>> converterType) {
         trimStringFields(body);
         return super.afterBodyRead(body, inputMessage, parameter, targetType, converterType);
     }
 
-    // TODO only works for classes not records since record fields are final (immutable) therefore field.set causes IllegalAccessException
+    // TODO only works for classes not records since record fields are final (immutable) therefore
+    // field.set causes IllegalAccessException
     private void trimStringFields(Object object) {
         if (object == null) return;
 
@@ -40,7 +50,7 @@ public class TrimRequestBodyAdvice extends RequestBodyAdviceAdapter {
                     String value = (String) field.get(object);
                     String trimmedValue = value.trim();
                     if (!trimmedValue.equals(value)) {
-                       throw new TrimValidationException(field.getName());
+                        throw new TrimValidationException(field.getName());
                     }
                 } catch (IllegalAccessException e) {
                     throw new RuntimeException(e);
@@ -48,6 +58,4 @@ public class TrimRequestBodyAdvice extends RequestBodyAdviceAdapter {
             }
         }
     }
-
-
 }

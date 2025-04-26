@@ -13,5 +13,4 @@ public class TrimValidationException extends RuntimeException {
     public TrimValidationException(String fieldName) {
         super(fieldName + " must not contain leading or trailing whitespace.");
     }
-
 }
