@@ -60,7 +60,7 @@ class BlacklistServiceTest extends BaseServiceTest {
 
         ArgumentCaptor<BlacklistEntry> blacklistEntryCaptor =
                 ArgumentCaptor.forClass(BlacklistEntry.class);
-        verify(blacklistRepository).save(testBlacklistEntry);
+        verify(blacklistRepository).save(blacklistEntryCaptor.capture());
         BlacklistEntry savedBlacklistEntry = blacklistEntryCaptor.getValue();
 
         assertEquals(ENCRYPTED_VALUE, savedBlacklistEntry.getBlacklistedEmailAddress());
