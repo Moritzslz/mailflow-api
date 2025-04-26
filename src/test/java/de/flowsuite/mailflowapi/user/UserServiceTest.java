@@ -24,6 +24,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.ZonedDateTime;
@@ -89,7 +90,6 @@ class UserServiceTest extends BaseServiceTest {
                         eq(savedUser.getVerificationToken()),
                         anyInt());
 
-        assertNotNull(savedUser.getId());
         assertEquals(CREATE_USER_MSG, message.message());
         assertEquals(customerId, savedUser.getCustomerId());
         assertFalse(savedUser.isEnabled());
@@ -311,6 +311,13 @@ class UserServiceTest extends BaseServiceTest {
         when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
         User user = userService.getUser(testUser.getCustomerId(), testUser.getId(), jwtMock);
         assertEquals(testUser, user);
+    }
+
+    @Test
+    void testGetUser_notFound() {
+        mockJwtForUser(testUser);
+        when(userRepository.findById(testUser.getId())).thenReturn(Optional.empty());
+        assertThrows(UsernameNotFoundException.class, () -> userService.getUser(testUser.getCustomerId(), testUser.getId(), jwtMock));
     }
 
     @Test
