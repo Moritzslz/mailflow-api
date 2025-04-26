@@ -32,7 +32,7 @@ public class MailService {
     private static final String RESET_PASSWORD_EMAIL_PATH = "classpath:templates/PasswordResetEmail.html";
     private static final String RESET_PASSWORD_EXPIRED_EMAIL_PATH = "classpath:templates/PasswordResetExpiredEmail.html";
     private static final String WELCOME_EMAIL_PATH = "classpath:templates/WelcomeEmail.html";
-   private final String mailFlowFrontendUrl;
+    private final String mailFlowFrontendUrl;
     private final JavaMailSender mailSender;
     private final String doubleOptInEmail;
     private final String registrationExpiredEmail;
