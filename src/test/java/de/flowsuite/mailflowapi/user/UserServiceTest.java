@@ -73,7 +73,8 @@ class UserServiceTest extends BaseServiceTest {
 
         when(passwordEncoder.encode(anyString())).thenReturn(HASHED_VALUE);
         when(userRepository.existsByEmailAddressHash(anyString())).thenReturn(false);
-        when(customerService.getByRegistrationToken(anyString())).thenReturn(Optional.of(testCustomer));
+        when(customerService.getByRegistrationToken(anyString()))
+                .thenReturn(Optional.of(testCustomer));
 
         Message message = userService.createUser(createUserRequest);
 
