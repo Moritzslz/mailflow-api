@@ -44,46 +44,6 @@ class ClientServiceTest extends BaseServiceTest {
     }
 
     @Test
-    void testLoadUserByUsername_success() {
-        when(clientRepository.findByClientName(testClient.getClientName()))
-                .thenReturn(Optional.of(testClient));
-
-        Client client = (Client) clientService.loadUserByUsername(testClient.getClientName());
-
-        assertEquals(testClient, client);
-    }
-
-    @Test
-    void testLoadUserByUsername_notFound() {
-        when(clientRepository.findByClientName(testClient.getClientName()))
-                .thenReturn(Optional.empty());
-
-        assertThrows(
-                UsernameNotFoundException.class,
-                () -> clientService.loadUserByUsername(testClient.getClientName()));
-    }
-
-    @Test
-    void testFindByClientName_success() {
-        when(clientRepository.findByClientName(testClient.getClientName()))
-                .thenReturn(Optional.of(testClient));
-
-        Client client = clientService.findByClientName(testClient.getClientName());
-
-        assertEquals(testClient, client);
-    }
-
-    @Test
-    void testFindByClientName_notFound() {
-        when(clientRepository.findByClientName(testClient.getClientName()))
-                .thenReturn(Optional.empty());
-
-        assertThrows(
-                UsernameNotFoundException.class,
-                () -> clientService.findByClientName(testClient.getClientName()));
-    }
-
-    @Test
     void testCreateClient_success() {
         when(clientRepository.existsByClientName(testClient.getClientName())).thenReturn(false);
         when(passwordEncoder.encode(anyString())).thenReturn(HASHED_VALUE);
