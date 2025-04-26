@@ -1,7 +1,5 @@
 package de.flowsuite.mailflowapi.mail;
 
-import de.flowsuite.mailflowapi.BaseServiceTest;
-
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @Disabled
 @SpringBootTest
-class MailServiceIntegrationTest extends BaseServiceTest {
+class MailServiceIntegrationTest {
 
     private static final long USER_ID = 1L;
     private static final String FIRST_NAME = "Vorname";
