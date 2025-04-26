@@ -32,8 +32,7 @@ class RagUrlService {
         }
 
         String url = ragUrl.getUrl();
-        URL parsedUrl = Util.validateUrl(url);
-        url = parsedUrl.toString();
+        Util.validateUrl(url);
 
         if (ragUrlRepository.existsByCustomerIdAndUrl(customerId, url)) {
             throw new EntityAlreadyExistsException(RagUrl.class.getSimpleName());

@@ -40,7 +40,7 @@ public class Util {
         }
     }
 
-    public static URL validateUrl(String url) {
+    public static void validateUrl(String url) {
         if (url == null || url.isBlank()) {
             throw new InvalidUrlException("URL must not be blank.");
         }
@@ -55,8 +55,6 @@ public class Util {
         if (!"https".equalsIgnoreCase(parsedUrl.getProtocol())) {
             throw new InvalidUrlException("Only https URLs are allowed.");
         }
-
-        return parsedUrl;
     }
 
     public static String generateRandomUrlSafeToken() {
