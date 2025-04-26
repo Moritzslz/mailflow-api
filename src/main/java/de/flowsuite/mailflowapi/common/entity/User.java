@@ -58,7 +58,7 @@ public class User implements UserDetails {
     private String phoneNumber;
 
     private String position;
-    @Builder.Default @JsonIgnore @NotNull private String role = Authorities.USER.getAuthority();
+    @Builder.Default @JsonIgnore @NotBlank private String role = Authorities.USER.getAuthority();
     @JsonIgnore @NotNull private Boolean isAccountLocked;
     @JsonIgnore @NotNull private Boolean isAccountEnabled;
     @NotNull private Boolean isSubscribedToNewsletter;
