@@ -89,6 +89,7 @@ class UserServiceTest extends BaseServiceTest {
                         eq(savedUser.getVerificationToken()),
                         anyInt());
 
+        assertNotNull(savedUser.getId());
         assertEquals(CREATE_USER_MSG, message.message());
         assertEquals(customerId, savedUser.getCustomerId());
         assertFalse(savedUser.isEnabled());
@@ -345,6 +346,8 @@ class UserServiceTest extends BaseServiceTest {
         verify(userRepository).save(userCaptor.capture());
         User updatedUser = userCaptor.getValue();
 
+        assertEquals(testUser.getId(), updatedUser.getId());
+        assertEquals(testUser.getCustomerId(), updatedUser.getCustomerId());
         assertEquals(ENCRYPTED_VALUE, updatedUser.getFirstName());
         assertEquals(ENCRYPTED_VALUE, updatedUser.getLastName());
         assertNull(updatedUser.getPhoneNumber());
@@ -356,9 +359,19 @@ class UserServiceTest extends BaseServiceTest {
     void testUpdateUser_idConflict() {
         mockJwtForUser(testUser);
 
-        UserResource.UpdateUserRequest updateUserRequest =
+        UserResource.UpdateUserRequest updateUserRequest1 =
                 new UserResource.UpdateUserRequest(
                         testUser.getId() + 1,
+                        testUser.getCustomerId(),
+                        "Morty",
+                        "Smith",
+                        null,
+                        "Grandson",
+                        false);
+
+        UserResource.UpdateUserRequest updateUserRequest2 =
+                new UserResource.UpdateUserRequest(
+                        testUser.getId(),
                         testUser.getCustomerId() + 1,
                         "Morty",
                         "Smith",
@@ -372,7 +385,16 @@ class UserServiceTest extends BaseServiceTest {
                         userService.updateUser(
                                 testUser.getCustomerId(),
                                 testUser.getId(),
-                                updateUserRequest,
+                                updateUserRequest1,
+                                jwtMock));
+
+        assertThrows(
+                IdConflictException.class,
+                () ->
+                        userService.updateUser(
+                                testUser.getCustomerId(),
+                                testUser.getId(),
+                                updateUserRequest2,
                                 jwtMock));
     }
 
