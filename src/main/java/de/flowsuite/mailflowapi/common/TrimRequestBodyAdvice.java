@@ -37,8 +37,6 @@ public class TrimRequestBodyAdvice extends RequestBodyAdviceAdapter {
         return super.afterBodyRead(body, inputMessage, parameter, targetType, converterType);
     }
 
-    // TODO only works for classes not records since record fields are final (immutable) therefore
-    // field.set causes IllegalAccessException
     private void trimStringFields(Object object) {
         if (object == null) return;
 
