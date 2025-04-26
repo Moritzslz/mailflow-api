@@ -10,8 +10,8 @@ import de.flowsuite.mailflowapi.common.constant.Authorities;
 import de.flowsuite.mailflowapi.common.entity.Customer;
 import de.flowsuite.mailflowapi.common.entity.User;
 import de.flowsuite.mailflowapi.common.exception.*;
-
 import de.flowsuite.mailflowapi.common.util.AuthorisationUtil;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -87,8 +87,7 @@ class CustomerServiceTest extends BaseServiceTest {
 
         customerService.createCustomer(createCustomerRequest);
 
-        ArgumentCaptor<Customer> customerCaptor =
-                ArgumentCaptor.forClass(Customer.class);
+        ArgumentCaptor<Customer> customerCaptor = ArgumentCaptor.forClass(Customer.class);
         verify(customerRepository).save(customerCaptor.capture());
         Customer savedCustomer = customerCaptor.getValue();
 
@@ -177,8 +176,7 @@ class CustomerServiceTest extends BaseServiceTest {
 
         customerService.updateCustomer(testCustomer.getId(), updatedCustomer, jwtMock);
 
-        ArgumentCaptor<Customer> customerCaptor =
-                ArgumentCaptor.forClass(Customer.class);
+        ArgumentCaptor<Customer> customerCaptor = ArgumentCaptor.forClass(Customer.class);
         verify(customerRepository).save(customerCaptor.capture());
         Customer savedCustomer = customerCaptor.getValue();
 
@@ -223,6 +221,8 @@ class CustomerServiceTest extends BaseServiceTest {
 
         assertThrows(
                 UpdateConflictException.class,
-                () -> customerService.updateCustomer(testCustomer.getId(), updatedCustomer, jwtMock));
+                () ->
+                        customerService.updateCustomer(
+                                testCustomer.getId(), updatedCustomer, jwtMock));
     }
 }
