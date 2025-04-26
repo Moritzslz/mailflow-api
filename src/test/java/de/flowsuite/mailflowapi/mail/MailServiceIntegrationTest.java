@@ -19,18 +19,23 @@ class MailServiceIntegrationTest {
     @Autowired private MailService mailService;
 
     @Test
-    void testSendDoubleOptInEmail_success() {
+    void testSendDoubleOptInEmail() {
         mailService.sendDoubleOptInEmail(FIRST_NAME, EMAIL_ADDRESS, TOKEN, TOKEN_TTL_HOURS);
     }
 
     @Test
-    void testSendPasswordResetEmail_success() {
+    void testSendRegistrationExpiredEmail() {
+        mailService.sendRegistrationExpiredEmail(USER_ID, FIRST_NAME, EMAIL_ADDRESS);
+    }
+
+    @Test
+    void testSendPasswordResetEmail() {
         mailService.sendPasswordResetEmail(
                 USER_ID, FIRST_NAME, EMAIL_ADDRESS, TOKEN, TOKEN_TTL_MINUTES);
     }
 
     @Test
-    void testSendPasswordResetExpiredEmail_success() {
+    void testSendPasswordResetExpiredEmail() {
         mailService.sendPasswordResetExpiredEmail(USER_ID, FIRST_NAME, EMAIL_ADDRESS);
     }
 
