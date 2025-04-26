@@ -5,12 +5,14 @@ import static de.flowsuite.mailflowapi.common.util.Util.BERLIN_ZONE;
 
 import de.flowsuite.mailflowapi.common.constant.Authorities;
 import de.flowsuite.mailflowapi.common.constant.Message;
+import de.flowsuite.mailflowapi.common.entity.Customer;
 import de.flowsuite.mailflowapi.common.entity.User;
 import de.flowsuite.mailflowapi.common.exception.IdConflictException;
 import de.flowsuite.mailflowapi.common.util.AesUtil;
 import de.flowsuite.mailflowapi.common.util.AuthorisationUtil;
 import de.flowsuite.mailflowapi.common.util.HmacUtil;
 import de.flowsuite.mailflowapi.common.util.Util;
+import de.flowsuite.mailflowapi.customer.CustomerService;
 import de.flowsuite.mailflowapi.mail.MailService;
 
 import org.slf4j.Logger;
@@ -35,14 +37,17 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final MailService mailService;
+    private final CustomerService customerService;
 
     UserService(
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
-            MailService mailService) {
+            MailService mailService,
+            CustomerService customerService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.mailService = mailService;
+        this.customerService = customerService;
     }
 
     @Override
@@ -83,6 +88,15 @@ public class UserService implements UserDetailsService {
 
         String emailAddressHash = HmacUtil.hash(emailAddress);
         if (!userRepository.existsByEmailAddressHash(emailAddressHash)) {
+            Optional<Customer> optionalCustomer =
+                    customerService.getByRegistrationToken(request.registrationToken());
+
+            if (optionalCustomer.isEmpty()) {
+                return new Message(CREATE_USER_MSG);
+            }
+
+            Customer customer = optionalCustomer.get();
+
             String passwordHash = passwordEncoder.encode(request.password());
 
             String verificationToken = generateVerificationToken();
@@ -99,7 +113,7 @@ public class UserService implements UserDetailsService {
 
             User user =
                     User.builder()
-                            .customerId(request.customerId())
+                            .customerId(customer.getId())
                             .firstName(AesUtil.encrypt(request.firstName()))
                             .lastName(AesUtil.encrypt(request.lastName()))
                             .emailAddressHash(emailAddressHash)

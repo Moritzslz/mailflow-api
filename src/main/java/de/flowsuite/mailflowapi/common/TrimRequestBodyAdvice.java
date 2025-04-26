@@ -1,5 +1,6 @@
 package de.flowsuite.mailflowapi.common;
 
+import de.flowsuite.mailflowapi.common.exception.TrimValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.MethodParameter;
@@ -37,10 +38,9 @@ public class TrimRequestBodyAdvice extends RequestBodyAdviceAdapter {
                 field.setAccessible(true);
                 try {
                     String value = (String) field.get(object);
-                    LOG.debug("Trimming value: {}", value);
-                    if (value != null) {
-                        LOG.debug("Trimmed value: {}", value.trim());
-                        field.set(object, value.trim());
+                    String trimmedValue = value.trim();
+                    if (!trimmedValue.equals(value)) {
+                       throw new TrimValidationException(field.getName());
                     }
                 } catch (IllegalAccessException e) {
                     throw new RuntimeException(e);

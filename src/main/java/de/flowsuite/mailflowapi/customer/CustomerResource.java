@@ -1,8 +1,12 @@
 package de.flowsuite.mailflowapi.customer;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import de.flowsuite.mailflowapi.common.entity.Customer;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,8 +29,8 @@ class CustomerResource {
 
     @PostMapping
     ResponseEntity<Customer> createCustomer(
-            @RequestBody @Valid Customer customer, UriComponentsBuilder uriBuilder) {
-        Customer createdCustomer = customerService.createCustomer(customer);
+            @RequestBody @Valid CreateCustomerRequest request, UriComponentsBuilder uriBuilder) {
+        Customer createdCustomer = customerService.createCustomer(request);
 
         URI location =
                 uriBuilder.path("/customers/{id}").buildAndExpand(createdCustomer.getId()).toUri();
@@ -51,4 +55,17 @@ class CustomerResource {
             @AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity.ok(customerService.updateCustomer(id, customer, jwt));
     }
+
+    record CreateCustomerRequest(
+            @NotBlank String company,
+            @NotBlank String street,
+            @NotBlank String houseNumber,
+            @NotBlank String postalCode,
+            @NotBlank String city,
+            @NotBlank String openaiApiKey,
+            @JsonIgnore String sourceOfContact,
+            String websiteUrl,
+            String privacyPolicyUrl,
+            String ctaUrl,
+            @Email @NotBlank String billingEmailAddress) {}
 }

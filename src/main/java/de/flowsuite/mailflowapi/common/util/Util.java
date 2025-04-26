@@ -1,7 +1,10 @@
 package de.flowsuite.mailflowapi.common.util;
 
 import de.flowsuite.mailflowapi.common.exception.InvalidEmailAddressException;
+import de.flowsuite.mailflowapi.common.exception.InvalidUrlException;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.SecureRandom;
 import java.time.ZoneId;
 import java.util.Base64;
@@ -35,6 +38,25 @@ public class Util {
         if (secondLevelDomain.isBlank() || topLevelDomain.isBlank()) {
             throw new InvalidEmailAddressException();
         }
+    }
+
+    public static URL validateUrl(String url) {
+        if (url == null || url.isBlank()) {
+            throw new InvalidUrlException("URL must not be blank.");
+        }
+
+        URL parsedUrl;
+        try {
+            parsedUrl = new URL(url);
+        } catch (MalformedURLException e) {
+            throw new InvalidUrlException("The provided URL is invalid: " + e.getMessage());
+        }
+
+        if (!"https".equalsIgnoreCase(parsedUrl.getProtocol())) {
+            throw new InvalidUrlException("Only https URLs are allowed.");
+        }
+
+        return parsedUrl;
     }
 
     public static String generateRandomUrlSafeToken() {

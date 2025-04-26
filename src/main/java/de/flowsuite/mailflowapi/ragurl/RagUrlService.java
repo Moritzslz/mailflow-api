@@ -7,9 +7,12 @@ import de.flowsuite.mailflowapi.common.exception.IdConflictException;
 import de.flowsuite.mailflowapi.common.exception.IdorException;
 import de.flowsuite.mailflowapi.common.util.AuthorisationUtil;
 
+import de.flowsuite.mailflowapi.common.util.Util;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URL;
 import java.util.List;
 
 @Service
@@ -28,15 +31,9 @@ class RagUrlService {
             throw new IdConflictException();
         }
 
-        String url = ragUrl.getUrl().trim();
-
-        if (!url.contains("://")) {
-            url = "https://" + url;
-        } else if (url.toLowerCase().startsWith("http://")) {
-            url = "https://" + url.substring(7);
-        }
-
-        ragUrl.setUrl(url);
+        String url = ragUrl.getUrl();
+        URL parsedUrl = Util.validateUrl(url);
+        url = parsedUrl.toString();
 
         if (ragUrlRepository.existsByCustomerIdAndUrl(customerId, url)) {
             throw new EntityAlreadyExistsException(RagUrl.class.getSimpleName());
