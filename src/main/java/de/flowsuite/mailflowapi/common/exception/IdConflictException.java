@@ -7,6 +7,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class IdConflictException extends RuntimeException {
 
     public IdConflictException() {
-        super("The provided Ids do not match the expected values.");
+        super("The provided Id is invalid or does not match the expected Id.");
     }
 }
