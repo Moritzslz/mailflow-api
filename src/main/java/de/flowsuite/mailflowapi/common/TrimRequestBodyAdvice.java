@@ -33,11 +33,11 @@ public class TrimRequestBodyAdvice extends RequestBodyAdviceAdapter {
             MethodParameter parameter,
             Type targetType,
             Class<? extends HttpMessageConverter<?>> converterType) {
-        trimStringFields(body);
+        validateStringFields(body);
         return super.afterBodyRead(body, inputMessage, parameter, targetType, converterType);
     }
 
-    private void trimStringFields(Object object) {
+    private void validateStringFields(Object object) {
         if (object == null) return;
 
         Field[] fields = object.getClass().getDeclaredFields();
