@@ -56,9 +56,6 @@ class BlacklistServiceTest extends BaseServiceTest {
         testBlacklistEntry.setId(null);
         assertNull(testBlacklistEntry.getId());
 
-        assertDoesNotThrow(
-                () -> Util.validateEmailAddress(testBlacklistEntry.getBlacklistedEmailAddress()));
-
         blacklistService.createBlacklistEntry(
                 testUser.getCustomerId(), testUser.getId(), testBlacklistEntry, jwtMock);
 
@@ -81,9 +78,6 @@ class BlacklistServiceTest extends BaseServiceTest {
         testBlacklistEntry.setId(null);
         assertNull(testBlacklistEntry.getId());
 
-        assertDoesNotThrow(
-                () -> Util.validateEmailAddress(testBlacklistEntry.getBlacklistedEmailAddress()));
-
         assertThrows(
                 EntityAlreadyExistsException.class,
                 () ->
@@ -98,9 +92,6 @@ class BlacklistServiceTest extends BaseServiceTest {
 
     @Test
     void testCreateBlacklistEntry_idConflict() {
-        assertDoesNotThrow(
-                () -> Util.validateEmailAddress(testBlacklistEntry.getBlacklistedEmailAddress()));
-
         assertThrows(
                 IdConflictException.class,
                 () ->

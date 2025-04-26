@@ -77,8 +77,6 @@ class UserServiceTest extends BaseServiceTest {
         when(customerService.getByRegistrationToken(anyString()))
                 .thenReturn(Optional.of(testCustomer));
 
-        assertDoesNotThrow(() -> Util.validateEmailAddress(createUserRequest.emailAddress()));
-
         Message message = userService.createUser(createUserRequest);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
@@ -115,8 +113,6 @@ class UserServiceTest extends BaseServiceTest {
     void testCreateUser_alreadyExists() {
         when(userRepository.existsByEmailAddressHash(anyString())).thenReturn(true);
 
-        assertDoesNotThrow(() -> Util.validateEmailAddress(createUserRequest.emailAddress()));
-
         Message message = userService.createUser(createUserRequest);
 
         verify(userRepository, never()).save(any(User.class));
@@ -130,8 +126,6 @@ class UserServiceTest extends BaseServiceTest {
     void testCreateUser_invalidRegistrationToken() {
         when(userRepository.existsByEmailAddressHash(anyString())).thenReturn(false);
         when(customerService.getByRegistrationToken(anyString())).thenReturn(Optional.empty());
-
-        assertDoesNotThrow(() -> Util.validateEmailAddress(createUserRequest.emailAddress()));
 
         Message message = userService.createUser(createUserRequest);
 
