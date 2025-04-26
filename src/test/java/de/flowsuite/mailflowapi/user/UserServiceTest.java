@@ -13,7 +13,6 @@ import de.flowsuite.mailflowapi.common.entity.Customer;
 import de.flowsuite.mailflowapi.common.entity.User;
 import de.flowsuite.mailflowapi.common.exception.IdConflictException;
 import de.flowsuite.mailflowapi.common.exception.IdorException;
-import de.flowsuite.mailflowapi.common.util.Util;
 import de.flowsuite.mailflowapi.customer.CustomerService;
 import de.flowsuite.mailflowapi.mail.MailService;
 

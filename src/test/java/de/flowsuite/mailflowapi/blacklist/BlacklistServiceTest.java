@@ -10,7 +10,6 @@ import de.flowsuite.mailflowapi.common.exception.EntityAlreadyExistsException;
 import de.flowsuite.mailflowapi.common.exception.EntityNotFoundException;
 import de.flowsuite.mailflowapi.common.exception.IdConflictException;
 import de.flowsuite.mailflowapi.common.exception.IdorException;
-import de.flowsuite.mailflowapi.common.util.Util;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
