@@ -1,4 +1,4 @@
-package de.flowsuite.mailflowapi;
+package de.flowsuite.mailflowapi.util;
 
 import static org.junit.jupiter.api.Assertions.*;
 
