@@ -32,6 +32,11 @@ public class Util {
 
         String domain = emailAddressParts[1];
         String[] domainParts = domain.split("\\.");
+
+        if (domainParts.length == 1) {
+            throw new InvalidEmailAddressException();
+        }
+
         String secondLevelDomain = domainParts[0];
         String topLevelDomain = domainParts[1];
 
