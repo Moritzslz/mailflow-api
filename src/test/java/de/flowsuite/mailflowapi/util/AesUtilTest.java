@@ -27,8 +27,12 @@ class AesUtilTest {
     }
 
     @Test
-    void testDecrypt_invalidData_throwsException() {
-        String invalidEncryptedData = "invalidEncryptedText";
-        assertThrows(RuntimeException.class, () -> AesUtil.decrypt(invalidEncryptedData));
+    void testDecrypt_nullEncryptedText_throwsException() {
+        assertThrows(RuntimeException.class, () -> AesUtil.decrypt(null));
+    }
+
+    @Test
+    void testDecrypt_invalidEncryptedText_throwsException() {
+        assertThrows(RuntimeException.class, () -> AesUtil.decrypt(PLAIN_TEXT));
     }
 }
