@@ -45,18 +45,4 @@ public class AnalyticsUtil {
             case YEARLY -> "year";
         };
     }
-
-    public static Map<String, Map<String, Long>> groupCategoryCountsByPeriod(
-            List<Object[]> categoryCountRows) {
-        Map<String, Map<String, Long>> categoryCountsByPeriod = new LinkedHashMap<>();
-        for (Object[] row : categoryCountRows) {
-            String period = row[0].toString();
-            String category = row[1].toString();
-            Long count = (Long) row[2];
-            categoryCountsByPeriod
-                    .computeIfAbsent(period, k -> new HashMap<>())
-                    .put(category, count);
-        }
-        return categoryCountsByPeriod;
-    }
 }
