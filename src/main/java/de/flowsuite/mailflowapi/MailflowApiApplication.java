@@ -9,7 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
-public class MailFlowApiApplication {
+public class MailflowApiApplication {
 
     @Bean
     RestTemplate restTemplate() {
@@ -22,6 +22,6 @@ public class MailFlowApiApplication {
     }
 
     public static void main(String[] args) {
-        SpringApplication.run(MailFlowApiApplication.class, args);
+        SpringApplication.run(MailflowApiApplication.class, args);
     }
 }
