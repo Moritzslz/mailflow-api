@@ -23,6 +23,12 @@ class HmacUtilTest {
         String hash1 = HmacUtil.hash(input);
         String hash2 = HmacUtil.hash(input);
 
+        assertNotNull(hash1);
+        assertFalse(hash1.isBlank());
+
+        assertNotNull(hash2);
+        assertFalse(hash2.isBlank());
+
         assertEquals(hash1, hash2);
     }
 
