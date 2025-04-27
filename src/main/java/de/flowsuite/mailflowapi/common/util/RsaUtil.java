@@ -1,4 +1,4 @@
-package de.flowsuite.mailflowapi.security;
+package de.flowsuite.mailflowapi.common.util;
 
 import de.flowsuite.mailflowapi.common.exception.MissingEnvVarException;
 
@@ -9,10 +9,10 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
-class RsaUtil {
+public class RsaUtil {
 
-    static final RSAPublicKey publicKey = loadPublicKey();
-    static final RSAPrivateKey privateKey = loadPrivateKey();
+    public static final RSAPublicKey publicKey = loadPublicKey();
+    public static final RSAPrivateKey privateKey = loadPrivateKey();
 
     public RsaUtil() {}
 

@@ -12,6 +12,7 @@ import com.nimbusds.jose.proc.SecurityContext;
 
 import de.flowsuite.mailflowapi.client.ClientService;
 import de.flowsuite.mailflowapi.common.constant.Authorities;
+import de.flowsuite.mailflowapi.common.util.RsaUtil;
 import de.flowsuite.mailflowapi.user.UserService;
 
 import org.springframework.beans.factory.annotation.Value;
