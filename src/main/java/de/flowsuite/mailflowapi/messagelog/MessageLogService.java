@@ -161,7 +161,8 @@ public class MessageLogService {
                 messageLogRepository.aggregateCategoryCountsByCustomer(
                         truncUnit, customerId, startDate, endDate);
 
-        Map<String, Map<String, Long>> categoryCountsByPeriod = groupCategoryCountsByPeriod(categoryCountRows);
+        Map<String, Map<String, Long>> categoryCountsByPeriod =
+                groupCategoryCountsByPeriod(categoryCountRows);
 
         Object[] analyticsRow =
                 messageLogRepository
@@ -197,7 +198,8 @@ public class MessageLogService {
                 messageLogRepository.aggregateCategoryCountsByUser(
                         truncUnit, userId, startDate, endDate);
 
-        Map<String, Map<String, Long>> categoryCountsByPeriod = groupCategoryCountsByPeriod(categoryCountRows);
+        Map<String, Map<String, Long>> categoryCountsByPeriod =
+                groupCategoryCountsByPeriod(categoryCountRows);
 
         Object[] analyticsRow =
                 messageLogRepository
