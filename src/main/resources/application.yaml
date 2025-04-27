@@ -1,6 +1,6 @@
 spring:
   application:
-    name: MailFlow-API
+    name: mailflow-API
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
