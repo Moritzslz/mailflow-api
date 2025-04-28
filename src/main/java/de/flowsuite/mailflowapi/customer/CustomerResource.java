@@ -67,5 +67,7 @@ class CustomerResource {
             @JsonIgnore String sourceOfContact,
             String websiteUrl,
             String privacyPolicyUrl,
-            String ctaUrl) {}
+            String ctaUrl,
+            boolean isTestVersion,
+            String ionosUsername) {}
 }
