@@ -43,7 +43,7 @@ public class MessageLogService {
     }
 
     public int countByUserId(long userId) {
-        return messageLogRepository.countByCustomerId(userId);
+        return messageLogRepository.countByUserId(userId);
     }
 
     private String generateToken() {
@@ -144,44 +144,27 @@ public class MessageLogService {
 
     MessageLogResource.MessageLogAnalyticsResponse getMessageLogAnalyticsForCustomer(
             long customerId, Date from, Date to, Timeframe timeframe, Jwt jwt) {
-        AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
-
-        if (timeframe == null) {
-            timeframe = Timeframe.DAILY;
-        }
-
-        ZonedDateTime startDate = AnalyticsUtil.resolveStartDate(from, timeframe);
-        ZonedDateTime endDate = AnalyticsUtil.resolveEndDate(to);
-
-        AnalyticsUtil.validateDateRange(startDate, endDate);
-
-        String truncUnit = AnalyticsUtil.getTruncUnitForTimeframe(timeframe);
-
-        List<Object[]> categoryCountRows =
-                messageLogRepository.aggregateCategoryCountsByCustomer(
-                        truncUnit, customerId, startDate, endDate);
-
-        Map<String, Map<String, Long>> categoryCountsByPeriod =
-                groupCategoryCountsByPeriod(categoryCountRows);
-
-        Object[] analyticsRow =
-                messageLogRepository
-                        .aggregateAvgProcessingTimeAndResponseRateByCustomer(
-                                customerId, startDate, endDate)
-                        .get(0);
-
-        double averageProcessingTimeInSeconds =
-                (double) Math.round((double) analyticsRow[0] * 100) / 100;
-        double responseRate = (double) Math.round((double) analyticsRow[1] * 100) / 100;
-
-        return new MessageLogResource.MessageLogAnalyticsResponse(
-                averageProcessingTimeInSeconds, responseRate, categoryCountsByPeriod);
+        return getMessageLogAnalytics(null, customerId, from, to, timeframe, jwt, false);
     }
 
     MessageLogResource.MessageLogAnalyticsResponse getMessageLogAnalyticsForUser(
             long customerId, long userId, Date from, Date to, Timeframe timeframe, Jwt jwt) {
+        return getMessageLogAnalytics(userId, customerId, from, to, timeframe, jwt, true);
+    }
+
+    private MessageLogResource.MessageLogAnalyticsResponse getMessageLogAnalytics(
+            Long userId,
+            long customerId,
+            Date from,
+            Date to,
+            Timeframe timeframe,
+            Jwt jwt,
+            boolean isUser) {
+
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
-        AuthorisationUtil.validateAccessToUser(userId, jwt);
+        if (isUser) {
+            AuthorisationUtil.validateAccessToUser(userId, jwt);
+        }
 
         if (timeframe == null) {
             timeframe = Timeframe.DAILY;
@@ -195,22 +178,45 @@ public class MessageLogService {
         String truncUnit = AnalyticsUtil.getTruncUnitForTimeframe(timeframe);
 
         List<Object[]> categoryCountRows =
-                messageLogRepository.aggregateCategoryCountsByUser(
-                        truncUnit, userId, startDate, endDate);
+                isUser
+                        ? messageLogRepository.aggregateCategoryCountsByUser(
+                                truncUnit, userId, startDate, endDate)
+                        : messageLogRepository.aggregateCategoryCountsByCustomer(
+                                truncUnit, customerId, startDate, endDate);
 
         Map<String, Map<String, Long>> categoryCountsByPeriod =
                 groupCategoryCountsByPeriod(categoryCountRows);
 
         Object[] analyticsRow =
-                messageLogRepository
-                        .aggregateAvgProcessingTimeAndResponseRateByUser(userId, startDate, endDate)
-                        .get(0);
+                isUser
+                        ? messageLogRepository
+                                .aggregateAvgProcessingTimeAndResponseRateByUser(
+                                        userId, startDate, endDate)
+                                .get(0)
+                        : messageLogRepository
+                                .aggregateAvgProcessingTimeAndResponseRateByCustomer(
+                                        customerId, startDate, endDate)
+                                .get(0);
 
         double averageProcessingTimeInSeconds =
                 (double) Math.round((double) analyticsRow[0] * 100) / 100;
         double responseRate = (double) Math.round((double) analyticsRow[1] * 100) / 100;
 
+        ZonedDateTime startOfDay =
+                ZonedDateTime.now(BERLIN_ZONE).withHour(0).withMinute(0).withSecond(0).withNano(0);
+        ZonedDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
+
+        int processedMessagesToday =
+                isUser
+                        ? messageLogRepository.countByUserIdAndReceivedAtBetween(
+                                userId, startOfDay, endOfDay)
+                        : messageLogRepository.countByCustomerIdAndReceivedAtBetween(
+                                customerId, startOfDay, endOfDay);
+
         return new MessageLogResource.MessageLogAnalyticsResponse(
-                averageProcessingTimeInSeconds, responseRate, categoryCountsByPeriod);
+                averageProcessingTimeInSeconds,
+                responseRate,
+                processedMessagesToday,
+                categoryCountsByPeriod);
     }
 }

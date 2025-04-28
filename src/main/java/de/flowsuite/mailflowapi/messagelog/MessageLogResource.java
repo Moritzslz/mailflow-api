@@ -124,5 +124,6 @@ class MessageLogResource {
     record MessageLogAnalyticsResponse(
             double avgProcessingTimeInSeconds,
             double responseRate,
+            int processedMessagesToday,
             Map<String, Map<String, Long>> messageLogAnalytics) {}
 }

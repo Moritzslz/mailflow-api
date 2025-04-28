@@ -26,6 +26,11 @@ interface MessageLogRepository extends CrudRepository<MessageLogEntry, Long> {
 
     int countByUserId(long userId);
 
+    int countByCustomerIdAndReceivedAtBetween(
+            long customerId, ZonedDateTime from, ZonedDateTime to);
+
+    int countByUserIdAndReceivedAtBetween(long userId, ZonedDateTime from, ZonedDateTime to);
+
     @Query(
             """
             SELECT
