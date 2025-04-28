@@ -1,0 +1,313 @@
+package de.flowsuite.mailflowapi.messagecategory;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+
+import de.flowsuite.mailflowapi.BaseServiceTest;
+import de.flowsuite.mailflowcommon.constant.Authorities;
+import de.flowsuite.mailflowcommon.entity.MessageCategory;
+import de.flowsuite.mailflowcommon.entity.User;
+import de.flowsuite.mailflowcommon.exception.*;
+import de.flowsuite.mailflowcommon.util.AuthorisationUtil;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
+import java.util.Optional;
+
+@ExtendWith(MockitoExtension.class)
+class MessageCategoryTest extends BaseServiceTest {
+
+    @Mock private MessageCategoryRepository messageCategoryRepository;
+
+    @InjectMocks private MessageCategoryService messageCategoryService;
+
+    private final User testUser = buildTestUser();
+    private MessageCategory testMessageCategory;
+
+    private MessageCategory buildTestMessageCategory() {
+        return MessageCategory.builder()
+                .id(1L)
+                .customerId(testUser.getCustomerId())
+                .category("Category")
+                .isReply(true)
+                .isFunctionCall(true)
+                .description("Description")
+                .build();
+    }
+
+    @Override
+    protected void mockJwtForUser(User user) {
+        when(jwtMock.getClaim(AuthorisationUtil.CLAIM_SCOPE))
+                .thenReturn(Authorities.USER.getAuthority());
+        when(jwtMock.getClaim(AuthorisationUtil.CLAIM_CUSTOMER_ID))
+                .thenReturn(user.getCustomerId());
+    }
+
+    @BeforeEach
+    void setup() {
+        testMessageCategory = buildTestMessageCategory();
+        mockJwtForUser(testUser);
+    }
+
+    @Test
+    void testCreateMessageCategory_success() {
+        when(messageCategoryRepository.existsByCustomerIdAndCategory(
+                        testUser.getCustomerId(), testMessageCategory.getCategory()))
+                .thenReturn(false);
+
+        testMessageCategory.setId(null);
+        assertNull(testMessageCategory.getId());
+
+        messageCategoryService.createMessageCategory(
+                testUser.getCustomerId(), testMessageCategory, jwtMock);
+
+        ArgumentCaptor<MessageCategory> messageCategoryEntryCaptor =
+                ArgumentCaptor.forClass(MessageCategory.class);
+        verify(messageCategoryRepository).save(messageCategoryEntryCaptor.capture());
+        MessageCategory savedMessageCategory = messageCategoryEntryCaptor.getValue();
+
+        assertNotNull(savedMessageCategory);
+        assertEquals(testMessageCategory.getCustomerId(), savedMessageCategory.getCustomerId());
+        assertEquals(testMessageCategory.getCategory(), savedMessageCategory.getCategory());
+        assertEquals(testMessageCategory.getIsReply(), savedMessageCategory.getIsReply());
+        assertEquals(
+                testMessageCategory.getIsFunctionCall(), savedMessageCategory.getIsFunctionCall());
+        assertEquals(testMessageCategory.getDescription(), savedMessageCategory.getDescription());
+    }
+
+    @Test
+    void testCreateBlacklistEntry_alreadyExists() {
+        when(messageCategoryRepository.existsByCustomerIdAndCategory(
+                        testUser.getCustomerId(), testMessageCategory.getCategory()))
+                .thenReturn(true);
+
+        testMessageCategory.setId(null);
+        assertNull(testMessageCategory.getId());
+
+        assertThrows(
+                EntityAlreadyExistsException.class,
+                () ->
+                        messageCategoryService.createMessageCategory(
+                                testUser.getCustomerId(), testMessageCategory, jwtMock));
+
+        verify(messageCategoryRepository, never()).save(any(MessageCategory.class));
+    }
+
+    @Test
+    void testCreateBlacklistEntry_idConflict() {
+        assertThrows(
+                IdConflictException.class,
+                () ->
+                        messageCategoryService.createMessageCategory(
+                                testUser.getCustomerId(), testMessageCategory, jwtMock));
+
+        testMessageCategory.setId(null);
+        testMessageCategory.setCustomerId(testUser.getCustomerId() + 1);
+
+        assertThrows(
+                IdConflictException.class,
+                () ->
+                        messageCategoryService.createMessageCategory(
+                                testUser.getCustomerId(), testMessageCategory, jwtMock));
+
+        verify(messageCategoryRepository, never()).save(any(MessageCategory.class));
+    }
+
+    @Test
+    void testCreateBlacklistEntry_idor() {
+        assertThrows(
+                IdorException.class,
+                () ->
+                        messageCategoryService.createMessageCategory(
+                                testUser.getCustomerId() + 1, testMessageCategory, jwtMock));
+
+        verify(messageCategoryRepository, never()).save(any(MessageCategory.class));
+    }
+
+    @Test
+    void testGetMessageCategory_success() {
+        when(messageCategoryRepository.findById(testMessageCategory.getId()))
+                .thenReturn(Optional.of(testMessageCategory));
+
+        MessageCategory messageCategory =
+                messageCategoryService.getMessageCategory(
+                        testUser.getCustomerId(), testMessageCategory.getId(), jwtMock);
+
+        verify(messageCategoryRepository).findById(testMessageCategory.getId());
+
+        assertEquals(testMessageCategory, messageCategory);
+    }
+
+    @Test
+    void testGetMessageCategory_notFound() {
+        when(messageCategoryRepository.findById(testMessageCategory.getId()))
+                .thenReturn(Optional.empty());
+        assertThrows(
+                EntityNotFoundException.class,
+                () ->
+                        messageCategoryService.getMessageCategory(
+                                testUser.getCustomerId(), testMessageCategory.getId(), jwtMock));
+    }
+
+    @Test
+    void testGetMessageCategory_idor() {
+        when(messageCategoryRepository.findById(testMessageCategory.getId()))
+                .thenReturn(Optional.of(testMessageCategory));
+
+        assertThrows(
+                IdorException.class,
+                () ->
+                        messageCategoryService.getMessageCategory(
+                                testUser.getCustomerId() + 1,
+                                testMessageCategory.getId(),
+                                jwtMock));
+
+        testMessageCategory.setCustomerId(testUser.getCustomerId() + 1);
+
+        assertThrows(
+                IdorException.class,
+                () ->
+                        messageCategoryService.getMessageCategory(
+                                testUser.getCustomerId(), testMessageCategory.getId(), jwtMock));
+
+        verify(messageCategoryRepository, never()).findById(testUser.getCustomerId());
+    }
+
+    @Test
+    void testListMessageCategories_success() {
+        when(messageCategoryRepository.findByCustomerId(testUser.getCustomerId()))
+                .thenReturn(List.of(testMessageCategory));
+
+        List<MessageCategory> messageCategories =
+                messageCategoryService.listMessageCategories(testUser.getCustomerId(), jwtMock);
+
+        assertEquals(1, messageCategories.size());
+        assertEquals(testMessageCategory, messageCategories.get(0));
+    }
+
+    @Test
+    void testListMessageCategories_idor() {
+        assertThrows(
+                IdorException.class,
+                () ->
+                        messageCategoryService.listMessageCategories(
+                                testUser.getCustomerId() + 1, jwtMock));
+
+        verify(messageCategoryRepository, never()).findByCustomerId(anyLong());
+    }
+
+    @Test
+    void testUpdateMessageCategory_success() {
+        when(messageCategoryRepository.findById(testMessageCategory.getId()))
+                .thenReturn(Optional.of(testMessageCategory));
+
+        MessageCategory updatedMessageCategory = buildTestMessageCategory();
+        updatedMessageCategory.setCategory("Updated Category");
+
+        messageCategoryService.updateMessageCategory(
+                testUser.getCustomerId(),
+                testMessageCategory.getId(),
+                updatedMessageCategory,
+                jwtMock);
+
+        ArgumentCaptor<MessageCategory> messageCategoryEntryCaptor =
+                ArgumentCaptor.forClass(MessageCategory.class);
+        verify(messageCategoryRepository).save(messageCategoryEntryCaptor.capture());
+        MessageCategory savedMessageCategory = messageCategoryEntryCaptor.getValue();
+
+        assertEquals(updatedMessageCategory, savedMessageCategory);
+    }
+
+    @Test
+    void testUpdateMessageCategory_idConflict() {
+        MessageCategory updatedMessageCategory = buildTestMessageCategory();
+        updatedMessageCategory.setCategory("Updated Category");
+        updatedMessageCategory.setCustomerId(testUser.getCustomerId() + 1);
+
+        assertThrows(
+                IdConflictException.class,
+                () ->
+                        messageCategoryService.updateMessageCategory(
+                                testUser.getCustomerId(),
+                                testMessageCategory.getId(),
+                                updatedMessageCategory,
+                                jwtMock));
+
+        verify(messageCategoryRepository, never()).save(any(MessageCategory.class));
+    }
+
+    @Test
+    void testUpdateMessageCategory_notFound() {
+        when(messageCategoryRepository.findById(testMessageCategory.getId()))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                EntityNotFoundException.class,
+                () ->
+                        messageCategoryService.updateMessageCategory(
+                                testUser.getCustomerId(),
+                                testMessageCategory.getId(),
+                                testMessageCategory,
+                                jwtMock));
+
+        verify(messageCategoryRepository, never()).save(any(MessageCategory.class));
+    }
+
+    @Test
+    void testUpdateMessageCategory_idor() {
+        MessageCategory updatedMessageCategory = buildTestMessageCategory();
+        updatedMessageCategory.setCategory("Updated Category");
+        updatedMessageCategory.setCustomerId(testUser.getCustomerId() + 1);
+
+        when(messageCategoryRepository.findById(testMessageCategory.getId()))
+                .thenReturn(Optional.of(updatedMessageCategory));
+
+        assertThrows(
+                IdorException.class,
+                () ->
+                        messageCategoryService.updateMessageCategory(
+                                testUser.getCustomerId(),
+                                testMessageCategory.getId(),
+                                testMessageCategory,
+                                jwtMock));
+
+        verify(messageCategoryRepository, never()).save(any(MessageCategory.class));
+    }
+
+    @Test
+    void testDeleteMessageCategory_success() {
+        when(messageCategoryRepository.findById(testMessageCategory.getId()))
+                .thenReturn(Optional.of(testMessageCategory));
+
+        messageCategoryService.deleteMessageCategory(
+                testUser.getCustomerId(), testMessageCategory.getId(), jwtMock);
+
+        ArgumentCaptor<MessageCategory> messageCategoryEntryCaptor =
+                ArgumentCaptor.forClass(MessageCategory.class);
+        verify(messageCategoryRepository).delete(messageCategoryEntryCaptor.capture());
+        MessageCategory deletedMessageCategory = messageCategoryEntryCaptor.getValue();
+
+        assertEquals(testMessageCategory, deletedMessageCategory);
+    }
+
+    @Test
+    void testDeleteBlacklistEntry_notFound() {
+        testGetMessageCategory_notFound();
+        verify(messageCategoryRepository, never()).delete(any(MessageCategory.class));
+    }
+
+    @Test
+    void testDeleteBlacklistEntry_idor() {
+        testGetMessageCategory_idor();
+        verify(messageCategoryRepository, never()).delete(any(MessageCategory.class));
+    }
+}
