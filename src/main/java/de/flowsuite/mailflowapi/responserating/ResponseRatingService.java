@@ -72,7 +72,8 @@ class ResponseRatingService {
                                         new EntityNotFoundException(
                                                 ResponseRating.class.getSimpleName()));
 
-        if (!responseRating.getCustomerId().equals(customerId) || !responseRating.getUserId().equals(userId)) {
+        if (!responseRating.getCustomerId().equals(customerId)
+                || !responseRating.getUserId().equals(userId)) {
             throw new IdorException();
         }
 

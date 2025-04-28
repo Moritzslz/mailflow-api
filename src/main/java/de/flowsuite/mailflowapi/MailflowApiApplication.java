@@ -12,10 +12,7 @@ import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
 @EntityScan(basePackages = "de.flowsuite.mailflowcommon.entity")
-@ComponentScan(basePackages = {
-        "de.flowsuite.mailflowapi",
-        "de.flowsuite.mailflowcommon"
-        })
+@ComponentScan(basePackages = {"de.flowsuite.mailflowapi", "de.flowsuite.mailflowcommon"})
 public class MailflowApiApplication {
 
     @Bean

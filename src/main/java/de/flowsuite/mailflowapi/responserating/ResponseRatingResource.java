@@ -54,7 +54,8 @@ class ResponseRatingResource {
             @PathVariable long userId,
             @PathVariable long id,
             @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(responseRatingService.getResponseRating(customerId, userId, id, jwt));
+        return ResponseEntity.ok(
+                responseRatingService.getResponseRating(customerId, userId, id, jwt));
     }
 
     @GetMapping("/{customerId}/response-ratings")
