@@ -1,8 +1,8 @@
 package de.flowsuite.mailflowapi.messagecategory;
 
-import de.flowsuite.mailflowapi.common.entity.MessageCategory;
-import de.flowsuite.mailflowapi.common.exception.*;
-import de.flowsuite.mailflowapi.common.util.AuthorisationUtil;
+import de.flowsuite.mailflowcommon.entity.MessageCategory;
+import de.flowsuite.mailflowcommon.exception.*;
+import de.flowsuite.mailflowcommon.util.AuthorisationUtil;
 
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;

@@ -2,7 +2,7 @@ package de.flowsuite.mailflowapi.customer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import de.flowsuite.mailflowapi.common.entity.Customer;
+import de.flowsuite.mailflowcommon.entity.Customer;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;

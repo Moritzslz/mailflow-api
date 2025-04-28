@@ -2,7 +2,7 @@ package de.flowsuite.mailflowapi.util;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import de.flowsuite.mailflowapi.common.util.HmacUtil;
+import de.flowsuite.mailflowcommon.util.HmacUtil;
 
 import org.junit.jupiter.api.Test;
 

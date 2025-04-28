@@ -1,13 +1,13 @@
 package de.flowsuite.mailflowapi.security;
 
-import static de.flowsuite.mailflowapi.common.util.AuthorisationUtil.*;
-import static de.flowsuite.mailflowapi.common.util.Util.BERLIN_ZONE;
+import static de.flowsuite.mailflowcommon.util.AuthorisationUtil.*;
+import static de.flowsuite.mailflowcommon.util.Util.BERLIN_ZONE;
 
-import de.flowsuite.mailflowapi.common.entity.Client;
-import de.flowsuite.mailflowapi.common.entity.User;
-import de.flowsuite.mailflowapi.common.exception.AuthenticationFailedException;
-import de.flowsuite.mailflowapi.common.exception.InvalidRefreshTokenException;
 import de.flowsuite.mailflowapi.user.UserService;
+import de.flowsuite.mailflowcommon.entity.Client;
+import de.flowsuite.mailflowcommon.entity.User;
+import de.flowsuite.mailflowcommon.exception.AuthenticationFailedException;
+import de.flowsuite.mailflowcommon.exception.InvalidRefreshTokenException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

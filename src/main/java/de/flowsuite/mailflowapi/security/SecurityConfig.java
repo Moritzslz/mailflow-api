@@ -11,9 +11,9 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 
 import de.flowsuite.mailflowapi.client.ClientService;
-import de.flowsuite.mailflowapi.common.constant.Authorities;
-import de.flowsuite.mailflowapi.common.util.RsaUtil;
 import de.flowsuite.mailflowapi.user.UserService;
+import de.flowsuite.mailflowcommon.constant.Authorities;
+import de.flowsuite.mailflowcommon.util.RsaUtil;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;

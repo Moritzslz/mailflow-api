@@ -1,6 +1,6 @@
 package de.flowsuite.mailflowapi.blacklist;
 
-import de.flowsuite.mailflowapi.common.entity.BlacklistEntry;
+import de.flowsuite.mailflowcommon.entity.BlacklistEntry;
 
 import jakarta.validation.Valid;
 

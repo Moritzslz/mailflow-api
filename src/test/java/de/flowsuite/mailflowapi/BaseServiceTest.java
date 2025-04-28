@@ -2,11 +2,11 @@ package de.flowsuite.mailflowapi;
 
 import static org.mockito.Mockito.*;
 
-import de.flowsuite.mailflowapi.common.constant.Authorities;
-import de.flowsuite.mailflowapi.common.entity.User;
-import de.flowsuite.mailflowapi.common.util.AesUtil;
-import de.flowsuite.mailflowapi.common.util.AuthorisationUtil;
-import de.flowsuite.mailflowapi.common.util.HmacUtil;
+import de.flowsuite.mailflowcommon.constant.Authorities;
+import de.flowsuite.mailflowcommon.entity.User;
+import de.flowsuite.mailflowcommon.util.AesUtil;
+import de.flowsuite.mailflowcommon.util.AuthorisationUtil;
+import de.flowsuite.mailflowcommon.util.HmacUtil;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

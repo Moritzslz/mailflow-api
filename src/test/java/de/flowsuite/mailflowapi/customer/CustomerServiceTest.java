@@ -6,11 +6,11 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import de.flowsuite.mailflowapi.BaseServiceTest;
-import de.flowsuite.mailflowapi.common.constant.Authorities;
-import de.flowsuite.mailflowapi.common.entity.Customer;
-import de.flowsuite.mailflowapi.common.entity.User;
-import de.flowsuite.mailflowapi.common.exception.*;
-import de.flowsuite.mailflowapi.common.util.AuthorisationUtil;
+import de.flowsuite.mailflowcommon.constant.Authorities;
+import de.flowsuite.mailflowcommon.entity.Customer;
+import de.flowsuite.mailflowcommon.entity.User;
+import de.flowsuite.mailflowcommon.exception.*;
+import de.flowsuite.mailflowcommon.util.AuthorisationUtil;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

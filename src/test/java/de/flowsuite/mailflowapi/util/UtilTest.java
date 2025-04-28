@@ -2,9 +2,9 @@ package de.flowsuite.mailflowapi.util;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import de.flowsuite.mailflowapi.common.exception.InvalidEmailAddressException;
-import de.flowsuite.mailflowapi.common.exception.InvalidUrlException;
-import de.flowsuite.mailflowapi.common.util.Util;
+import de.flowsuite.mailflowcommon.exception.InvalidEmailAddressException;
+import de.flowsuite.mailflowcommon.exception.InvalidUrlException;
+import de.flowsuite.mailflowcommon.util.Util;
 
 import org.junit.jupiter.api.Test;
 

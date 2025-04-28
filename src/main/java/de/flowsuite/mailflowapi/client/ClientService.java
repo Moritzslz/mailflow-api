@@ -1,9 +1,9 @@
 package de.flowsuite.mailflowapi.client;
 
-import de.flowsuite.mailflowapi.common.entity.Client;
-import de.flowsuite.mailflowapi.common.exception.EntityAlreadyExistsException;
-import de.flowsuite.mailflowapi.common.exception.EntityNotFoundException;
-import de.flowsuite.mailflowapi.common.exception.IdConflictException;
+import de.flowsuite.mailflowcommon.entity.Client;
+import de.flowsuite.mailflowcommon.exception.EntityAlreadyExistsException;
+import de.flowsuite.mailflowcommon.exception.EntityNotFoundException;
+import de.flowsuite.mailflowcommon.exception.IdConflictException;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

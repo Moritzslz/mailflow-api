@@ -1,6 +1,6 @@
 package de.flowsuite.mailflowapi.ragurl;
 
-import de.flowsuite.mailflowapi.common.entity.RagUrl;
+import de.flowsuite.mailflowcommon.entity.RagUrl;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;

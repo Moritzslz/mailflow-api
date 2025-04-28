@@ -1,9 +1,10 @@
 package de.flowsuite.mailflowapi.util;
 
-import de.flowsuite.mailflowapi.common.util.RsaUtil;
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import de.flowsuite.mailflowcommon.util.RsaUtil;
+
+import org.junit.jupiter.api.Test;
 
 class RsaUtilTest {
 

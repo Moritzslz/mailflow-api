@@ -1,19 +1,19 @@
 package de.flowsuite.mailflowapi.responserating;
 
-import static de.flowsuite.mailflowapi.common.constant.Message.RESPONSE_RATING_EXPIRED_MSG;
-import static de.flowsuite.mailflowapi.common.util.Util.BERLIN_ZONE;
 import static de.flowsuite.mailflowapi.messagelog.MessageLogService.TOKEN_TTL_DAYS;
+import static de.flowsuite.mailflowcommon.constant.Message.RESPONSE_RATING_EXPIRED_MSG;
+import static de.flowsuite.mailflowcommon.util.Util.BERLIN_ZONE;
 
-import de.flowsuite.mailflowapi.common.constant.Timeframe;
-import de.flowsuite.mailflowapi.common.entity.MessageLogEntry;
-import de.flowsuite.mailflowapi.common.entity.ResponseRating;
-import de.flowsuite.mailflowapi.common.exception.EntityAlreadyExistsException;
-import de.flowsuite.mailflowapi.common.exception.EntityNotFoundException;
-import de.flowsuite.mailflowapi.common.exception.IdorException;
-import de.flowsuite.mailflowapi.common.exception.TokenExpiredException;
-import de.flowsuite.mailflowapi.common.util.AnalyticsUtil;
-import de.flowsuite.mailflowapi.common.util.AuthorisationUtil;
 import de.flowsuite.mailflowapi.messagelog.MessageLogService;
+import de.flowsuite.mailflowcommon.constant.Timeframe;
+import de.flowsuite.mailflowcommon.entity.MessageLogEntry;
+import de.flowsuite.mailflowcommon.entity.ResponseRating;
+import de.flowsuite.mailflowcommon.exception.EntityAlreadyExistsException;
+import de.flowsuite.mailflowcommon.exception.EntityNotFoundException;
+import de.flowsuite.mailflowcommon.exception.IdorException;
+import de.flowsuite.mailflowcommon.exception.TokenExpiredException;
+import de.flowsuite.mailflowcommon.util.AnalyticsUtil;
+import de.flowsuite.mailflowcommon.util.AuthorisationUtil;
 
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;

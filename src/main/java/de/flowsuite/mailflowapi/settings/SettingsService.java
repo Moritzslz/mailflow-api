@@ -1,14 +1,14 @@
 package de.flowsuite.mailflowapi.settings;
 
-import de.flowsuite.mailflowapi.common.entity.Customer;
-import de.flowsuite.mailflowapi.common.entity.Settings;
-import de.flowsuite.mailflowapi.common.exception.EntityAlreadyExistsException;
-import de.flowsuite.mailflowapi.common.exception.EntityNotFoundException;
-import de.flowsuite.mailflowapi.common.exception.IdConflictException;
-import de.flowsuite.mailflowapi.common.exception.UpdateConflictException;
-import de.flowsuite.mailflowapi.common.util.AesUtil;
-import de.flowsuite.mailflowapi.common.util.AuthorisationUtil;
-import de.flowsuite.mailflowapi.common.util.HmacUtil;
+import de.flowsuite.mailflowcommon.entity.Customer;
+import de.flowsuite.mailflowcommon.entity.Settings;
+import de.flowsuite.mailflowcommon.exception.EntityAlreadyExistsException;
+import de.flowsuite.mailflowcommon.exception.EntityNotFoundException;
+import de.flowsuite.mailflowcommon.exception.IdConflictException;
+import de.flowsuite.mailflowcommon.exception.UpdateConflictException;
+import de.flowsuite.mailflowcommon.util.AesUtil;
+import de.flowsuite.mailflowcommon.util.AuthorisationUtil;
+import de.flowsuite.mailflowcommon.util.HmacUtil;
 
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;

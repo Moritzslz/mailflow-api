@@ -1,7 +1,7 @@
 package de.flowsuite.mailflowapi.messagelog;
 
-import de.flowsuite.mailflowapi.common.constant.Timeframe;
-import de.flowsuite.mailflowapi.common.entity.MessageLogEntry;
+import de.flowsuite.mailflowcommon.constant.Timeframe;
+import de.flowsuite.mailflowcommon.entity.MessageLogEntry;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;

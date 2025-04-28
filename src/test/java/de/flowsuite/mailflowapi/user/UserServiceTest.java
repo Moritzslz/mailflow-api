@@ -1,20 +1,20 @@
 package de.flowsuite.mailflowapi.user;
 
-import static de.flowsuite.mailflowapi.common.constant.Message.*;
+import static de.flowsuite.mailflowcommon.constant.Message.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import de.flowsuite.mailflowapi.BaseServiceTest;
-import de.flowsuite.mailflowapi.common.constant.Authorities;
-import de.flowsuite.mailflowapi.common.constant.Message;
-import de.flowsuite.mailflowapi.common.entity.Customer;
-import de.flowsuite.mailflowapi.common.entity.User;
-import de.flowsuite.mailflowapi.common.exception.IdConflictException;
-import de.flowsuite.mailflowapi.common.exception.IdorException;
 import de.flowsuite.mailflowapi.customer.CustomerService;
 import de.flowsuite.mailflowapi.mail.MailService;
+import de.flowsuite.mailflowcommon.constant.Authorities;
+import de.flowsuite.mailflowcommon.constant.Message;
+import de.flowsuite.mailflowcommon.entity.Customer;
+import de.flowsuite.mailflowcommon.entity.User;
+import de.flowsuite.mailflowcommon.exception.IdConflictException;
+import de.flowsuite.mailflowcommon.exception.IdorException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

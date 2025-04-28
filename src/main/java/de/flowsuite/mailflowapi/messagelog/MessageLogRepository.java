@@ -1,6 +1,6 @@
 package de.flowsuite.mailflowapi.messagelog;
 
-import de.flowsuite.mailflowapi.common.entity.MessageLogEntry;
+import de.flowsuite.mailflowcommon.entity.MessageLogEntry;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;

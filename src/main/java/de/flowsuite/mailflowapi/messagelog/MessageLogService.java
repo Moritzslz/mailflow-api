@@ -1,16 +1,16 @@
 package de.flowsuite.mailflowapi.messagelog;
 
-import static de.flowsuite.mailflowapi.common.util.Util.BERLIN_ZONE;
+import static de.flowsuite.mailflowcommon.util.Util.BERLIN_ZONE;
 
-import de.flowsuite.mailflowapi.common.constant.Timeframe;
-import de.flowsuite.mailflowapi.common.entity.MessageLogEntry;
-import de.flowsuite.mailflowapi.common.exception.EntityNotFoundException;
-import de.flowsuite.mailflowapi.common.exception.IdConflictException;
-import de.flowsuite.mailflowapi.common.exception.IdorException;
-import de.flowsuite.mailflowapi.common.util.AesUtil;
-import de.flowsuite.mailflowapi.common.util.AnalyticsUtil;
-import de.flowsuite.mailflowapi.common.util.AuthorisationUtil;
-import de.flowsuite.mailflowapi.common.util.Util;
+import de.flowsuite.mailflowcommon.constant.Timeframe;
+import de.flowsuite.mailflowcommon.entity.MessageLogEntry;
+import de.flowsuite.mailflowcommon.exception.EntityNotFoundException;
+import de.flowsuite.mailflowcommon.exception.IdConflictException;
+import de.flowsuite.mailflowcommon.exception.IdorException;
+import de.flowsuite.mailflowcommon.util.AesUtil;
+import de.flowsuite.mailflowcommon.util.AnalyticsUtil;
+import de.flowsuite.mailflowcommon.util.AuthorisationUtil;
+import de.flowsuite.mailflowcommon.util.Util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

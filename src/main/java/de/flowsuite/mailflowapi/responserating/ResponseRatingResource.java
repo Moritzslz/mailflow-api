@@ -1,7 +1,7 @@
 package de.flowsuite.mailflowapi.responserating;
 
-import de.flowsuite.mailflowapi.common.constant.Timeframe;
-import de.flowsuite.mailflowapi.common.entity.ResponseRating;
+import de.flowsuite.mailflowcommon.constant.Timeframe;
+import de.flowsuite.mailflowcommon.entity.ResponseRating;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;

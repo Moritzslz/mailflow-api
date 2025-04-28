@@ -2,7 +2,7 @@ package de.flowsuite.mailflowapi.util;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import de.flowsuite.mailflowapi.common.util.AesUtil;
+import de.flowsuite.mailflowcommon.util.AesUtil;
 
 import org.junit.jupiter.api.Test;
 

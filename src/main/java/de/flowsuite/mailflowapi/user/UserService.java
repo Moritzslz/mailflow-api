@@ -1,19 +1,19 @@
 package de.flowsuite.mailflowapi.user;
 
-import static de.flowsuite.mailflowapi.common.constant.Message.*;
-import static de.flowsuite.mailflowapi.common.util.Util.BERLIN_ZONE;
+import static de.flowsuite.mailflowcommon.constant.Message.*;
+import static de.flowsuite.mailflowcommon.util.Util.BERLIN_ZONE;
 
-import de.flowsuite.mailflowapi.common.constant.Authorities;
-import de.flowsuite.mailflowapi.common.constant.Message;
-import de.flowsuite.mailflowapi.common.entity.Customer;
-import de.flowsuite.mailflowapi.common.entity.User;
-import de.flowsuite.mailflowapi.common.exception.IdConflictException;
-import de.flowsuite.mailflowapi.common.util.AesUtil;
-import de.flowsuite.mailflowapi.common.util.AuthorisationUtil;
-import de.flowsuite.mailflowapi.common.util.HmacUtil;
-import de.flowsuite.mailflowapi.common.util.Util;
 import de.flowsuite.mailflowapi.customer.CustomerService;
 import de.flowsuite.mailflowapi.mail.MailService;
+import de.flowsuite.mailflowcommon.constant.Authorities;
+import de.flowsuite.mailflowcommon.constant.Message;
+import de.flowsuite.mailflowcommon.entity.Customer;
+import de.flowsuite.mailflowcommon.entity.User;
+import de.flowsuite.mailflowcommon.exception.IdConflictException;
+import de.flowsuite.mailflowcommon.util.AesUtil;
+import de.flowsuite.mailflowcommon.util.AuthorisationUtil;
+import de.flowsuite.mailflowcommon.util.HmacUtil;
+import de.flowsuite.mailflowcommon.util.Util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
