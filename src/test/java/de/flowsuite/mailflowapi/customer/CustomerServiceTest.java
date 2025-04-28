@@ -45,7 +45,9 @@ class CustomerServiceTest extends BaseServiceTest {
                     "LinkedIn",
                     "https://example.com",
                     "https://example.com/privacy-policy",
-                    "https://example.com/cta");
+                    "https://example.com/cta",
+                    true,
+                    "ionosUsername");
 
     private Customer buildTestCustomer() {
         return Customer.builder()
@@ -62,6 +64,8 @@ class CustomerServiceTest extends BaseServiceTest {
                 .privacyPolicyUrl(createCustomerRequest.privacyPolicyUrl())
                 .ctaUrl(createCustomerRequest.ctaUrl())
                 .registrationToken("registrationToken")
+                .isTestVersion(true)
+                .ionosUsername(createCustomerRequest.ionosUsername())
                 .build();
     }
 
@@ -92,6 +96,7 @@ class CustomerServiceTest extends BaseServiceTest {
         Customer savedCustomer = customerCaptor.getValue();
 
         // spotless:off
+        assertNotNull(savedCustomer);
         assertNotNull(savedCustomer.getRegistrationToken());
         assertEquals(createCustomerRequest.company(), savedCustomer.getCompany());
         assertEquals(createCustomerRequest.street(), savedCustomer.getStreet());
@@ -104,6 +109,8 @@ class CustomerServiceTest extends BaseServiceTest {
         assertEquals(createCustomerRequest.websiteUrl(), savedCustomer.getWebsiteUrl());
         assertEquals(createCustomerRequest.privacyPolicyUrl(), savedCustomer.getPrivacyPolicyUrl());
         assertEquals(createCustomerRequest.ctaUrl(), savedCustomer.getCtaUrl());
+        assertEquals(createCustomerRequest.isTestVersion(), savedCustomer.isTestVersion());
+        assertEquals(createCustomerRequest.ionosUsername(), savedCustomer.getIonosUsername());
         // spotless:on
     }
 
@@ -153,11 +160,17 @@ class CustomerServiceTest extends BaseServiceTest {
         assertThrows(
                 EntityNotFoundException.class,
                 () -> customerService.getCustomer(testCustomer.getId(), jwtMock));
+
+        verify(customerRepository, never()).save(any(Customer.class));
     }
 
     @Test
     void testGetCustomer_idor() {
         mockJwtForUser(testUser);
+        assertThrows(
+                IdorException.class,
+                () -> customerService.getCustomer(testCustomer.getId() + 1, jwtMock));
+
         assertThrows(
                 IdorException.class,
                 () -> customerService.getCustomer(testCustomer.getId() + 1, jwtMock));
@@ -207,10 +220,12 @@ class CustomerServiceTest extends BaseServiceTest {
         assertThrows(
                 EntityNotFoundException.class,
                 () -> customerService.updateCustomer(testCustomer.getId(), testCustomer, jwtMock));
+
+        verify(customerRepository, never()).save(any(Customer.class));
     }
 
     @Test
-    void testUpdateCustomer_openaiKeyConflict() {
+    void testUpdateCustomer_updateConflict() {
         mockJwtForUser(testUser);
 
         Customer updatedCustomer = buildTestCustomer();

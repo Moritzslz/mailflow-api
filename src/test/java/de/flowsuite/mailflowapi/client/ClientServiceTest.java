@@ -56,6 +56,7 @@ class ClientServiceTest extends BaseServiceTest {
         verify(clientRepository).save(clientCaptor.capture());
         Client savedClient = clientCaptor.getValue();
 
+        assertNotNull(savedClient);
         assertEquals(testClient.getClientName(), savedClient.getClientName());
         assertEquals(HASHED_VALUE, savedClient.getClientSecret());
     }

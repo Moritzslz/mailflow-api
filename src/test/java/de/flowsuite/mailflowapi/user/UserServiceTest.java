@@ -89,6 +89,7 @@ class UserServiceTest extends BaseServiceTest {
                         eq(savedUser.getVerificationToken()),
                         anyInt());
 
+        assertNotNull(savedUser);
         assertEquals(CREATE_USER_MSG, message.message());
         assertEquals(customerId, savedUser.getCustomerId());
         assertFalse(savedUser.isEnabled());

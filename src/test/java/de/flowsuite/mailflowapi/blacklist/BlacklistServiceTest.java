@@ -63,6 +63,7 @@ class BlacklistServiceTest extends BaseServiceTest {
         verify(blacklistRepository).save(blacklistEntryCaptor.capture());
         BlacklistEntry savedBlacklistEntry = blacklistEntryCaptor.getValue();
 
+        assertNotNull(savedBlacklistEntry);
         assertEquals(ENCRYPTED_VALUE, savedBlacklistEntry.getBlacklistedEmailAddress());
         assertEquals(HASHED_VALUE, savedBlacklistEntry.getBlacklistedEmailAddressHash());
         assertEquals(testUser.getId(), savedBlacklistEntry.getUserId());
@@ -155,6 +156,7 @@ class BlacklistServiceTest extends BaseServiceTest {
     @Test
     void testGetBlacklistEntry_notFound() {
         when(blacklistRepository.findById(testBlacklistEntry.getId())).thenReturn(Optional.empty());
+
         assertThrows(
                 EntityNotFoundException.class,
                 () ->
@@ -163,19 +165,14 @@ class BlacklistServiceTest extends BaseServiceTest {
                                 testUser.getId(),
                                 testBlacklistEntry.getId(),
                                 jwtMock));
+
+        verify(blacklistRepository, never()).save(any(BlacklistEntry.class));
     }
 
     @Test
     void testGetBlacklistEntry_idor() {
-        BlacklistEntry testBlacklistEntryIdor = buildTestBlacklistEntry();
-        testBlacklistEntryIdor.setId(testBlacklistEntryIdor.getId() + 1);
-        testBlacklistEntryIdor.setUserId(testUser.getId() + 1);
-
-        long testBlackListEntryId = testBlacklistEntry.getId();
-        long testBlackListEntryIdIdor = testBlacklistEntryIdor.getId();
-
-        when(blacklistRepository.findById(testBlackListEntryIdIdor))
-                .thenReturn(Optional.of(testBlacklistEntryIdor));
+        when(blacklistRepository.findById(testBlacklistEntry.getId()))
+                .thenReturn(Optional.of(testBlacklistEntry));
 
         assertThrows(
                 IdorException.class,
@@ -183,7 +180,7 @@ class BlacklistServiceTest extends BaseServiceTest {
                         blacklistService.getBlacklistEntry(
                                 testUser.getCustomerId() + 1,
                                 testUser.getId(),
-                                testBlackListEntryId,
+                                testBlacklistEntry.getId(),
                                 jwtMock));
         assertThrows(
                 IdorException.class,
@@ -191,15 +188,18 @@ class BlacklistServiceTest extends BaseServiceTest {
                         blacklistService.getBlacklistEntry(
                                 testUser.getCustomerId(),
                                 testUser.getId() + 1,
-                                testBlackListEntryId,
+                                testBlacklistEntry.getId(),
                                 jwtMock));
+
+        testBlacklistEntry.setUserId(testUser.getId() + 1);
+
         assertThrows(
                 IdorException.class,
                 () ->
                         blacklistService.getBlacklistEntry(
                                 testUser.getCustomerId(),
                                 testUser.getId(),
-                                testBlackListEntryIdIdor,
+                                testBlacklistEntry.getId(),
                                 jwtMock));
     }
 
