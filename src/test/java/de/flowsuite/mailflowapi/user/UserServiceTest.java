@@ -313,6 +313,10 @@ class UserServiceTest extends BaseServiceTest {
         mockJwtForUser(testUser);
         when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
         User user = userService.getUser(testUser.getCustomerId(), testUser.getId(), jwtMock);
+
+        testUser.setFirstName(DECRYPTED_VALUE);
+        testUser.setLastName(DECRYPTED_VALUE);
+
         assertEquals(testUser, user);
     }
 
