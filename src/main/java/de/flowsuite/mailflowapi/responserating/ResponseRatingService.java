@@ -61,7 +61,7 @@ class ResponseRatingService {
         return responseRatingRepository.save(responseRating);
     }
 
-    ResponseRating getResponseRating(long customerId, long id, Jwt jwt) {
+    ResponseRating getResponseRating(long customerId, long userId, long id, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
 
         ResponseRating responseRating =
@@ -72,7 +72,7 @@ class ResponseRatingService {
                                         new EntityNotFoundException(
                                                 ResponseRating.class.getSimpleName()));
 
-        if (!responseRating.getCustomerId().equals(customerId)) {
+        if (!responseRating.getCustomerId().equals(customerId) || !responseRating.getUserId().equals(userId)) {
             throw new IdorException();
         }
 

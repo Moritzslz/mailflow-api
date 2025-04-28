@@ -38,21 +38,23 @@ class ResponseRatingResource {
 
         URI location =
                 uriBuilder
-                        .path("/customers/{customerId}/response-ratings/{id}")
+                        .path("/customers/{customerId}/users/{userId}/response-ratings/{id}")
                         .buildAndExpand(
                                 createdResponseRating.getCustomerId(),
+                                createdResponseRating.getUserId(),
                                 createdResponseRating.getMessageLogId())
                         .toUri();
 
         return ResponseEntity.created(location).body(createdResponseRating);
     }
 
-    @GetMapping("/{customerId}/response-ratings/{id}")
-    ResponseEntity<ResponseRating> getResponseRatings(
+    @GetMapping("/{customerId}/users/{userId}/response-ratings/{id}")
+    ResponseEntity<ResponseRating> getResponseRating(
             @PathVariable long customerId,
+            @PathVariable long userId,
             @PathVariable long id,
             @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(responseRatingService.getResponseRating(customerId, id, jwt));
+        return ResponseEntity.ok(responseRatingService.getResponseRating(customerId, userId, id, jwt));
     }
 
     @GetMapping("/{customerId}/response-ratings")
