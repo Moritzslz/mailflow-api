@@ -27,7 +27,8 @@ class MessageCategoryService {
             throw new IdConflictException();
         }
 
-        if (messageCategoryRepository.existsByCategory(messageCategory.getCategory())) {
+        if (messageCategoryRepository.existsByCustomerIdAndCategory(
+                customerId, messageCategory.getCategory())) {
             throw new EntityAlreadyExistsException(MessageCategory.class.getSimpleName());
         }
 
@@ -59,15 +60,15 @@ class MessageCategoryService {
     }
 
     MessageCategory updateMessageCategory(
-            long customerId, long id, MessageCategory messageCategory, Jwt jwt) {
+            long customerId, long id, MessageCategory updatedMessageCategory, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
 
-        if (!messageCategory.getCustomerId().equals(customerId)
-                || !messageCategory.getId().equals(id)) {
+        if (!updatedMessageCategory.getCustomerId().equals(customerId)
+                || !updatedMessageCategory.getId().equals(id)) {
             throw new IdConflictException();
         }
 
-        MessageCategory existingCategory =
+        MessageCategory messageCategory =
                 messageCategoryRepository
                         .findById(id)
                         .orElseThrow(
@@ -75,11 +76,11 @@ class MessageCategoryService {
                                         new EntityNotFoundException(
                                                 MessageCategory.class.getSimpleName()));
 
-        if (!existingCategory.getCustomerId().equals(customerId)) {
-            throw new UpdateConflictException();
+        if (!messageCategory.getCustomerId().equals(customerId)) {
+            throw new IdorException();
         }
 
-        return messageCategoryRepository.save(messageCategory);
+        return messageCategoryRepository.save(updatedMessageCategory);
     }
 
     void deleteMessageCategory(long customerId, long id, Jwt jwt) {
