@@ -14,7 +14,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.UnsupportedEncodingException;
@@ -32,7 +31,7 @@ public class MailService {
     private static final String RESET_PASSWORD_EMAIL_PATH = "classpath:templates/PasswordResetEmail.html";
     private static final String RESET_PASSWORD_EXPIRED_EMAIL_PATH = "classpath:templates/PasswordResetExpiredEmail.html";
     private static final String WELCOME_EMAIL_PATH = "classpath:templates/WelcomeEmail.html";
-    private final String mailFlowFrontendUrl;
+    private final String mailflowFrontendUrl;
     private final JavaMailSender mailSender;
     private final String doubleOptInEmail;
     private final String registrationExpiredEmail;
@@ -42,10 +41,10 @@ public class MailService {
     // spotless:on
 
     public MailService(
-            @Value("${mailflow.frontend.url}") String mailFlowFrontendUrl,
+            @Value("${mailflow.frontend.url}") String mailflowFrontendUrl,
             JavaMailSender mailSender,
             ResourceLoader resourceLoader) {
-        this.mailFlowFrontendUrl = mailFlowFrontendUrl;
+        this.mailflowFrontendUrl = mailflowFrontendUrl;
         this.mailSender = mailSender;
         this.doubleOptInEmail = MailUtil.readFile(resourceLoader, DOUBLE_OPT_IN_EMAIL_PATH);
         this.registrationExpiredEmail =
@@ -58,10 +57,9 @@ public class MailService {
 
     public void sendDoubleOptInEmail(
             String fistName, String emailAddress, String token, int hours) {
-        String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
 
         URI uri =
-                UriComponentsBuilder.fromUriString(baseUrl)
+                UriComponentsBuilder.fromUriString(mailflowFrontendUrl)
                         .path("/customers/users/enable")
                         .queryParam("token", token)
                         .build()
@@ -79,7 +77,7 @@ public class MailService {
 
     public void sendRegistrationExpiredEmail(long userId, String firstName, String emailAddress) {
         URI uri =
-                UriComponentsBuilder.fromUriString(mailFlowFrontendUrl)
+                UriComponentsBuilder.fromUriString(mailflowFrontendUrl)
                         .path("/register")
                         .build()
                         .toUri();
@@ -97,7 +95,7 @@ public class MailService {
     public void sendPasswordResetEmail(
             long userId, String firstName, String emailAddress, String token, int minutes) {
         URI uri =
-                UriComponentsBuilder.fromUriString(mailFlowFrontendUrl)
+                UriComponentsBuilder.fromUriString(mailflowFrontendUrl)
                         .path("/password-reset")
                         .queryParam("token", token)
                         .build()
@@ -117,7 +115,7 @@ public class MailService {
 
     public void sendPasswordResetExpiredEmail(long userId, String firstName, String emailAddress) {
         URI uri =
-                UriComponentsBuilder.fromUriString(mailFlowFrontendUrl)
+                UriComponentsBuilder.fromUriString(mailflowFrontendUrl)
                         .path("/password-reset/request")
                         .build()
                         .toUri();
@@ -133,7 +131,7 @@ public class MailService {
     }
 
     public void sendWelcomeEmail(long userId, String firstName, String emailAddress) {
-        URI uri = UriComponentsBuilder.fromUriString(mailFlowFrontendUrl).build().toUri();
+        URI uri = UriComponentsBuilder.fromUriString(mailflowFrontendUrl).build().toUri();
 
         String emailContent =
                 MailUtil.replacePlaceholder(welcomeEmail, "TITLE", WELCOME_EMAIL_SUBJECT);
