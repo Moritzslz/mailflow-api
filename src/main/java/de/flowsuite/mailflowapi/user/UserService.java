@@ -223,7 +223,12 @@ public class UserService implements UserDetailsService {
     User getUser(long customerId, long id, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
         AuthorisationUtil.validateAccessToUser(id, jwt);
-        return getById(id);
+
+        User user = getById(id);
+        user.setFirstName(AesUtil.decrypt(user.getFirstName()));
+        user.setLastName(AesUtil.decrypt(user.getLastName()));
+
+        return user;
     }
 
     User updateUser(long customerId, long id, UserResource.UpdateUserRequest request, Jwt jwt) {
