@@ -70,10 +70,10 @@ class MessageCategoryTest extends BaseServiceTest {
         messageCategoryService.createMessageCategory(
                 testUser.getCustomerId(), testMessageCategory, jwtMock);
 
-        ArgumentCaptor<MessageCategory> messageCategoryEntryCaptor =
+        ArgumentCaptor<MessageCategory> messageCategoryCaptor =
                 ArgumentCaptor.forClass(MessageCategory.class);
-        verify(messageCategoryRepository).save(messageCategoryEntryCaptor.capture());
-        MessageCategory savedMessageCategory = messageCategoryEntryCaptor.getValue();
+        verify(messageCategoryRepository).save(messageCategoryCaptor.capture());
+        MessageCategory savedMessageCategory = messageCategoryCaptor.getValue();
 
         assertNotNull(savedMessageCategory);
         assertEquals(testMessageCategory.getCustomerId(), savedMessageCategory.getCustomerId());
@@ -219,10 +219,10 @@ class MessageCategoryTest extends BaseServiceTest {
                 updatedMessageCategory,
                 jwtMock);
 
-        ArgumentCaptor<MessageCategory> messageCategoryEntryCaptor =
+        ArgumentCaptor<MessageCategory> messageCategoryCaptor =
                 ArgumentCaptor.forClass(MessageCategory.class);
-        verify(messageCategoryRepository).save(messageCategoryEntryCaptor.capture());
-        MessageCategory savedMessageCategory = messageCategoryEntryCaptor.getValue();
+        verify(messageCategoryRepository).save(messageCategoryCaptor.capture());
+        MessageCategory savedMessageCategory = messageCategoryCaptor.getValue();
 
         assertEquals(updatedMessageCategory, savedMessageCategory);
     }
@@ -291,10 +291,10 @@ class MessageCategoryTest extends BaseServiceTest {
         messageCategoryService.deleteMessageCategory(
                 testUser.getCustomerId(), testMessageCategory.getId(), jwtMock);
 
-        ArgumentCaptor<MessageCategory> messageCategoryEntryCaptor =
+        ArgumentCaptor<MessageCategory> messageCategoryCaptor =
                 ArgumentCaptor.forClass(MessageCategory.class);
-        verify(messageCategoryRepository).delete(messageCategoryEntryCaptor.capture());
-        MessageCategory deletedMessageCategory = messageCategoryEntryCaptor.getValue();
+        verify(messageCategoryRepository).delete(messageCategoryCaptor.capture());
+        MessageCategory deletedMessageCategory = messageCategoryCaptor.getValue();
 
         assertEquals(testMessageCategory, deletedMessageCategory);
     }
