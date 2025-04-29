@@ -62,10 +62,17 @@ public abstract class BaseServiceTest {
         hmacUtilMock.close();
     }
 
-    protected void mockJwtForUser(User user) {
+    protected void mockJwtWithUserAndCustomerClaims(User user) {
         when(jwtMock.getClaim(AuthorisationUtil.CLAIM_SCOPE))
                 .thenReturn(Authorities.USER.getAuthority());
         when(jwtMock.getSubject()).thenReturn(String.valueOf(user.getId()));
+        when(jwtMock.getClaim(AuthorisationUtil.CLAIM_CUSTOMER_ID))
+                .thenReturn(user.getCustomerId());
+    }
+
+    protected void mockJwtWithCustomerClaimsOnly(User user) {
+        when(jwtMock.getClaim(AuthorisationUtil.CLAIM_SCOPE))
+                .thenReturn(Authorities.USER.getAuthority());
         when(jwtMock.getClaim(AuthorisationUtil.CLAIM_CUSTOMER_ID))
                 .thenReturn(user.getCustomerId());
     }
