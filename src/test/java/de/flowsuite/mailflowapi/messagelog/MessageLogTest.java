@@ -9,10 +9,15 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import de.flowsuite.mailflowapi.BaseServiceTest;
+import de.flowsuite.mailflowcommon.constant.Timeframe;
+import de.flowsuite.mailflowcommon.entity.MessageCategory;
 import de.flowsuite.mailflowcommon.entity.MessageLogEntry;
 import de.flowsuite.mailflowcommon.entity.User;
+import de.flowsuite.mailflowcommon.exception.EntityNotFoundException;
 import de.flowsuite.mailflowcommon.exception.IdConflictException;
 
+import de.flowsuite.mailflowcommon.exception.IdorException;
+import de.flowsuite.mailflowcommon.util.AnalyticsUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +27,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.ZonedDateTime;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class MessageLogTest extends BaseServiceTest {
@@ -183,11 +191,129 @@ class MessageLogTest extends BaseServiceTest {
 
     @Test
     void testListMessageLogEntriesByCustomer() {
-        mockJwtWithUserAndCustomerClaims(testUser);
+        mockJwtWithCustomerClaimsOnly(testUser);
+        when(messageLogRepository.findByCustomerId(testUser.getCustomerId()))
+                .thenReturn(List.of(testMessageLogEntry));
+
+        List<MessageLogEntry> messageLogEntries =
+                messageLogService.listMessageLogEntriesByCustomer(
+                        testUser.getCustomerId(), jwtMock);
+
+        assertEquals(1, messageLogEntries.size());
+        assertEquals(testMessageLogEntry, messageLogEntries.get(0));
+    }
+
+    @Test
+    void testListMessageLogEntriesByCustomer_idor() {
+        mockJwtWithCustomerClaimsOnly(testUser);
+
+        assertThrows(IdorException.class, () ->
+                messageLogService.listMessageLogEntriesByCustomer(
+                        testUser.getCustomerId() + 1, jwtMock));
+
+        verify(messageLogRepository, never()).findByCustomerId(anyLong());
     }
 
     @Test
     void testListMessageLogEntriesByUser() {
         mockJwtWithUserAndCustomerClaims(testUser);
+        when(messageLogRepository.findByUserId(testUser.getId()))
+                .thenReturn(List.of(testMessageLogEntry));
+
+        List<MessageLogEntry> messageLogEntries =
+                messageLogService.listMessageLogEntriesByUser(
+                        testUser.getCustomerId(), testUser.getId(), jwtMock);
+
+        assertEquals(1, messageLogEntries.size());
+        assertEquals(testMessageLogEntry, messageLogEntries.get(0));
+    }
+
+    @Test
+    void testListMessageLogEntriesByUser_idor() {
+        mockJwtWithUserAndCustomerClaims(testUser);
+
+        assertThrows(IdorException.class, () ->
+                messageLogService.listMessageLogEntriesByUser(
+                        testUser.getCustomerId() + 1, testUser.getId(), jwtMock));
+
+        assertThrows(IdorException.class, () ->
+                messageLogService.listMessageLogEntriesByUser(
+                        testUser.getCustomerId(), testUser.getId() + 1, jwtMock));
+
+        verify(messageLogRepository, never()).findByUserId(anyLong());
+    }
+
+    @Test
+    void testGetMessageLogEntry_success() {
+        mockJwtWithUserAndCustomerClaims(testUser);
+        when(messageLogRepository.findById(testMessageLogEntry.getId()))
+                .thenReturn(Optional.of(testMessageLogEntry));
+
+        MessageLogEntry messageLogEntry =
+                messageLogService.getMessageLogEntry(
+                        testUser.getCustomerId(), testUser.getId(), testMessageLogEntry.getId(), jwtMock);
+
+        verify(messageLogRepository).findById(testMessageLogEntry.getId());
+
+        assertEquals(testMessageLogEntry, messageLogEntry);
+    }
+
+    @Test
+    void testGetMessageLogEntry_notFound() {
+        mockJwtWithUserAndCustomerClaims(testUser);
+        when(messageLogRepository.findById(testMessageLogEntry.getId()))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                EntityNotFoundException.class,
+                () ->
+                        messageLogService.getMessageLogEntry(
+                                testUser.getCustomerId(), testUser.getId(), testMessageLogEntry.getId(), jwtMock));
+    }
+
+    @Test
+    void testGetMessageLogEntry_idor() {
+        mockJwtWithUserAndCustomerClaims(testUser);
+
+        MessageLogEntry testMessageLogEntryIdor1 = buildTestMessageLogEntry();
+        testMessageLogEntryIdor1.setId(testMessageLogEntry.getId() + 1);
+        testMessageLogEntryIdor1.setCustomerId(testUser.getCustomerId() + 1);
+
+        MessageLogEntry testMessageLogEntryIdor2 = buildTestMessageLogEntry();
+        testMessageLogEntryIdor1.setId(testMessageLogEntry.getId() + 2);
+        testMessageLogEntryIdor2.setUserId(testUser.getId() + 1);
+
+        when(messageLogRepository.findById(testMessageLogEntry.getId()))
+                .thenReturn(Optional.of(testMessageLogEntry));
+
+        when(messageLogRepository.findById(testMessageLogEntryIdor1.getId()))
+                .thenReturn(Optional.of(testMessageLogEntryIdor1));
+
+        when(messageLogRepository.findById(testMessageLogEntryIdor2.getId()))
+                .thenReturn(Optional.of(testMessageLogEntryIdor2));
+
+        assertThrows(
+                IdorException.class,
+                () ->
+                        messageLogService.getMessageLogEntry(
+                                testUser.getCustomerId() + 1, testUser.getId(), testMessageLogEntry.getId(), jwtMock));
+
+        assertThrows(
+                IdorException.class,
+                () ->
+                        messageLogService.getMessageLogEntry(
+                                testUser.getCustomerId(), testUser.getId() + 1, testMessageLogEntry.getId(), jwtMock));
+
+        assertThrows(
+                IdorException.class,
+                () ->
+                        messageLogService.getMessageLogEntry(
+                                testUser.getCustomerId(), testUser.getId(), testMessageLogEntryIdor1.getId(), jwtMock));
+
+        assertThrows(
+                IdorException.class,
+                () ->
+                        messageLogService.getMessageLogEntry(
+                                testUser.getCustomerId(), testUser.getId(), testMessageLogEntryIdor2.getId(), jwtMock));
     }
 }
