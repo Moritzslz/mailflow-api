@@ -81,6 +81,7 @@ class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/customers").access(hasAnyScope(Authorities.CUSTOMERS_LIST.getAuthority(), Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.GET, "/customers/{id}").access(hasAnyScope(Authorities.CUSTOMERS_READ.getAuthority(), Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.PUT, "/customers/{id}").access(hasAnyScope(Authorities.CUSTOMERS_WRITE.getAuthority(), Authorities.ADMIN.getAuthority()))
+                        .requestMatchers(HttpMethod.PUT, "/customers/{id}/test-version").access(hasScope(Authorities.ADMIN.getAuthority()))
                         // User Resource
                         .requestMatchers(HttpMethod.POST, "/customers/users/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/customers/users/enable").permitAll()
