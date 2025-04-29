@@ -9,15 +9,12 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import de.flowsuite.mailflowapi.BaseServiceTest;
-import de.flowsuite.mailflowcommon.constant.Timeframe;
-import de.flowsuite.mailflowcommon.entity.MessageCategory;
 import de.flowsuite.mailflowcommon.entity.MessageLogEntry;
 import de.flowsuite.mailflowcommon.entity.User;
 import de.flowsuite.mailflowcommon.exception.EntityNotFoundException;
 import de.flowsuite.mailflowcommon.exception.IdConflictException;
-
 import de.flowsuite.mailflowcommon.exception.IdorException;
-import de.flowsuite.mailflowcommon.util.AnalyticsUtil;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,7 +24,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.ZonedDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -207,9 +203,11 @@ class MessageLogTest extends BaseServiceTest {
     void testListMessageLogEntriesByCustomer_idor() {
         mockJwtWithCustomerClaimsOnly(testUser);
 
-        assertThrows(IdorException.class, () ->
-                messageLogService.listMessageLogEntriesByCustomer(
-                        testUser.getCustomerId() + 1, jwtMock));
+        assertThrows(
+                IdorException.class,
+                () ->
+                        messageLogService.listMessageLogEntriesByCustomer(
+                                testUser.getCustomerId() + 1, jwtMock));
 
         verify(messageLogRepository, never()).findByCustomerId(anyLong());
     }
@@ -232,13 +230,17 @@ class MessageLogTest extends BaseServiceTest {
     void testListMessageLogEntriesByUser_idor() {
         mockJwtWithUserAndCustomerClaims(testUser);
 
-        assertThrows(IdorException.class, () ->
-                messageLogService.listMessageLogEntriesByUser(
-                        testUser.getCustomerId() + 1, testUser.getId(), jwtMock));
+        assertThrows(
+                IdorException.class,
+                () ->
+                        messageLogService.listMessageLogEntriesByUser(
+                                testUser.getCustomerId() + 1, testUser.getId(), jwtMock));
 
-        assertThrows(IdorException.class, () ->
-                messageLogService.listMessageLogEntriesByUser(
-                        testUser.getCustomerId(), testUser.getId() + 1, jwtMock));
+        assertThrows(
+                IdorException.class,
+                () ->
+                        messageLogService.listMessageLogEntriesByUser(
+                                testUser.getCustomerId(), testUser.getId() + 1, jwtMock));
 
         verify(messageLogRepository, never()).findByUserId(anyLong());
     }
@@ -251,7 +253,10 @@ class MessageLogTest extends BaseServiceTest {
 
         MessageLogEntry messageLogEntry =
                 messageLogService.getMessageLogEntry(
-                        testUser.getCustomerId(), testUser.getId(), testMessageLogEntry.getId(), jwtMock);
+                        testUser.getCustomerId(),
+                        testUser.getId(),
+                        testMessageLogEntry.getId(),
+                        jwtMock);
 
         verify(messageLogRepository).findById(testMessageLogEntry.getId());
 
@@ -268,7 +273,10 @@ class MessageLogTest extends BaseServiceTest {
                 EntityNotFoundException.class,
                 () ->
                         messageLogService.getMessageLogEntry(
-                                testUser.getCustomerId(), testUser.getId(), testMessageLogEntry.getId(), jwtMock));
+                                testUser.getCustomerId(),
+                                testUser.getId(),
+                                testMessageLogEntry.getId(),
+                                jwtMock));
     }
 
     @Test
@@ -296,24 +304,36 @@ class MessageLogTest extends BaseServiceTest {
                 IdorException.class,
                 () ->
                         messageLogService.getMessageLogEntry(
-                                testUser.getCustomerId() + 1, testUser.getId(), testMessageLogEntry.getId(), jwtMock));
+                                testUser.getCustomerId() + 1,
+                                testUser.getId(),
+                                testMessageLogEntry.getId(),
+                                jwtMock));
 
         assertThrows(
                 IdorException.class,
                 () ->
                         messageLogService.getMessageLogEntry(
-                                testUser.getCustomerId(), testUser.getId() + 1, testMessageLogEntry.getId(), jwtMock));
+                                testUser.getCustomerId(),
+                                testUser.getId() + 1,
+                                testMessageLogEntry.getId(),
+                                jwtMock));
 
         assertThrows(
                 IdorException.class,
                 () ->
                         messageLogService.getMessageLogEntry(
-                                testUser.getCustomerId(), testUser.getId(), testMessageLogEntryIdor1.getId(), jwtMock));
+                                testUser.getCustomerId(),
+                                testUser.getId(),
+                                testMessageLogEntryIdor1.getId(),
+                                jwtMock));
 
         assertThrows(
                 IdorException.class,
                 () ->
                         messageLogService.getMessageLogEntry(
-                                testUser.getCustomerId(), testUser.getId(), testMessageLogEntryIdor2.getId(), jwtMock));
+                                testUser.getCustomerId(),
+                                testUser.getId(),
+                                testMessageLogEntryIdor2.getId(),
+                                jwtMock));
     }
 }
