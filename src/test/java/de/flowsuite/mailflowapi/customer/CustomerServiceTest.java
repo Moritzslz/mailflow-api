@@ -6,11 +6,9 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import de.flowsuite.mailflowapi.BaseServiceTest;
-import de.flowsuite.mailflowcommon.constant.Authorities;
 import de.flowsuite.mailflowcommon.entity.Customer;
 import de.flowsuite.mailflowcommon.entity.User;
 import de.flowsuite.mailflowcommon.exception.*;
-import de.flowsuite.mailflowcommon.util.AuthorisationUtil;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,7 +45,8 @@ class CustomerServiceTest extends BaseServiceTest {
                     "https://example.com/privacy-policy",
                     "https://example.com/cta",
                     true,
-                    "ionosUsername");
+                    "test@ionos.de",
+                    "password");
 
     private Customer buildTestCustomer() {
         return Customer.builder()
@@ -58,23 +57,16 @@ class CustomerServiceTest extends BaseServiceTest {
                 .postalCode(createCustomerRequest.postalCode())
                 .city(createCustomerRequest.city())
                 .billingEmailAddress(createCustomerRequest.billingEmailAddress())
-                .openaiApiKey(createCustomerRequest.openaiApiKey())
+                .openaiApiKey(ENCRYPTED_VALUE)
                 .sourceOfContact(createCustomerRequest.sourceOfContact())
                 .websiteUrl(createCustomerRequest.websiteUrl())
                 .privacyPolicyUrl(createCustomerRequest.privacyPolicyUrl())
                 .ctaUrl(createCustomerRequest.ctaUrl())
                 .registrationToken("registrationToken")
-                .isTestVersion(true)
+                .isTestVersion(false)
                 .ionosUsername(createCustomerRequest.ionosUsername())
+                .ionosPassword(ENCRYPTED_VALUE)
                 .build();
-    }
-
-    @Override
-    protected void mockJwtForUser(User user) {
-        when(jwtMock.getClaim(AuthorisationUtil.CLAIM_SCOPE))
-                .thenReturn(Authorities.USER.getAuthority());
-        when(jwtMock.getClaim(AuthorisationUtil.CLAIM_CUSTOMER_ID))
-                .thenReturn(user.getCustomerId());
     }
 
     @BeforeEach
@@ -111,6 +103,7 @@ class CustomerServiceTest extends BaseServiceTest {
         assertEquals(createCustomerRequest.ctaUrl(), savedCustomer.getCtaUrl());
         assertEquals(createCustomerRequest.isTestVersion(), savedCustomer.isTestVersion());
         assertEquals(createCustomerRequest.ionosUsername(), savedCustomer.getIonosUsername());
+        assertEquals(ENCRYPTED_VALUE, savedCustomer.getIonosPassword());
         // spotless:on
     }
 
@@ -141,7 +134,7 @@ class CustomerServiceTest extends BaseServiceTest {
 
     @Test
     void testGetCustomer_success() {
-        mockJwtForUser(testUser);
+        mockJwtWithCustomerClaimsOnly(testUser);
         when(customerRepository.findById(testCustomer.getId()))
                 .thenReturn(Optional.of(testCustomer));
 
@@ -153,8 +146,26 @@ class CustomerServiceTest extends BaseServiceTest {
     }
 
     @Test
+    void testGetCustomer_isTestVersion_success() {
+        mockJwtWithCustomerClaimsOnly(testUser);
+
+        testCustomer.setTestVersion(true);
+
+        when(customerRepository.findById(testCustomer.getId()))
+                .thenReturn(Optional.of(testCustomer));
+
+        Customer customer = customerService.getCustomer(testCustomer.getId(), jwtMock);
+
+        verify(customerRepository).findById(testCustomer.getId());
+
+        assertEquals(testCustomer, customer);
+        assertNotNull(customer.getIonosPassword());
+        assertEquals(DECRYPTED_VALUE, customer.getIonosPassword());
+    }
+
+    @Test
     void testGetCustomer_notFound() {
-        mockJwtForUser(testUser);
+        mockJwtWithCustomerClaimsOnly(testUser);
         when(customerRepository.findById(testCustomer.getId())).thenReturn(Optional.empty());
 
         assertThrows(
@@ -166,7 +177,7 @@ class CustomerServiceTest extends BaseServiceTest {
 
     @Test
     void testGetCustomer_idor() {
-        mockJwtForUser(testUser);
+        mockJwtWithCustomerClaimsOnly(testUser);
         assertThrows(
                 IdorException.class,
                 () -> customerService.getCustomer(testCustomer.getId() + 1, jwtMock));
@@ -180,7 +191,7 @@ class CustomerServiceTest extends BaseServiceTest {
 
     @Test
     void testUpdateCustomer_success() {
-        mockJwtForUser(testUser);
+        mockJwtWithCustomerClaimsOnly(testUser);
         when(customerRepository.findById(testCustomer.getId()))
                 .thenReturn(Optional.of(testCustomer));
 
@@ -198,7 +209,7 @@ class CustomerServiceTest extends BaseServiceTest {
 
     @Test
     void testUpdateCustomer_idConflict() {
-        mockJwtForUser(testUser);
+        mockJwtWithCustomerClaimsOnly(testUser);
 
         Customer updatedCustomer = buildTestCustomer();
         updatedCustomer.setId(testCustomer.getId() + 1);
@@ -214,7 +225,7 @@ class CustomerServiceTest extends BaseServiceTest {
 
     @Test
     void testUpdateCustomer_notFound() {
-        mockJwtForUser(testUser);
+        mockJwtWithCustomerClaimsOnly(testUser);
         when(customerRepository.findById(testCustomer.getId())).thenReturn(Optional.empty());
 
         assertThrows(
@@ -226,7 +237,7 @@ class CustomerServiceTest extends BaseServiceTest {
 
     @Test
     void testUpdateCustomer_updateConflict() {
-        mockJwtForUser(testUser);
+        mockJwtWithCustomerClaimsOnly(testUser);
 
         Customer updatedCustomer = buildTestCustomer();
         updatedCustomer.setOpenaiApiKey("differentEncryptedKey");
@@ -239,5 +250,119 @@ class CustomerServiceTest extends BaseServiceTest {
                 () ->
                         customerService.updateCustomer(
                                 testCustomer.getId(), updatedCustomer, jwtMock));
+    }
+
+    @Test
+    void testUpdateCustomer_billingEmailAddress_success() {
+        mockJwtWithCustomerClaimsOnly(testUser);
+
+        Customer updatedCustomer = buildTestCustomer();
+        updatedCustomer.setBillingEmailAddress("invoice@exmaple.com");
+
+        when(customerRepository.findById(testCustomer.getId()))
+                .thenReturn(Optional.of(testCustomer));
+        when(customerRepository.existsByBillingEmailAddress(updatedCustomer.getBillingEmailAddress()))
+                .thenReturn(false);
+
+        customerService.updateCustomer(testCustomer.getId(), updatedCustomer, jwtMock);
+
+        ArgumentCaptor<Customer> customerCaptor = ArgumentCaptor.forClass(Customer.class);
+        verify(customerRepository).save(customerCaptor.capture());
+        Customer savedCustomer = customerCaptor.getValue();
+
+        assertEquals(updatedCustomer, savedCustomer);
+    }
+
+    @Test
+    void testUpdateCustomer_billingEmailAddress_alreadyExists() {
+        mockJwtWithCustomerClaimsOnly(testUser);
+
+        Customer updatedCustomer = buildTestCustomer();
+        updatedCustomer.setBillingEmailAddress("invoice@exmaple.com");
+
+        when(customerRepository.findById(testCustomer.getId()))
+                .thenReturn(Optional.of(testCustomer));
+        when(customerRepository.existsByBillingEmailAddress(updatedCustomer.getBillingEmailAddress()))
+                .thenReturn(true);
+
+        assertThrows(
+                EntityAlreadyExistsException.class,
+                () ->
+                        customerService.updateCustomer(
+                                testCustomer.getId(), updatedCustomer, jwtMock));
+    }
+
+    @Test
+    void testUpdateCustomer_isTestVersion_notNull_true() {
+        mockJwtWithCustomerClaimsOnly(testUser);
+
+        Customer updatedCustomer = buildTestCustomer();
+        updatedCustomer.setTestVersion(true);
+        updatedCustomer.setIonosUsername(null);
+        updatedCustomer.setIonosPassword(null);
+
+        when(customerRepository.findById(testCustomer.getId()))
+                .thenReturn(Optional.of(testCustomer));
+
+        customerService.updateCustomer(testCustomer.getId(), updatedCustomer, jwtMock);
+
+        ArgumentCaptor<Customer> customerCaptor = ArgumentCaptor.forClass(Customer.class);
+        verify(customerRepository).save(customerCaptor.capture());
+        Customer savedCustomer = customerCaptor.getValue();
+
+        assertEquals(updatedCustomer, savedCustomer);
+        assertNotNull(savedCustomer.getIonosUsername());
+        assertNotNull(savedCustomer.getIonosPassword());
+        assertEquals(testCustomer.getIonosUsername(), savedCustomer.getIonosUsername());
+        assertEquals(ENCRYPTED_VALUE, savedCustomer.getIonosPassword());
+    }
+
+    @Test
+    void testUpdateCustomer_isTestVersion_null_true() {
+        mockJwtWithCustomerClaimsOnly(testUser);
+
+        testCustomer.setIonosUsername(null);
+        testCustomer.setIonosPassword(null);
+
+        Customer updatedCustomer = buildTestCustomer();
+        updatedCustomer.setTestVersion(true);
+        updatedCustomer.setIonosUsername("updatedTest@ionos.de");
+        updatedCustomer.setIonosPassword("updatedPassword");
+
+        when(customerRepository.findById(testCustomer.getId()))
+                .thenReturn(Optional.of(testCustomer));
+
+        customerService.updateCustomer(testCustomer.getId(), updatedCustomer, jwtMock);
+
+        ArgumentCaptor<Customer> customerCaptor = ArgumentCaptor.forClass(Customer.class);
+        verify(customerRepository).save(customerCaptor.capture());
+        Customer savedCustomer = customerCaptor.getValue();
+
+        assertEquals(updatedCustomer, savedCustomer);
+        assertEquals(updatedCustomer.getIonosUsername(), savedCustomer.getIonosUsername());
+        assertEquals(ENCRYPTED_VALUE, savedCustomer.getIonosPassword());
+        assertNotEquals(testCustomer.getIonosUsername(), savedCustomer.getIonosUsername());
+        assertNotEquals(testCustomer.getIonosPassword(), savedCustomer.getIonosPassword());
+    }
+
+    @Test
+    void testUpdateCustomer_isTestVersion_false() {
+        mockJwtWithCustomerClaimsOnly(testUser);
+
+        Customer updatedCustomer = buildTestCustomer();
+        updatedCustomer.setTestVersion(false);
+
+        when(customerRepository.findById(testCustomer.getId()))
+                .thenReturn(Optional.of(testCustomer));
+
+        customerService.updateCustomer(testCustomer.getId(), updatedCustomer, jwtMock);
+
+        ArgumentCaptor<Customer> customerCaptor = ArgumentCaptor.forClass(Customer.class);
+        verify(customerRepository).save(customerCaptor.capture());
+        Customer savedCustomer = customerCaptor.getValue();
+
+        assertEquals(updatedCustomer, savedCustomer);
+        assertNull(savedCustomer.getIonosUsername());
+        assertNull(savedCustomer.getIonosPassword());
     }
 }

@@ -71,8 +71,16 @@ public class CustomerService {
                         .ctaUrl(request.ctaUrl())
                         .registrationToken(registrationToken)
                         .isTestVersion(request.isTestVersion())
-                        .ionosUsername(request.ionosUsername())
                         .build();
+
+        if (request.ionosUsername() != null && !request.ionosUsername().isBlank()) {
+            Util.validateEmailAddress(request.ionosUsername());
+            customer.setIonosUsername(request.ionosUsername());
+        }
+
+        if (request.ionosPassword() != null && !request.ionosPassword().isBlank()) {
+            customer.setIonosPassword(AesUtil.encrypt(request.ionosPassword()));
+        }
 
         return customerRepository.save(customer);
     }
@@ -84,9 +92,15 @@ public class CustomerService {
     Customer getCustomer(long id, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(id, jwt);
 
-        return customerRepository
+        Customer customer =  customerRepository
                 .findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Customer.class.getSimpleName()));
+
+        if (customer.isTestVersion() && customer.getIonosPassword() != null) {
+            customer.setIonosPassword(AesUtil.decrypt(customer.getIonosPassword()));
+        }
+
+        return customer;
     }
 
     Customer updateCustomer(long id, Customer customer, Jwt jwt) {
@@ -104,6 +118,37 @@ public class CustomerService {
 
         if (!existingCustomer.getOpenaiApiKey().equals(customer.getOpenaiApiKey())) {
             throw new UpdateConflictException();
+        }
+
+        String billingEmailAddress = customer.getBillingEmailAddress().toLowerCase();
+
+        if (!billingEmailAddress.equalsIgnoreCase(existingCustomer.getBillingEmailAddress())) {
+            Util.validateEmailAddress(billingEmailAddress);
+
+            if (customerRepository.existsByBillingEmailAddress(billingEmailAddress)) {
+                throw new EntityAlreadyExistsException(Customer.class.getSimpleName());
+            }
+
+            customer.setBillingEmailAddress(billingEmailAddress);
+        }
+
+        if (customer.isTestVersion()) {
+            if (existingCustomer.getIonosUsername() != null) {
+                customer.setIonosUsername(existingCustomer.getIonosUsername());
+            } else if (customer.getIonosUsername() != null && !customer.getIonosUsername().isBlank()) {
+                String ionosUsername = customer.getIonosUsername().toLowerCase();
+                Util.validateEmailAddress(ionosUsername);
+                customer.setIonosUsername(ionosUsername);
+            }
+
+            if (existingCustomer.getIonosPassword() != null) {
+                customer.setIonosPassword(existingCustomer.getIonosPassword());
+            } else if (customer.getIonosPassword() != null && !customer.getIonosPassword().isBlank()) {
+                customer.setIonosPassword(AesUtil.encrypt(customer.getIonosPassword()));
+            }
+        } else {
+            customer.setIonosUsername(null);
+            customer.setIonosPassword(null);
         }
 
         return customerRepository.save(customer);

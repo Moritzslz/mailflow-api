@@ -69,5 +69,6 @@ class CustomerResource {
             String privacyPolicyUrl,
             String ctaUrl,
             boolean isTestVersion,
-            String ionosUsername) {}
+            @Email String ionosUsername,
+            String ionosPassword) {}
 }
