@@ -92,7 +92,7 @@ public class CustomerService {
     Customer getCustomer(long id, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(id, jwt);
 
-        Customer customer =  customerRepository
+        Customer customer = customerRepository
                 .findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(Customer.class.getSimpleName()));
 
@@ -122,7 +122,7 @@ public class CustomerService {
 
         String billingEmailAddress = customer.getBillingEmailAddress().toLowerCase();
 
-        if (!billingEmailAddress.equalsIgnoreCase(existingCustomer.getBillingEmailAddress())) {
+        if (!billingEmailAddress.equals(existingCustomer.getBillingEmailAddress())) {
             Util.validateEmailAddress(billingEmailAddress);
 
             if (customerRepository.existsByBillingEmailAddress(billingEmailAddress)) {
@@ -132,20 +132,36 @@ public class CustomerService {
             customer.setBillingEmailAddress(billingEmailAddress);
         }
 
-        if (customer.isTestVersion()) {
-            if (existingCustomer.getIonosUsername() != null) {
-                customer.setIonosUsername(existingCustomer.getIonosUsername());
-            } else if (customer.getIonosUsername() != null && !customer.getIonosUsername().isBlank()) {
-                String ionosUsername = customer.getIonosUsername().toLowerCase();
-                Util.validateEmailAddress(ionosUsername);
-                customer.setIonosUsername(ionosUsername);
-            }
+        customer.setTestVersion(existingCustomer.isTestVersion());
 
-            if (existingCustomer.getIonosPassword() != null) {
-                customer.setIonosPassword(existingCustomer.getIonosPassword());
-            } else if (customer.getIonosPassword() != null && !customer.getIonosPassword().isBlank()) {
-                customer.setIonosPassword(AesUtil.encrypt(customer.getIonosPassword()));
-            }
+        if (existingCustomer.isTestVersion()) {
+            customer.setIonosUsername(existingCustomer.getIonosUsername());
+            customer.setIonosPassword(existingCustomer.getIonosPassword());
+        } else {
+            customer.setIonosUsername(null);
+            customer.setIonosPassword(null);
+        }
+
+        return customerRepository.save(customer);
+    }
+
+    Customer updateCustomerTestVersion(long id, CustomerResource.UpdateCustomerTestVersionRequest request) {
+        if (!request.id().equals(id)) {
+            throw new IdConflictException();
+        }
+
+        String ionosUsername = request.ionosUsername().toLowerCase();
+        Util.validateEmailAddress(ionosUsername);
+
+        Customer customer =  customerRepository
+                .findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(Customer.class.getSimpleName()));
+
+        customer.setTestVersion(request.isTestVersion());
+
+        if (request.isTestVersion()) {
+            customer.setIonosUsername(ionosUsername);
+            customer.setIonosPassword(AesUtil.encrypt(request.ionosPassword()));
         } else {
             customer.setIonosUsername(null);
             customer.setIonosPassword(null);

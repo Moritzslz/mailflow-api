@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
+import jakarta.validation.constraints.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -56,6 +57,13 @@ class CustomerResource {
         return ResponseEntity.ok(customerService.updateCustomer(id, customer, jwt));
     }
 
+    @PutMapping("/{id}/test-version")
+    ResponseEntity<Customer> updateCustomerTestVersion(
+            @PathVariable long id,
+            @RequestBody @Valid UpdateCustomerTestVersionRequest request) {
+        return ResponseEntity.ok(customerService.updateCustomerTestVersion(id, request));
+    }
+
     record CreateCustomerRequest(
             @NotBlank String company,
             @NotBlank String street,
@@ -71,4 +79,11 @@ class CustomerResource {
             boolean isTestVersion,
             @Email String ionosUsername,
             String ionosPassword) {}
+
+    record UpdateCustomerTestVersionRequest(
+            @NotNull Long id,
+            boolean isTestVersion,
+            @Email String ionosUsername,
+            String ionosPassword
+    ) {}
 }

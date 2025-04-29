@@ -293,11 +293,13 @@ class CustomerServiceTest extends BaseServiceTest {
     }
 
     @Test
-    void testUpdateCustomer_isTestVersion_notNull_true() {
+    void testUpdateCustomer_isTestVersion_true() {
         mockJwtWithCustomerClaimsOnly(testUser);
 
+        testCustomer.setTestVersion(true);
+
         Customer updatedCustomer = buildTestCustomer();
-        updatedCustomer.setTestVersion(true);
+        updatedCustomer.setTestVersion(false);
         updatedCustomer.setIonosUsername(null);
         updatedCustomer.setIonosPassword(null);
 
@@ -313,44 +315,18 @@ class CustomerServiceTest extends BaseServiceTest {
         assertEquals(updatedCustomer, savedCustomer);
         assertNotNull(savedCustomer.getIonosUsername());
         assertNotNull(savedCustomer.getIonosPassword());
+        assertTrue(savedCustomer.isTestVersion());
         assertEquals(testCustomer.getIonosUsername(), savedCustomer.getIonosUsername());
         assertEquals(ENCRYPTED_VALUE, savedCustomer.getIonosPassword());
-    }
-
-    @Test
-    void testUpdateCustomer_isTestVersion_null_true() {
-        mockJwtWithCustomerClaimsOnly(testUser);
-
-        testCustomer.setIonosUsername(null);
-        testCustomer.setIonosPassword(null);
-
-        Customer updatedCustomer = buildTestCustomer();
-        updatedCustomer.setTestVersion(true);
-        updatedCustomer.setIonosUsername("updatedTest@ionos.de");
-        updatedCustomer.setIonosPassword("updatedPassword");
-
-        when(customerRepository.findById(testCustomer.getId()))
-                .thenReturn(Optional.of(testCustomer));
-
-        customerService.updateCustomer(testCustomer.getId(), updatedCustomer, jwtMock);
-
-        ArgumentCaptor<Customer> customerCaptor = ArgumentCaptor.forClass(Customer.class);
-        verify(customerRepository).save(customerCaptor.capture());
-        Customer savedCustomer = customerCaptor.getValue();
-
-        assertEquals(updatedCustomer, savedCustomer);
-        assertEquals(updatedCustomer.getIonosUsername(), savedCustomer.getIonosUsername());
-        assertEquals(ENCRYPTED_VALUE, savedCustomer.getIonosPassword());
-        assertNotEquals(testCustomer.getIonosUsername(), savedCustomer.getIonosUsername());
-        assertNotEquals(testCustomer.getIonosPassword(), savedCustomer.getIonosPassword());
     }
 
     @Test
     void testUpdateCustomer_isTestVersion_false() {
         mockJwtWithCustomerClaimsOnly(testUser);
 
+        testCustomer.setTestVersion(false);
+
         Customer updatedCustomer = buildTestCustomer();
-        updatedCustomer.setTestVersion(false);
 
         when(customerRepository.findById(testCustomer.getId()))
                 .thenReturn(Optional.of(testCustomer));
@@ -362,6 +338,7 @@ class CustomerServiceTest extends BaseServiceTest {
         Customer savedCustomer = customerCaptor.getValue();
 
         assertEquals(updatedCustomer, savedCustomer);
+        assertFalse(savedCustomer.isTestVersion());
         assertNull(savedCustomer.getIonosUsername());
         assertNull(savedCustomer.getIonosPassword());
     }
