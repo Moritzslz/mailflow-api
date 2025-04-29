@@ -6,11 +6,9 @@ import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.never;
 
 import de.flowsuite.mailflowapi.BaseServiceTest;
-import de.flowsuite.mailflowcommon.constant.Authorities;
 import de.flowsuite.mailflowcommon.entity.MessageCategory;
 import de.flowsuite.mailflowcommon.entity.User;
 import de.flowsuite.mailflowcommon.exception.*;
-import de.flowsuite.mailflowcommon.util.AuthorisationUtil;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,18 +42,10 @@ class MessageCategoryTest extends BaseServiceTest {
                 .build();
     }
 
-    @Override
-    protected void mockJwtForUser(User user) {
-        when(jwtMock.getClaim(AuthorisationUtil.CLAIM_SCOPE))
-                .thenReturn(Authorities.USER.getAuthority());
-        when(jwtMock.getClaim(AuthorisationUtil.CLAIM_CUSTOMER_ID))
-                .thenReturn(user.getCustomerId());
-    }
-
     @BeforeEach
     void setup() {
         testMessageCategory = buildTestMessageCategory();
-        mockJwtForUser(testUser);
+        mockJwtWithCustomerClaimsOnly(testUser);
     }
 
     @Test

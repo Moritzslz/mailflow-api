@@ -42,7 +42,7 @@ class BlacklistServiceTest extends BaseServiceTest {
 
     @BeforeEach
     void setup() {
-        mockJwtForUser(testUser);
+        mockJwtWithUserAndCustomerClaims(testUser);
         testBlacklistEntry = buildTestBlacklistEntry();
     }
 

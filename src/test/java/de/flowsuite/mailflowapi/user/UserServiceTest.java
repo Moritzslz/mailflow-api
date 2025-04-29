@@ -310,7 +310,7 @@ class UserServiceTest extends BaseServiceTest {
 
     @Test
     void testGetUser_success() {
-        mockJwtForUser(testUser);
+        mockJwtWithUserAndCustomerClaims(testUser);
         when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
         User user = userService.getUser(testUser.getCustomerId(), testUser.getId(), jwtMock);
 
@@ -322,7 +322,7 @@ class UserServiceTest extends BaseServiceTest {
 
     @Test
     void testGetUser_notFound() {
-        mockJwtForUser(testUser);
+        mockJwtWithUserAndCustomerClaims(testUser);
         when(userRepository.findById(testUser.getId())).thenReturn(Optional.empty());
         assertThrows(
                 UsernameNotFoundException.class,
@@ -331,7 +331,7 @@ class UserServiceTest extends BaseServiceTest {
 
     @Test
     void testGetUser_idor() {
-        mockJwtForUser(testUser);
+        mockJwtWithUserAndCustomerClaims(testUser);
         assertThrows(
                 IdorException.class,
                 () -> userService.getUser(testUser.getCustomerId() + 1, testUser.getId(), jwtMock));
@@ -343,7 +343,7 @@ class UserServiceTest extends BaseServiceTest {
 
     @Test
     void testUpdateUser_success() {
-        mockJwtForUser(testUser);
+        mockJwtWithUserAndCustomerClaims(testUser);
         when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
 
         UserResource.UpdateUserRequest updateUserRequest =
@@ -374,7 +374,7 @@ class UserServiceTest extends BaseServiceTest {
 
     @Test
     void testUpdateUser_idConflict() {
-        mockJwtForUser(testUser);
+        mockJwtWithUserAndCustomerClaims(testUser);
 
         UserResource.UpdateUserRequest updateUserRequest1 =
                 new UserResource.UpdateUserRequest(
@@ -419,7 +419,7 @@ class UserServiceTest extends BaseServiceTest {
 
     @Test
     void testUpdateUser_idor() {
-        mockJwtForUser(testUser);
+        mockJwtWithUserAndCustomerClaims(testUser);
 
         assertThrows(
                 IdorException.class,
