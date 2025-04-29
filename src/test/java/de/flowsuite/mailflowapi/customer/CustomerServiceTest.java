@@ -342,4 +342,56 @@ class CustomerServiceTest extends BaseServiceTest {
         assertNull(savedCustomer.getIonosUsername());
         assertNull(savedCustomer.getIonosPassword());
     }
+
+    @Test
+    void testUpdateCustomerTestVersion_isTestVersion_true() {
+        testCustomer.setTestVersion(true);
+
+        CustomerResource.UpdateCustomerTestVersionRequest request =
+                new CustomerResource.UpdateCustomerTestVersionRequest(
+                        testCustomer.getId(),
+                        true,
+                        "updatedTest@example.de",
+                        "updatedPassword"
+                );
+
+        when(customerRepository.findById(testCustomer.getId()))
+                .thenReturn(Optional.of(testCustomer));
+
+        customerService.updateCustomerTestVersion(testCustomer.getId(), request);
+
+        ArgumentCaptor<Customer> customerCaptor = ArgumentCaptor.forClass(Customer.class);
+        verify(customerRepository).save(customerCaptor.capture());
+        Customer savedCustomer = customerCaptor.getValue();
+
+        assertTrue(savedCustomer.isTestVersion());
+        assertNotNull(savedCustomer.getIonosUsername());
+        assertEquals(ENCRYPTED_VALUE, savedCustomer.getIonosPassword());
+    }
+
+    @Test
+    void testUpdateCustomerTestVersion_isTestVersion_false() {
+        testCustomer.setTestVersion(true);
+
+        CustomerResource.UpdateCustomerTestVersionRequest request =
+                new CustomerResource.UpdateCustomerTestVersionRequest(
+                        testCustomer.getId(),
+                        false,
+                        null,
+                        null
+                );
+
+        when(customerRepository.findById(testCustomer.getId()))
+                .thenReturn(Optional.of(testCustomer));
+
+        customerService.updateCustomerTestVersion(testCustomer.getId(), request);
+
+        ArgumentCaptor<Customer> customerCaptor = ArgumentCaptor.forClass(Customer.class);
+        verify(customerRepository).save(customerCaptor.capture());
+        Customer savedCustomer = customerCaptor.getValue();
+
+        assertFalse(savedCustomer.isTestVersion());
+        assertNull(savedCustomer.getIonosUsername());
+        assertNull(savedCustomer.getIonosPassword());
+    }
 }

@@ -150,8 +150,11 @@ public class CustomerService {
             throw new IdConflictException();
         }
 
-        String ionosUsername = request.ionosUsername().toLowerCase();
-        Util.validateEmailAddress(ionosUsername);
+        String ionosUsername = request.ionosUsername();
+        if (ionosUsername != null) {
+            ionosUsername = ionosUsername.toLowerCase();
+            Util.validateEmailAddress(ionosUsername);
+        }
 
         Customer customer =  customerRepository
                 .findById(id)
