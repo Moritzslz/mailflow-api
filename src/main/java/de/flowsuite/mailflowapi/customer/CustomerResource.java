@@ -7,8 +7,8 @@ import de.flowsuite.mailflowcommon.entity.Customer;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-
 import jakarta.validation.constraints.NotNull;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -59,8 +59,7 @@ class CustomerResource {
 
     @PutMapping("/{id}/test-version")
     ResponseEntity<Customer> updateCustomerTestVersion(
-            @PathVariable long id,
-            @RequestBody @Valid UpdateCustomerTestVersionRequest request) {
+            @PathVariable long id, @RequestBody @Valid UpdateCustomerTestVersionRequest request) {
         return ResponseEntity.ok(customerService.updateCustomerTestVersion(id, request));
     }
 
@@ -84,6 +83,5 @@ class CustomerResource {
             @NotNull Long id,
             boolean isTestVersion,
             @Email String ionosUsername,
-            String ionosPassword
-    ) {}
+            String ionosPassword) {}
 }

@@ -92,9 +92,11 @@ public class CustomerService {
     Customer getCustomer(long id, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(id, jwt);
 
-        Customer customer = customerRepository
-                .findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(Customer.class.getSimpleName()));
+        Customer customer =
+                customerRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () -> new EntityNotFoundException(Customer.class.getSimpleName()));
 
         if (customer.isTestVersion() && customer.getIonosPassword() != null) {
             customer.setIonosPassword(AesUtil.decrypt(customer.getIonosPassword()));
@@ -145,7 +147,8 @@ public class CustomerService {
         return customerRepository.save(customer);
     }
 
-    Customer updateCustomerTestVersion(long id, CustomerResource.UpdateCustomerTestVersionRequest request) {
+    Customer updateCustomerTestVersion(
+            long id, CustomerResource.UpdateCustomerTestVersionRequest request) {
         if (!request.id().equals(id)) {
             throw new IdConflictException();
         }
@@ -156,9 +159,11 @@ public class CustomerService {
             Util.validateEmailAddress(ionosUsername);
         }
 
-        Customer customer =  customerRepository
-                .findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(Customer.class.getSimpleName()));
+        Customer customer =
+                customerRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () -> new EntityNotFoundException(Customer.class.getSimpleName()));
 
         customer.setTestVersion(request.isTestVersion());
 

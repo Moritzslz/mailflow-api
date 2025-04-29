@@ -119,7 +119,7 @@ public class MessageLogService {
     List<MessageLogEntry> listMessageLogEntriesByUser(long customerId, long userId, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
         AuthorisationUtil.validateAccessToUser(userId, jwt);
-        return messageLogRepository.findByCustomerIdAndUserId(customerId, userId);
+        return messageLogRepository.findByUserId(userId);
     }
 
     MessageLogEntry getMessageLogEntry(long customerId, long userId, long id, Jwt jwt) {

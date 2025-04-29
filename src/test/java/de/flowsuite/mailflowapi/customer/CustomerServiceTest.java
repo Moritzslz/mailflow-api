@@ -261,7 +261,8 @@ class CustomerServiceTest extends BaseServiceTest {
 
         when(customerRepository.findById(testCustomer.getId()))
                 .thenReturn(Optional.of(testCustomer));
-        when(customerRepository.existsByBillingEmailAddress(updatedCustomer.getBillingEmailAddress()))
+        when(customerRepository.existsByBillingEmailAddress(
+                        updatedCustomer.getBillingEmailAddress()))
                 .thenReturn(false);
 
         customerService.updateCustomer(testCustomer.getId(), updatedCustomer, jwtMock);
@@ -282,7 +283,8 @@ class CustomerServiceTest extends BaseServiceTest {
 
         when(customerRepository.findById(testCustomer.getId()))
                 .thenReturn(Optional.of(testCustomer));
-        when(customerRepository.existsByBillingEmailAddress(updatedCustomer.getBillingEmailAddress()))
+        when(customerRepository.existsByBillingEmailAddress(
+                        updatedCustomer.getBillingEmailAddress()))
                 .thenReturn(true);
 
         assertThrows(
@@ -349,11 +351,7 @@ class CustomerServiceTest extends BaseServiceTest {
 
         CustomerResource.UpdateCustomerTestVersionRequest request =
                 new CustomerResource.UpdateCustomerTestVersionRequest(
-                        testCustomer.getId(),
-                        true,
-                        "updatedTest@example.de",
-                        "updatedPassword"
-                );
+                        testCustomer.getId(), true, "updatedTest@example.de", "updatedPassword");
 
         when(customerRepository.findById(testCustomer.getId()))
                 .thenReturn(Optional.of(testCustomer));
@@ -375,11 +373,7 @@ class CustomerServiceTest extends BaseServiceTest {
 
         CustomerResource.UpdateCustomerTestVersionRequest request =
                 new CustomerResource.UpdateCustomerTestVersionRequest(
-                        testCustomer.getId(),
-                        false,
-                        null,
-                        null
-                );
+                        testCustomer.getId(), false, null, null);
 
         when(customerRepository.findById(testCustomer.getId()))
                 .thenReturn(Optional.of(testCustomer));

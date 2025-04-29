@@ -16,7 +16,7 @@ interface MessageLogRepository extends CrudRepository<MessageLogEntry, Long> {
 
     List<MessageLogEntry> findByCustomerId(long customerId);
 
-    List<MessageLogEntry> findByCustomerIdAndUserId(long customerId, long userId);
+    List<MessageLogEntry> findByUserId(long userId);
 
     Optional<MessageLogEntry> findByToken(String token);
 
