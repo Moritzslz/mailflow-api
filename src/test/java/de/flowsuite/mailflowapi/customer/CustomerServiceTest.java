@@ -293,7 +293,7 @@ class CustomerServiceTest extends BaseServiceTest {
     }
 
     @Test
-    void testUpdateCustomer_isTestVersion_true() {
+    void testUpdateCustomer_preservesIonosCredentials_ifTestVersion_true() {
         mockJwtWithCustomerClaimsOnly(testUser);
 
         testCustomer.setTestVersion(true);
@@ -321,7 +321,7 @@ class CustomerServiceTest extends BaseServiceTest {
     }
 
     @Test
-    void testUpdateCustomer_isTestVersion_false() {
+    void testUpdateCustomer_clearsIonosCredentials_ifTestVersion_false() {
         mockJwtWithCustomerClaimsOnly(testUser);
 
         testCustomer.setTestVersion(false);
