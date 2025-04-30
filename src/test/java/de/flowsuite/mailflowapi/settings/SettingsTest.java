@@ -5,13 +5,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import de.flowsuite.mailflowapi.BaseServiceTest;
-import de.flowsuite.mailflowcommon.entity.MessageCategory;
-import de.flowsuite.mailflowcommon.entity.ResponseRating;
 import de.flowsuite.mailflowcommon.entity.Settings;
 import de.flowsuite.mailflowcommon.entity.User;
 import de.flowsuite.mailflowcommon.exception.*;
-
 import de.flowsuite.mailflowcommon.util.HmacUtil;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -150,10 +148,7 @@ class SettingsTest extends BaseServiceTest {
                 .thenReturn(Optional.of(testSettings));
 
         Settings settings =
-                settingsService.getSettings(
-                        testUser.getCustomerId(),
-                        testUser.getId(),
-                        jwtMock);
+                settingsService.getSettings(testUser.getCustomerId(), testUser.getId(), jwtMock);
 
         verify(settingsRepository).findById(testSettings.getUserId());
 
@@ -162,13 +157,13 @@ class SettingsTest extends BaseServiceTest {
 
     @Test
     void getResponseRating_notFound() {
-        when(settingsRepository.findById(testSettings.getUserId()))
-                .thenReturn(Optional.empty());
+        when(settingsRepository.findById(testSettings.getUserId())).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> settingsService.getSettings(
-                testUser.getCustomerId(),
-                testUser.getId(),
-                jwtMock));
+        assertThrows(
+                EntityNotFoundException.class,
+                () ->
+                        settingsService.getSettings(
+                                testUser.getCustomerId(), testUser.getId(), jwtMock));
     }
 
     @Test
@@ -213,14 +208,10 @@ class SettingsTest extends BaseServiceTest {
                         "updated imapHost",
                         "update smtpHost",
                         2,
-                        2
-                );
+                        2);
 
         settingsService.updateSettings(
-                testUser.getCustomerId(),
-                testUser.getId(),
-                updateSettingsRequest,
-                jwtMock);
+                testUser.getCustomerId(), testUser.getId(), updateSettingsRequest, jwtMock);
 
         ArgumentCaptor<Settings> settingsCaptor = ArgumentCaptor.forClass(Settings.class);
         verify(settingsRepository).save(settingsCaptor.capture());
@@ -229,10 +220,16 @@ class SettingsTest extends BaseServiceTest {
         assertNotNull(savedSettings);
         assertEquals(updateSettingsRequest.userId(), savedSettings.getCustomerId());
         assertEquals(updateSettingsRequest.customerId(), savedSettings.getUserId());
-        assertEquals(updateSettingsRequest.isExecutionEnabled(), savedSettings.isExecutionEnabled());
-        assertEquals(updateSettingsRequest.isAutoReplyEnabled(), savedSettings.isAutoReplyEnabled());
-        assertEquals(updateSettingsRequest.isResponseRatingEnabled(), savedSettings.isResponseRatingEnabled());
-        assertEquals(updateSettingsRequest.crawlFrequencyInHours(), savedSettings.getCrawlFrequencyInHours());
+        assertEquals(
+                updateSettingsRequest.isExecutionEnabled(), savedSettings.isExecutionEnabled());
+        assertEquals(
+                updateSettingsRequest.isAutoReplyEnabled(), savedSettings.isAutoReplyEnabled());
+        assertEquals(
+                updateSettingsRequest.isResponseRatingEnabled(),
+                savedSettings.isResponseRatingEnabled());
+        assertEquals(
+                updateSettingsRequest.crawlFrequencyInHours(),
+                savedSettings.getCrawlFrequencyInHours());
         assertEquals(updateSettingsRequest.lastCrawlAt(), savedSettings.getLastCrawlAt());
         assertEquals(updateSettingsRequest.nextCrawlAt(), savedSettings.getNextCrawlAt());
         assertEquals(updateSettingsRequest.imapHost(), savedSettings.getImapHost());
@@ -260,8 +257,7 @@ class SettingsTest extends BaseServiceTest {
                         "updated imapHost",
                         "update smtpHost",
                         2,
-                        2
-                );
+                        2);
 
         SettingsResource.UpdateSettingsRequest updateSettingsRequestIdConflict2 =
                 new SettingsResource.UpdateSettingsRequest(
@@ -276,8 +272,7 @@ class SettingsTest extends BaseServiceTest {
                         "updated imapHost",
                         "update smtpHost",
                         2,
-                        2
-                );
+                        2);
 
         assertThrows(
                 IdConflictException.class,
@@ -302,8 +297,7 @@ class SettingsTest extends BaseServiceTest {
 
     @Test
     void testUpdateMessageCategory_notFound() {
-        when(settingsRepository.findById(testSettings.getUserId()))
-                .thenReturn(Optional.empty());
+        when(settingsRepository.findById(testSettings.getUserId())).thenReturn(Optional.empty());
 
         int updatedCrawlFrequency = 200;
         ZonedDateTime lastCrawlAt = ZonedDateTime.now();
@@ -322,8 +316,7 @@ class SettingsTest extends BaseServiceTest {
                         "updated imapHost",
                         "update smtpHost",
                         2,
-                        2
-                );
+                        2);
 
         assertThrows(
                 EntityNotFoundException.class,
@@ -356,8 +349,7 @@ class SettingsTest extends BaseServiceTest {
                         "updated imapHost",
                         "update smtpHost",
                         2,
-                        2
-                );
+                        2);
 
         assertThrows(
                 IdorException.class,
@@ -393,10 +385,7 @@ class SettingsTest extends BaseServiceTest {
                         newPassword);
 
         settingsService.updateMailboxPassword(
-                testUser.getCustomerId(),
-                testUser.getId(),
-                request,
-                jwtMock);
+                testUser.getCustomerId(), testUser.getId(), request, jwtMock);
 
         ArgumentCaptor<Settings> settingsCaptor = ArgumentCaptor.forClass(Settings.class);
         verify(settingsRepository).save(settingsCaptor.capture());
@@ -420,19 +409,23 @@ class SettingsTest extends BaseServiceTest {
                         testSettings.getMailboxPassword(),
                         "newPass");
 
-        assertThrows(IdConflictException.class, () ->
-                settingsService.updateMailboxPassword(
-                        testUser.getCustomerId(),
-                        testUser.getId(),
-                        wrongUserIdRequest,
-                        jwtMock));
+        assertThrows(
+                IdConflictException.class,
+                () ->
+                        settingsService.updateMailboxPassword(
+                                testUser.getCustomerId(),
+                                testUser.getId(),
+                                wrongUserIdRequest,
+                                jwtMock));
 
-        assertThrows(IdConflictException.class, () ->
-                settingsService.updateMailboxPassword(
-                        testUser.getCustomerId(),
-                        testUser.getId(),
-                        wrongCustomerIdRequest,
-                        jwtMock));
+        assertThrows(
+                IdConflictException.class,
+                () ->
+                        settingsService.updateMailboxPassword(
+                                testUser.getCustomerId(),
+                                testUser.getId(),
+                                wrongCustomerIdRequest,
+                                jwtMock));
 
         verify(settingsRepository, never()).save(any());
     }
@@ -448,12 +441,11 @@ class SettingsTest extends BaseServiceTest {
                         testSettings.getMailboxPassword(),
                         "newPass");
 
-        assertThrows(EntityNotFoundException.class, () ->
-                settingsService.updateMailboxPassword(
-                        testUser.getCustomerId(),
-                        testUser.getId(),
-                        request,
-                        jwtMock));
+        assertThrows(
+                EntityNotFoundException.class,
+                () ->
+                        settingsService.updateMailboxPassword(
+                                testUser.getCustomerId(), testUser.getId(), request, jwtMock));
 
         verify(settingsRepository, never()).save(any());
     }
@@ -464,19 +456,15 @@ class SettingsTest extends BaseServiceTest {
 
         SettingsResource.UpdateMailboxPasswordRequest request =
                 new SettingsResource.UpdateMailboxPasswordRequest(
-                        testUser.getCustomerId(),
-                        testUser.getId(),
-                        "wrongPassword",
-                        "newPass");
+                        testUser.getCustomerId(), testUser.getId(), "wrongPassword", "newPass");
 
         when(HmacUtil.hash(anyString())).thenReturn("differentHash");
 
-        assertThrows(UpdateConflictException.class, () ->
-                settingsService.updateMailboxPassword(
-                        testUser.getCustomerId(),
-                        testUser.getId(),
-                        request,
-                        jwtMock));
+        assertThrows(
+                UpdateConflictException.class,
+                () ->
+                        settingsService.updateMailboxPassword(
+                                testUser.getCustomerId(), testUser.getId(), request, jwtMock));
 
         verify(settingsRepository, never()).save(any());
     }
