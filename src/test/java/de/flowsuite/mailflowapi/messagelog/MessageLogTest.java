@@ -292,9 +292,6 @@ class MessageLogTest extends BaseServiceTest {
         testMessageLogEntryIdor1.setId(testMessageLogEntry.getId() + 2);
         testMessageLogEntryIdor2.setUserId(testUser.getId() + 1);
 
-        when(messageLogRepository.findById(testMessageLogEntry.getId()))
-                .thenReturn(Optional.of(testMessageLogEntry));
-
         when(messageLogRepository.findById(testMessageLogEntryIdor1.getId()))
                 .thenReturn(Optional.of(testMessageLogEntryIdor1));
 
