@@ -1,6 +1,6 @@
 package de.flowsuite.mailflowapi.blacklist;
 
-import de.flowsuite.mailflowcommon.entity.BlacklistEntry;
+import de.flowsuite.mailflow.common.entity.BlacklistEntry;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;

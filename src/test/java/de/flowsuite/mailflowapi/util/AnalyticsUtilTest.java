@@ -3,9 +3,9 @@ package de.flowsuite.mailflowapi.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import de.flowsuite.mailflowcommon.constant.Timeframe;
-import de.flowsuite.mailflowcommon.util.AnalyticsUtil;
-import de.flowsuite.mailflowcommon.util.Util;
+import de.flowsuite.mailflow.common.constant.Timeframe;
+import de.flowsuite.mailflow.common.util.AnalyticsUtil;
+import de.flowsuite.mailflow.common.util.Util;
 
 import org.junit.jupiter.api.Test;
 

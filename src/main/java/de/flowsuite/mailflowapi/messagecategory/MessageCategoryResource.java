@@ -1,6 +1,6 @@
 package de.flowsuite.mailflowapi.messagecategory;
 
-import de.flowsuite.mailflowcommon.entity.MessageCategory;
+import de.flowsuite.mailflow.common.entity.MessageCategory;
 
 import jakarta.validation.Valid;
 

@@ -1,7 +1,7 @@
 package de.flowsuite.mailflowapi.user;
 
-import de.flowsuite.mailflowcommon.constant.Message;
-import de.flowsuite.mailflowcommon.entity.User;
+import de.flowsuite.mailflow.common.constant.Message;
+import de.flowsuite.mailflow.common.entity.User;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;

@@ -2,10 +2,10 @@ package de.flowsuite.mailflowapi.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import de.flowsuite.mailflowcommon.GlobalExceptionHandler;
-import de.flowsuite.mailflowcommon.exception.InvalidReCaptchaTokenException;
-import de.flowsuite.mailflowcommon.exception.MissingReCaptchaTokenException;
-import de.flowsuite.mailflowcommon.exception.ReCaptchaResponseException;
+import de.flowsuite.mailflow.common.GlobalExceptionHandler;
+import de.flowsuite.mailflow.common.exception.InvalidReCaptchaTokenException;
+import de.flowsuite.mailflow.common.exception.MissingReCaptchaTokenException;
+import de.flowsuite.mailflow.common.exception.ReCaptchaResponseException;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

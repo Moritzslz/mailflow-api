@@ -1,8 +1,8 @@
 package de.flowsuite.mailflowapi.security;
 
-import de.flowsuite.mailflowcommon.exception.InvalidReCaptchaTokenException;
-import de.flowsuite.mailflowcommon.exception.MissingReCaptchaTokenException;
-import de.flowsuite.mailflowcommon.exception.ReCaptchaResponseException;
+import de.flowsuite.mailflow.common.exception.InvalidReCaptchaTokenException;
+import de.flowsuite.mailflow.common.exception.MissingReCaptchaTokenException;
+import de.flowsuite.mailflow.common.exception.ReCaptchaResponseException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

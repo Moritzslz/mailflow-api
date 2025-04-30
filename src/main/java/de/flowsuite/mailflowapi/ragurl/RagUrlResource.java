@@ -1,6 +1,6 @@
 package de.flowsuite.mailflowapi.ragurl;
 
-import de.flowsuite.mailflowcommon.entity.RagUrl;
+import de.flowsuite.mailflow.common.entity.RagUrl;
 
 import jakarta.validation.Valid;
 

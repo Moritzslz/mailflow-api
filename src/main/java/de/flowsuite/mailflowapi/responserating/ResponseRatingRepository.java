@@ -1,6 +1,6 @@
 package de.flowsuite.mailflowapi.responserating;
 
-import de.flowsuite.mailflowcommon.entity.ResponseRating;
+import de.flowsuite.mailflow.common.entity.ResponseRating;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;

@@ -1,7 +1,5 @@
 package de.flowsuite.mailflowapi.mail;
 
-import static de.flowsuite.mailflowcommon.constant.Message.*;
-
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 

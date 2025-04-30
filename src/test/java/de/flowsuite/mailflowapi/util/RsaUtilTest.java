@@ -2,7 +2,7 @@ package de.flowsuite.mailflowapi.util;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import de.flowsuite.mailflowcommon.util.RsaUtil;
+import de.flowsuite.mailflow.common.util.RsaUtil;
 
 import org.junit.jupiter.api.Test;
 

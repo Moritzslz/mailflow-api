@@ -1,8 +1,6 @@
 package de.flowsuite.mailflowapi.user;
 
-import static de.flowsuite.mailflowcommon.constant.Message.*;
-
-import de.flowsuite.mailflowcommon.exception.InvalidPasswordException;
+import de.flowsuite.mailflow.common.exception.InvalidPasswordException;
 
 import java.util.regex.Pattern;
 

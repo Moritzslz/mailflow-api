@@ -5,9 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import de.flowsuite.mailflowcommon.constant.Authorities;
-import de.flowsuite.mailflowcommon.exception.IdorException;
-import de.flowsuite.mailflowcommon.util.AuthorisationUtil;
+import de.flowsuite.mailflow.common.constant.Authorities;
+import de.flowsuite.mailflow.common.exception.IdorException;
+import de.flowsuite.mailflow.common.util.AuthorisationUtil;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

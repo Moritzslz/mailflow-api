@@ -1,6 +1,6 @@
 package de.flowsuite.mailflowapi.customer;
 
-import de.flowsuite.mailflowcommon.entity.Customer;
+import de.flowsuite.mailflow.common.entity.Customer;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;

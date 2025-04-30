@@ -1,6 +1,6 @@
 package de.flowsuite.mailflowapi.settings;
 
-import de.flowsuite.mailflowcommon.entity.Settings;
+import de.flowsuite.mailflow.common.entity.Settings;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;

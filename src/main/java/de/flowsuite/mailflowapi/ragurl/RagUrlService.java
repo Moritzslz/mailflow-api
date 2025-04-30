@@ -1,12 +1,12 @@
 package de.flowsuite.mailflowapi.ragurl;
 
-import de.flowsuite.mailflowcommon.entity.RagUrl;
-import de.flowsuite.mailflowcommon.exception.EntityAlreadyExistsException;
-import de.flowsuite.mailflowcommon.exception.EntityNotFoundException;
-import de.flowsuite.mailflowcommon.exception.IdConflictException;
-import de.flowsuite.mailflowcommon.exception.IdorException;
-import de.flowsuite.mailflowcommon.util.AuthorisationUtil;
-import de.flowsuite.mailflowcommon.util.Util;
+import de.flowsuite.mailflow.common.entity.RagUrl;
+import de.flowsuite.mailflow.common.exception.EntityAlreadyExistsException;
+import de.flowsuite.mailflow.common.exception.EntityNotFoundException;
+import de.flowsuite.mailflow.common.exception.IdConflictException;
+import de.flowsuite.mailflow.common.exception.IdorException;
+import de.flowsuite.mailflow.common.util.AuthorisationUtil;
+import de.flowsuite.mailflow.common.util.Util;
 
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;

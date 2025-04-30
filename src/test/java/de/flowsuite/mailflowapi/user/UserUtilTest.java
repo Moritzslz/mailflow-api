@@ -1,11 +1,10 @@
 package de.flowsuite.mailflowapi.user;
 
 import static de.flowsuite.mailflowapi.user.UserUtil.*;
-import static de.flowsuite.mailflowcommon.constant.Message.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import de.flowsuite.mailflowcommon.exception.InvalidPasswordException;
+import de.flowsuite.mailflow.common.exception.InvalidPasswordException;
 
 import org.junit.jupiter.api.Test;
 

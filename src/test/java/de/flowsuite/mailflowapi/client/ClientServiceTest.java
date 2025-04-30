@@ -6,10 +6,10 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import de.flowsuite.mailflowapi.BaseServiceTest;
-import de.flowsuite.mailflowcommon.entity.Client;
-import de.flowsuite.mailflowcommon.exception.EntityAlreadyExistsException;
-import de.flowsuite.mailflowcommon.exception.EntityNotFoundException;
-import de.flowsuite.mailflowcommon.exception.IdConflictException;
+import de.flowsuite.mailflow.common.entity.Client;
+import de.flowsuite.mailflow.common.exception.EntityAlreadyExistsException;
+import de.flowsuite.mailflow.common.exception.EntityNotFoundException;
+import de.flowsuite.mailflow.common.exception.IdConflictException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
