@@ -165,22 +165,23 @@ class MessageLogTest extends BaseServiceTest {
     void testCreateMessageLogEntry_idor() {
         mockJwtWithUserAndCustomerClaims(testUser);
 
-        MessageLogResource.CreateMessageLogEntryRequest request1 =
-                buildCreateCustomerRequest(testUser.getId() + 1, testUser.getCustomerId());
-        MessageLogResource.CreateMessageLogEntryRequest request2 =
-                buildCreateCustomerRequest(testUser.getId(), testUser.getCustomerId() + 1);
-
         assertThrows(
-                IdConflictException.class,
+                IdorException.class,
                 () ->
                         messageLogService.createMessageLogEntry(
-                                testUser.getCustomerId(), testUser.getId(), request1, jwtMock));
+                                testUser.getCustomerId() + 1,
+                                testUser.getId(),
+                                createMessageLogEntryRequest,
+                                jwtMock));
 
         assertThrows(
-                IdConflictException.class,
+                IdorException.class,
                 () ->
                         messageLogService.createMessageLogEntry(
-                                testUser.getCustomerId(), testUser.getId(), request2, jwtMock));
+                                testUser.getCustomerId(),
+                                testUser.getId() + 1,
+                                createMessageLogEntryRequest,
+                                jwtMock));
 
         verify(messageLogRepository, never()).save(any(MessageLogEntry.class));
     }
