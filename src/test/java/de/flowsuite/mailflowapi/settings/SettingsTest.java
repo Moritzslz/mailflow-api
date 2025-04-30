@@ -395,7 +395,7 @@ class SettingsTest extends BaseServiceTest {
         ArgumentCaptor<Settings> settingsCaptor = ArgumentCaptor.forClass(Settings.class);
         verify(settingsRepository).save(settingsCaptor.capture());
         Settings savedSettings = settingsCaptor.getValue();
-        assertEquals(savedSettings, savedSettings);
+        assertEquals(savedSettings, testSettings);
     }
 
     @Test
