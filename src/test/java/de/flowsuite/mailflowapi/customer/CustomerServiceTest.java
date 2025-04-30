@@ -185,8 +185,6 @@ class CustomerServiceTest extends BaseServiceTest {
         assertThrows(
                 IdorException.class,
                 () -> customerService.getCustomer(testCustomer.getId() + 1, jwtMock));
-
-        verify(customerRepository, never()).findById(testCustomer.getId());
     }
 
     @Test

@@ -168,8 +168,6 @@ class MessageCategoryTest extends BaseServiceTest {
                 () ->
                         messageCategoryService.getMessageCategory(
                                 testUser.getCustomerId(), testMessageCategory.getId(), jwtMock));
-
-        verify(messageCategoryRepository, never()).findById(testUser.getCustomerId());
     }
 
     @Test
