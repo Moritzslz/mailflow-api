@@ -63,6 +63,7 @@ class ResponseRatingService {
 
     ResponseRating getResponseRating(long customerId, long userId, long id, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
+        AuthorisationUtil.validateAccessToUser(userId, jwt);
 
         ResponseRating responseRating =
                 responseRatingRepository
