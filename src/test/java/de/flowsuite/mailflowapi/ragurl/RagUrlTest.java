@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 import de.flowsuite.mailflowapi.BaseServiceTest;
-import de.flowsuite.mailflowcommon.entity.MessageCategory;
 import de.flowsuite.mailflowcommon.entity.RagUrl;
 import de.flowsuite.mailflowcommon.entity.User;
 import de.flowsuite.mailflowcommon.exception.EntityAlreadyExistsException;
@@ -35,7 +34,12 @@ class RagUrlTest extends BaseServiceTest {
     private RagUrl testRagUrl;
 
     private RagUrl bulildTestRagUrl() {
-        return new RagUrl(1L, testUser.getCustomerId(), "https://www.example.com", true);
+        return RagUrl.builder()
+                .id(1L)
+                .customerId(testUser.getCustomerId())
+                .url("https://example.com")
+                .isLastCrawlSuccessful(true)
+                .build();
     }
 
     @BeforeEach
