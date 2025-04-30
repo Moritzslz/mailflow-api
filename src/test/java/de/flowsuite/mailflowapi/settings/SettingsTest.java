@@ -24,7 +24,16 @@ import java.util.Optional;
 @ExtendWith(MockitoExtension.class)
 class SettingsTest extends BaseServiceTest {
 
-    private static final int CRAWL_FREQUENCY_HOURS = 168;
+    protected static final int DEFAULT_CRAWL_FREQ = 168;
+    protected static final int UPDATED_CRAWL_FREQ = 200;
+
+    protected static final String DEFAULT_IMAP_HOST = "imapHost";
+    protected static final String DEFAULT_SMTP_HOST = "smtpHost";
+    protected static final String UPDATED_IMAP_HOST = "updated imapHost";
+    protected static final String UPDATED_SMTP_HOST = "update smtpHost";
+
+    protected static final int DEFAULT_PORT = 1;
+    protected static final int UPDATED_PORT = 2;
 
     @Mock SettingsRepository settingsRepository;
 
@@ -43,15 +52,15 @@ class SettingsTest extends BaseServiceTest {
                 .isExecutionEnabled(true)
                 .isAutoReplyEnabled(false)
                 .isResponseRatingEnabled(true)
-                .crawlFrequencyInHours(CRAWL_FREQUENCY_HOURS)
+                .crawlFrequencyInHours(DEFAULT_CRAWL_FREQ)
                 .lastCrawlAt(now)
-                .nextCrawlAt(now.plusHours(CRAWL_FREQUENCY_HOURS))
+                .nextCrawlAt(now.plusHours(DEFAULT_CRAWL_FREQ))
                 .mailboxPasswordHash(HASHED_VALUE)
                 .mailboxPassword(ENCRYPTED_VALUE)
-                .imapHost("imapHost")
-                .smtpHost("smtpHost")
-                .imapPort(1)
-                .smtpPort(1)
+                .imapHost(DEFAULT_IMAP_HOST)
+                .smtpHost(DEFAULT_SMTP_HOST)
+                .imapPort(DEFAULT_PORT)
+                .smtpPort(DEFAULT_PORT)
                 .build();
     }
 
@@ -191,9 +200,8 @@ class SettingsTest extends BaseServiceTest {
         when(settingsRepository.findById(testSettings.getUserId()))
                 .thenReturn(Optional.of(testSettings));
 
-        int updatedCrawlFrequency = 200;
         ZonedDateTime lastCrawlAt = ZonedDateTime.now();
-        ZonedDateTime nextCrawlAt = lastCrawlAt.plusHours(updatedCrawlFrequency);
+        ZonedDateTime nextCrawlAt = lastCrawlAt.plusHours(UPDATED_CRAWL_FREQ);
 
         SettingsResource.UpdateSettingsRequest updateSettingsRequest =
                 new SettingsResource.UpdateSettingsRequest(
@@ -202,13 +210,13 @@ class SettingsTest extends BaseServiceTest {
                         true,
                         true,
                         true,
-                        updatedCrawlFrequency,
+                        UPDATED_CRAWL_FREQ,
                         lastCrawlAt,
                         nextCrawlAt,
-                        "updated imapHost",
-                        "update smtpHost",
-                        2,
-                        2);
+                        UPDATED_IMAP_HOST,
+                        UPDATED_SMTP_HOST,
+                        UPDATED_PORT,
+                        UPDATED_PORT);
 
         settingsService.updateSettings(
                 testUser.getCustomerId(), testUser.getId(), updateSettingsRequest, jwtMock);
@@ -240,9 +248,8 @@ class SettingsTest extends BaseServiceTest {
 
     @Test
     void testUpdateMessageCategory_idConflict() {
-        int updatedCrawlFrequency = 200;
         ZonedDateTime lastCrawlAt = ZonedDateTime.now();
-        ZonedDateTime nextCrawlAt = lastCrawlAt.plusHours(updatedCrawlFrequency);
+        ZonedDateTime nextCrawlAt = lastCrawlAt.plusHours(UPDATED_CRAWL_FREQ);
 
         SettingsResource.UpdateSettingsRequest updateSettingsRequestIdConflict1 =
                 new SettingsResource.UpdateSettingsRequest(
@@ -251,13 +258,13 @@ class SettingsTest extends BaseServiceTest {
                         true,
                         true,
                         true,
-                        updatedCrawlFrequency,
+                        UPDATED_CRAWL_FREQ,
                         lastCrawlAt,
                         nextCrawlAt,
-                        "updated imapHost",
-                        "update smtpHost",
-                        2,
-                        2);
+                        UPDATED_IMAP_HOST,
+                        UPDATED_SMTP_HOST,
+                        UPDATED_PORT,
+                        UPDATED_PORT);
 
         SettingsResource.UpdateSettingsRequest updateSettingsRequestIdConflict2 =
                 new SettingsResource.UpdateSettingsRequest(
@@ -266,13 +273,13 @@ class SettingsTest extends BaseServiceTest {
                         true,
                         true,
                         true,
-                        updatedCrawlFrequency,
+                        UPDATED_CRAWL_FREQ,
                         lastCrawlAt,
                         nextCrawlAt,
-                        "updated imapHost",
-                        "update smtpHost",
-                        2,
-                        2);
+                        UPDATED_IMAP_HOST,
+                        UPDATED_SMTP_HOST,
+                        UPDATED_PORT,
+                        UPDATED_PORT);
 
         assertThrows(
                 IdConflictException.class,
@@ -299,9 +306,8 @@ class SettingsTest extends BaseServiceTest {
     void testUpdateMessageCategory_notFound() {
         when(settingsRepository.findById(testSettings.getUserId())).thenReturn(Optional.empty());
 
-        int updatedCrawlFrequency = 200;
         ZonedDateTime lastCrawlAt = ZonedDateTime.now();
-        ZonedDateTime nextCrawlAt = lastCrawlAt.plusHours(updatedCrawlFrequency);
+        ZonedDateTime nextCrawlAt = lastCrawlAt.plusHours(UPDATED_CRAWL_FREQ);
 
         SettingsResource.UpdateSettingsRequest updateSettingsRequest =
                 new SettingsResource.UpdateSettingsRequest(
@@ -310,13 +316,13 @@ class SettingsTest extends BaseServiceTest {
                         true,
                         true,
                         true,
-                        200,
+                        UPDATED_CRAWL_FREQ,
                         lastCrawlAt,
                         nextCrawlAt,
-                        "updated imapHost",
-                        "update smtpHost",
-                        2,
-                        2);
+                        UPDATED_IMAP_HOST,
+                        UPDATED_SMTP_HOST,
+                        UPDATED_PORT,
+                        UPDATED_PORT);
 
         assertThrows(
                 EntityNotFoundException.class,
@@ -332,9 +338,8 @@ class SettingsTest extends BaseServiceTest {
 
     @Test
     void testUpdateMessageCategory_idor() {
-        int updatedCrawlFrequency = 200;
         ZonedDateTime lastCrawlAt = ZonedDateTime.now();
-        ZonedDateTime nextCrawlAt = lastCrawlAt.plusHours(updatedCrawlFrequency);
+        ZonedDateTime nextCrawlAt = lastCrawlAt.plusHours(UPDATED_CRAWL_FREQ);
 
         SettingsResource.UpdateSettingsRequest updateSettingsRequest =
                 new SettingsResource.UpdateSettingsRequest(
@@ -343,13 +348,13 @@ class SettingsTest extends BaseServiceTest {
                         true,
                         true,
                         true,
-                        updatedCrawlFrequency,
+                        UPDATED_CRAWL_FREQ,
                         lastCrawlAt,
                         nextCrawlAt,
-                        "updated imapHost",
-                        "update smtpHost",
-                        2,
-                        2);
+                        UPDATED_IMAP_HOST,
+                        UPDATED_SMTP_HOST,
+                        UPDATED_PORT,
+                        UPDATED_PORT);
 
         assertThrows(
                 IdorException.class,
