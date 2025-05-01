@@ -55,7 +55,6 @@ class SecurityConfig {
     private final PasswordEncoder passwordEncoder;
     private final Environment environment;
 
-
     SecurityConfig(
             @Value("${google.recaptcha.http-header}") String reCaptchaHttpHeader,
             ReCaptchaService reCaptchaService,
