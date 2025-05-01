@@ -5,11 +5,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
+import de.flowsuite.mailflow.api.BaseServiceTest;
 import de.flowsuite.mailflow.common.entity.Client;
 import de.flowsuite.mailflow.common.exception.EntityAlreadyExistsException;
 import de.flowsuite.mailflow.common.exception.EntityNotFoundException;
 import de.flowsuite.mailflow.common.exception.IdConflictException;
-import de.flowsuite.mailflow.api.BaseServiceTest;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

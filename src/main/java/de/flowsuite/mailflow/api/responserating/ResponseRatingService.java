@@ -1,9 +1,10 @@
 package de.flowsuite.mailflow.api.responserating;
 
+import static de.flowsuite.mailflow.api.messagelog.MessageLogService.TOKEN_TTL_DAYS;
 import static de.flowsuite.mailflow.common.constant.Message.RESPONSE_RATING_EXPIRED_MSG;
 import static de.flowsuite.mailflow.common.util.Util.BERLIN_ZONE;
-import static de.flowsuite.mailflow.api.messagelog.MessageLogService.TOKEN_TTL_DAYS;
 
+import de.flowsuite.mailflow.api.messagelog.MessageLogService;
 import de.flowsuite.mailflow.common.constant.Timeframe;
 import de.flowsuite.mailflow.common.entity.MessageLogEntry;
 import de.flowsuite.mailflow.common.entity.ResponseRating;
@@ -13,7 +14,6 @@ import de.flowsuite.mailflow.common.exception.IdorException;
 import de.flowsuite.mailflow.common.exception.TokenExpiredException;
 import de.flowsuite.mailflow.common.util.AnalyticsUtil;
 import de.flowsuite.mailflow.common.util.AuthorisationUtil;
-import de.flowsuite.mailflow.api.messagelog.MessageLogService;
 
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;

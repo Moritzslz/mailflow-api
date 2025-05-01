@@ -3,6 +3,8 @@ package de.flowsuite.mailflow.api.user;
 import static de.flowsuite.mailflow.common.constant.Message.*;
 import static de.flowsuite.mailflow.common.util.Util.BERLIN_ZONE;
 
+import de.flowsuite.mailflow.api.customer.CustomerService;
+import de.flowsuite.mailflow.api.mail.MailService;
 import de.flowsuite.mailflow.common.constant.Authorities;
 import de.flowsuite.mailflow.common.constant.Message;
 import de.flowsuite.mailflow.common.entity.Customer;
@@ -12,8 +14,6 @@ import de.flowsuite.mailflow.common.util.AesUtil;
 import de.flowsuite.mailflow.common.util.AuthorisationUtil;
 import de.flowsuite.mailflow.common.util.HmacUtil;
 import de.flowsuite.mailflow.common.util.Util;
-import de.flowsuite.mailflow.api.customer.CustomerService;
-import de.flowsuite.mailflow.api.mail.MailService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

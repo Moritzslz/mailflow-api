@@ -1,7 +1,7 @@
 package de.flowsuite.mailflow.api.user;
 
-import static de.flowsuite.mailflow.common.constant.Message.*;
 import static de.flowsuite.mailflow.api.user.UserUtil.*;
+import static de.flowsuite.mailflow.common.constant.Message.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
