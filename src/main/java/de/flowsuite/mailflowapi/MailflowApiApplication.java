@@ -11,7 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
-@EntityScan(basePackages = "de.flowsuite.mailflowcommon.entity")
+@EntityScan(basePackages = "de.flowsuite.mailflow.common.entity")
 @ComponentScan(basePackages = {"de.flowsuite.mailflowapi", "de.flowsuite.mailflow.common"})
 public class MailflowApiApplication {
 
