@@ -1,5 +1,3 @@
-SET TIME ZONE 'Europe/Berlin';
-
 CREATE TABLE customers (
     id BIGSERIAL PRIMARY KEY,
     company VARCHAR(64) NOT NULL,
