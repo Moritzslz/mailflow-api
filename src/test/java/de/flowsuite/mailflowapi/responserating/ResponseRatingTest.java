@@ -5,8 +5,6 @@ import static de.flowsuite.mailflow.common.util.Util.BERLIN_ZONE;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import de.flowsuite.mailflowapi.BaseServiceTest;
-import de.flowsuite.mailflowapi.messagelog.MessageLogService;
 import de.flowsuite.mailflow.common.entity.MessageLogEntry;
 import de.flowsuite.mailflow.common.entity.ResponseRating;
 import de.flowsuite.mailflow.common.entity.User;
@@ -14,6 +12,8 @@ import de.flowsuite.mailflow.common.exception.EntityAlreadyExistsException;
 import de.flowsuite.mailflow.common.exception.EntityNotFoundException;
 import de.flowsuite.mailflow.common.exception.IdorException;
 import de.flowsuite.mailflow.common.exception.TokenExpiredException;
+import de.flowsuite.mailflowapi.BaseServiceTest;
+import de.flowsuite.mailflowapi.messagelog.MessageLogService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

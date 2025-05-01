@@ -1,8 +1,8 @@
 package de.flowsuite.mailflowapi.security;
 
-import de.flowsuite.mailflowapi.user.UserService;
 import de.flowsuite.mailflow.common.entity.Client;
 import de.flowsuite.mailflow.common.entity.User;
+import de.flowsuite.mailflowapi.user.UserService;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;

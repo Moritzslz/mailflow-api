@@ -10,10 +10,10 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 
-import de.flowsuite.mailflowapi.client.ClientService;
-import de.flowsuite.mailflowapi.user.UserService;
 import de.flowsuite.mailflow.common.constant.Authorities;
 import de.flowsuite.mailflow.common.util.RsaUtil;
+import de.flowsuite.mailflowapi.client.ClientService;
+import de.flowsuite.mailflowapi.user.UserService;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;

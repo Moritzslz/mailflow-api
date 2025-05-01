@@ -4,15 +4,15 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import de.flowsuite.mailflowapi.BaseServiceTest;
-import de.flowsuite.mailflowapi.customer.CustomerService;
-import de.flowsuite.mailflowapi.mail.MailService;
 import de.flowsuite.mailflow.common.constant.Authorities;
 import de.flowsuite.mailflow.common.constant.Message;
 import de.flowsuite.mailflow.common.entity.Customer;
 import de.flowsuite.mailflow.common.entity.User;
 import de.flowsuite.mailflow.common.exception.IdConflictException;
 import de.flowsuite.mailflow.common.exception.IdorException;
+import de.flowsuite.mailflowapi.BaseServiceTest;
+import de.flowsuite.mailflowapi.customer.CustomerService;
+import de.flowsuite.mailflowapi.mail.MailService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

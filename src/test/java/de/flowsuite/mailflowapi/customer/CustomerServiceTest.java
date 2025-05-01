@@ -5,10 +5,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-import de.flowsuite.mailflow.common.exception.*;
-import de.flowsuite.mailflowapi.BaseServiceTest;
 import de.flowsuite.mailflow.common.entity.Customer;
 import de.flowsuite.mailflow.common.entity.User;
+import de.flowsuite.mailflow.common.exception.*;
+import de.flowsuite.mailflowapi.BaseServiceTest;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
