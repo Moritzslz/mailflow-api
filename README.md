@@ -1,1 +1,1 @@
-# MailFlow API
+# mailflow API
