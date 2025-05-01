@@ -20,6 +20,7 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -52,23 +53,33 @@ class SecurityConfig {
     private final UserService userService;
     private final ClientService clientService;
     private final PasswordEncoder passwordEncoder;
+    private final Environment environment;
+
 
     SecurityConfig(
             @Value("${google.recaptcha.http-header}") String reCaptchaHttpHeader,
             ReCaptchaService reCaptchaService,
             UserService userService,
             ClientService clientService,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            Environment environment) {
         this.reCaptchaHttpHeader = reCaptchaHttpHeader;
         this.reCaptchaFilter = new ReCaptchaFilter(reCaptchaHttpHeader, reCaptchaService);
         this.userService = userService;
         this.clientService = clientService;
         this.passwordEncoder = passwordEncoder;
+        this.environment = environment;
     }
 
     // spotless:off
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        boolean isProd = Arrays.asList(environment.getActiveProfiles()).contains("prod");
+
+        if (isProd) {
+            http.requiresChannel(channel -> channel.anyRequest().requiresSecure());
+        }
+
         return http.authorizeHttpRequests(auth -> auth
                         // Auth Resource
                         .requestMatchers(HttpMethod.POST, "/auth/**").permitAll()
@@ -127,8 +138,6 @@ class SecurityConfig {
                         // Authenticate any request
                         .anyRequest()
                         .authenticated())
-                // TODO uncomment in prod:
-                //  .requiresChannel(channel -> channel.anyRequest().requiresSecure())
                 .oauth2ResourceServer(resourceServer -> resourceServer.jwt(Customizer.withDefaults()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(AbstractHttpConfigurer::disable)
