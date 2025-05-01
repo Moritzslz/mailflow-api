@@ -1,5 +1,6 @@
 package de.flowsuite.mailflowapi.user;
 
+import static de.flowsuite.mailflow.common.constant.Message.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
