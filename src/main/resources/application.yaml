@@ -1,6 +1,8 @@
 spring:
   application:
-    name: MailFlow-API
+    name: mailflow-api
+  profiles:
+    active: ${ACTIVE_PROFILE}
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
@@ -8,6 +10,8 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     open-in-view: false
+  jackson:
+    time-zone: Europe/Berlin
   mail:
     host: smtp.ionos.de
     port: 465
@@ -29,18 +33,9 @@ server:
   servlet:
     context-path: /api/v1
 
-logging:
-  level:
-    de.flowsuite.mailflowapi: DEBUG
-    org.springframework.security: TRACE
-
 google:
   recaptcha:
     http-header: reCAPTCHA
     secret-key: ${GOOGLE_RECAPTCHA_SECRET_KEY}
     verify-url: https://www.google.com/recaptcha/api/siteverify
     threshold: 0.5
-
-mailflow:
-  frontend:
-    url: https://dashboard.mail-flow.ai

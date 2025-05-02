@@ -1,5 +1,3 @@
-SET TIME ZONE 'Europe/Berlin';
-
 CREATE TABLE customers (
     id BIGSERIAL PRIMARY KEY,
     company VARCHAR(64) NOT NULL,
@@ -13,7 +11,10 @@ CREATE TABLE customers (
     website_url TEXT,
     privacy_policy_url TEXT,
     cta_url TEXT,
-    registration_token TEXT UNIQUE NOT NULL
+    registration_token TEXT UNIQUE NOT NULL,
+    is_test_version BOOLEAN,
+    ionos_username VARCHAR(64),
+    ionos_password_encrypted TEXT
 );
 CREATE INDEX idx_customers_registration_token ON customers(registration_token);
 
@@ -135,9 +136,9 @@ CREATE INDEX idx_response_ratings_user_id ON response_ratings(user_id);
 CREATE INDEX idx_response_ratings_rating ON response_ratings(rating);
 CREATE INDEX idx_response_ratings_rated_at ON response_ratings(created_at);
 
-INSERT INTO customers (company, street, house_number, postal_code, city, billing_email_address, openai_api_key_encrypted, registration_token)
-VALUES ('FlowSuite', 'Straße', '69', '1337', 'München', 'rechnungen@flow-suite.de', 'R0p2fHYTSBAHIq5YEWzN1Jwnfar/IwvyqnPhw/AGjwliTfNO71WPHw==', 'secureToken1'),
-       ('Company', 'Street', '69', '1337', 'City', 'billing@example.de', 'R0p2fHYTSBAHIq5YEWzN1Jwnfar/IwvyqnPhw/AGjwliTfNO71WPHw==', 'secureToken2');
+INSERT INTO customers (company, street, house_number, postal_code, city, billing_email_address, openai_api_key_encrypted, registration_token, is_test_version, ionos_username, ionos_password_encrypted)
+VALUES ('FlowSuite', 'Straße', '69', '1337', 'München', 'rechnungen@flow-suite.de', 'R0p2fHYTSBAHIq5YEWzN1Jwnfar/IwvyqnPhw/AGjwliTfNO71WPHw==', 'secureToken1', true, 'test@flow-suite.de' , 'password'),
+       ('Company', 'Street', '69', '1337', 'City', 'billing@example.de', 'R0p2fHYTSBAHIq5YEWzN1Jwnfar/IwvyqnPhw/AGjwliTfNO71WPHw==', 'secureToken2', true, 'test@flow-suite.de', 'password');
 
 INSERT INTO users (customer_id, first_name_encrypted, last_name_encrypted, email_address_hash, email_address_encrypted, password_hash, role, is_account_locked, is_account_enabled, is_subscribed_to_newsletter, verification_token, token_expires_at)
 VALUES (1, 'Uztmz8Fii79yN2SY6wg5md6Ek5RLeBzMGYlNlqYutLyj', 'Uztmz8Fii79yN2SY6wg5md6Ek5RLeBzMGYlNlqYutLyj', 'Cb6R4BLpHhVMebqauEd3TZrhfdkR8hFjvulTHYUfbNM=', 'DMX3vfIVH7vta9jAgOUbwEWGRTa5jFiv2yLi6BMnNv4d7hcfQFdMGnUCRcJPfA==', '$2a$10$t0Olv0N4TdmUfd9yG242i.znX.NN7c.a3AU9DadUg1ro0Xsc8jvom', 'ADMIN', false, true, true, 'token1', NOW() + INTERVAL '30 minutes'),

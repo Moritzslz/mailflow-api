@@ -1,0 +1,8 @@
+logging:
+  level:
+    de.flowsuite.mailflowapi: DEBUG
+    org.springframework.security: TRACE
+
+mailflow:
+  frontend:
+    url: http://localhost:5173

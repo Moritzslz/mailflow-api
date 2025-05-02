@@ -1,1 +1,3 @@
-rootProject.name = 'MailFlow-API'
+rootProject.name = 'mailflow-api'
+
+include ':mailflow-common'
