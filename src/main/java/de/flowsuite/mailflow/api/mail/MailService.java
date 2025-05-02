@@ -56,7 +56,7 @@ public class MailService {
     }
 
     public void sendDoubleOptInEmail(
-            String fistName, String emailAddress, String token, int hours) {
+            String firstName, String emailAddress, String token, int hours) {
 
         URI uri =
                 UriComponentsBuilder.fromUriString(mailflowFrontendUrl)
@@ -67,7 +67,7 @@ public class MailService {
 
         String emailContent =
                 MailUtil.replacePlaceholder(doubleOptInEmail, "TITLE", DOUBLE_OPT_IN_EMAIL_SUBJECT);
-        emailContent = MailUtil.replacePlaceholder(emailContent, "FIRST_NAME", fistName);
+        emailContent = MailUtil.replacePlaceholder(emailContent, "FIRST_NAME", firstName);
         emailContent = MailUtil.replacePlaceholder(emailContent, "URL", uri.toString());
         emailContent = MailUtil.replacePlaceholder(emailContent, "HOURS", String.valueOf(hours));
 
