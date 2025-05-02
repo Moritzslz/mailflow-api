@@ -149,13 +149,6 @@ class SecurityConfig {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(false);
-        configuration.setAllowedOrigins(
-                List.of(
-                        "http://localhost:*",
-                        "http://flow-suite.de",
-                        "https://flow-suite.de",
-                        "http://*.flow-suite.de",
-                        "https://*.flow-suite.de"));
         configuration.setAllowedHeaders(
                 List.of(HttpHeaders.AUTHORIZATION, HttpHeaders.CONTENT_TYPE, reCaptchaHttpHeader));
         configuration.setAllowedMethods(
@@ -165,6 +158,8 @@ class SecurityConfig {
                         HttpMethod.PUT.name(),
                         HttpMethod.DELETE.name(),
                         HttpMethod.OPTIONS.name()));
+        configuration.addAllowedOriginPattern("http://localhost:*");
+        configuration.addAllowedOriginPattern("https://*.mail-flow.com");
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
