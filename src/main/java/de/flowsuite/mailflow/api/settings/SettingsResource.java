@@ -44,7 +44,7 @@ class SettingsResource {
                                 createdSettings.getCustomerId(), createdSettings.getUserId())
                         .toUri();
 
-        // TODO notify mailbox-service
+        // TODO notify mailbox-service with whole user object (including settings)
 
         return ResponseEntity.created(location).body(createdSettings);
     }
@@ -73,7 +73,7 @@ class SettingsResource {
             @PathVariable long userId,
             @RequestBody @Valid UpdateMailboxPasswordRequest request,
             @AuthenticationPrincipal Jwt jwt) {
-        // TODO notify mailbox-service
+        // TODO notify mailbox-service with whole user object (including settings)
         return ResponseEntity.ok(
                 settingsService.updateMailboxPassword(customerId, userId, request, jwt));
     }

@@ -31,7 +31,7 @@ class UserResource {
 
     @GetMapping("/users/enable")
     ResponseEntity<Message> enableUser(@RequestParam @NotBlank String token) {
-        // TODO notify mailbox-service
+        // TODO notify mailbox-service with whole user object (including settings)
         return ResponseEntity.ok(userService.enableUser(token));
     }
 
@@ -67,7 +67,7 @@ class UserResource {
             @PathVariable long id,
             @RequestBody UpdateUserRequest request,
             @AuthenticationPrincipal Jwt jwt) {
-        // TODO notify mailbox-service
+        // TODO notify mailbox-service with whole user object (including settings)
         return ResponseEntity.ok(userService.updateUser(customerId, id, request, jwt));
     }
 
