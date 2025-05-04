@@ -145,7 +145,10 @@ VALUES (1, 'Uztmz8Fii79yN2SY6wg5md6Ek5RLeBzMGYlNlqYutLyj', 'Uztmz8Fii79yN2SY6wg5
        (2, 'RtlBAwPz6EdINA4O51gu8uz0AuZ0UHE5FJPC26Xbquo=', 'RtlBAwPz6EdINA4O51gu8uz0AuZ0UHE5FJPC26Xbquo=', 'U8c45XuAqt5w5/4xkE6/vFfnLE5E3t1uNJJqoywHvUM=', 'g6jxJeir/fXKqxEOwUGuuyLraFFSFnW9Gn8/3QF/J9eS6ka9yyk55iLA5rwgcg==', '$2a$10$t0Olv0N4TdmUfd9yG242i.znX.NN7c.a3AU9DadUg1ro0Xsc8jvom', 'USER', false, true, true, 'token2', NOW() + INTERVAL '30 minutes');
 
 INSERT INTO clients(client_name, client_secret_hash, scope)
-VALUES ('test-client', '$2a$10$WdPzc4aO2o4dkjpk9OXg5OCWAYCkm/G314raW8pkUgi1ctS8VxnpS', 'CLIENT customers:list customers:read settings:read');
+VALUES ('mailbox-service', '$2a$10$4/8k4VN17iFXP4PD840vVOV.RvKwWQ.pFP9cjOPSqYHYmeWMk1wXe', 'CLIENT customers:list customers:read settings:read'),
+       ('rag-service', '$2a$10$4/8k4VN17iFXP4PD840vVOV.RvKwWQ.pFP9cjOPSqYHYmeWMk1wXe', 'CLIENT customers:list customers:read settings:read'),
+       ('llm-service', '$2a$10$4/8k4VN17iFXP4PD840vVOV.RvKwWQ.pFP9cjOPSqYHYmeWMk1wXe', 'CLIENT customers:list customers:read settings:read');
+
 
 INSERT INTO settings (user_id, customer_id, is_execution_enabled, is_auto_reply_enabled, is_response_rating_enabled, crawl_frequency_in_hours, mailbox_password_hash, mailbox_password_encrypted, imap_host, smtp_host, imap_port, smtp_port)
 VALUES (1, 1,true, false, true, 168, '4NtowY94nzPXZNY7emJFTPGycM6GlSugg6OwlOFQeDI=', '$2a$10$/fXalbMsPDJvqVAVo2YNYeEFWdKl67nIyM4.7DEsoy/ZXdWHkJRHm', 'imap.ionos.de', 'smtp.ionos.com', 993, 465),
