@@ -151,8 +151,8 @@ VALUES ('mailbox-service', '$2a$10$4/8k4VN17iFXP4PD840vVOV.RvKwWQ.pFP9cjOPSqYHYm
 
 
 INSERT INTO settings (user_id, customer_id, is_execution_enabled, is_auto_reply_enabled, is_response_rating_enabled, crawl_frequency_in_hours, mailbox_password_hash, mailbox_password_encrypted, imap_host, smtp_host, imap_port, smtp_port)
-VALUES (1, 1,true, false, true, 168, '41yeeikOtfki4nlr4piOQ1QVD8+ZeJFk8gGeTzHNFHw=', 'nxFNCTbBVAbIrQfJ2vSlDf261/MbLRyM8cclSjqNaz5sPT+kXl7PkheKR2A9Qd7i', 'imap.ionos.de', 'smtp.ionos.com', 993, 465),
-       (2, 2,true, false, true, 168, 'lCh3te1DelaKsFWzM7N58Ib8i9D7lB6Xr9HBQUoL57M=', 'z5RN8Uv5mdoAbmUn+dgLeEqzEHQsRed8tJaN87VIWj3ph32V0SJ8Vd+32haVU3nv', 'imap.ionos.de', 'smtp.ionos.com', 993, 465);
+VALUES (1, 1,true, false, true, 168, '41yeeikOtfki4nlr4piOQ1QVD8+ZeJFk8gGeTzHNFHw=', 'nxFNCTbBVAbIrQfJ2vSlDf261/MbLRyM8cclSjqNaz5sPT+kXl7PkheKR2A9Qd7i', 'imap.ionos.de', 'smtp.ionos.de', 993, 465),
+       (2, 2,true, false, true, 168, 'lCh3te1DelaKsFWzM7N58Ib8i9D7lB6Xr9HBQUoL57M=', 'z5RN8Uv5mdoAbmUn+dgLeEqzEHQsRed8tJaN87VIWj3ph32V0SJ8Vd+32haVU3nv', 'imap.ionos.de', 'smtp.ionos.de', 993, 465);
 
 INSERT INTO rag_urls (customer_id, url, is_last_crawl_successful)
 VALUES (1, 'https://www.flow-suite.de', NULL),
