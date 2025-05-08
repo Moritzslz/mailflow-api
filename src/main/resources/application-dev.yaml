@@ -1,6 +1,6 @@
 logging:
   level:
-    de.flowsuite.mailflowapi: DEBUG
+    de.flowsuite.mailflow: DEBUG
     org.springframework.security: TRACE
 
 mailflow:
