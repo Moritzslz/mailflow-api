@@ -137,8 +137,8 @@ CREATE INDEX idx_response_ratings_rating ON response_ratings(rating);
 CREATE INDEX idx_response_ratings_rated_at ON response_ratings(created_at);
 
 INSERT INTO customers (company, street, house_number, postal_code, city, billing_email_address, openai_api_key_encrypted, registration_token, is_test_version, ionos_username, ionos_password_encrypted)
-VALUES ('FlowSuite', 'Straße', '69', '1337', 'München', 'rechnungen@flow-suite.de', 'R0p2fHYTSBAHIq5YEWzN1Jwnfar/IwvyqnPhw/AGjwliTfNO71WPHw==', 'secureToken1', true, 'test@flow-suite.de' , 'password'),
-       ('Company', 'Street', '69', '1337', 'City', 'billing@example.de', 'R0p2fHYTSBAHIq5YEWzN1Jwnfar/IwvyqnPhw/AGjwliTfNO71WPHw==', 'secureToken2', true, 'test@flow-suite.de', 'password');
+VALUES ('FlowSuite', 'Straße', '69', '1337', 'München', 'rechnungen@flow-suite.de', 'R0p2fHYTSBAHIq5YEWzN1Jwnfar/IwvyqnPhw/AGjwliTfNO71WPHw==', 'secureToken1', true, 'test@flow-suite.de' , 'nxFNCTbBVAbIrQfJ2vSlDf261/MbLRyM8cclSjqNaz5sPT+kXl7PkheKR2A9Qd7i'),
+       ('Company', 'Street', '69', '1337', 'City', 'billing@example.de', 'R0p2fHYTSBAHIq5YEWzN1Jwnfar/IwvyqnPhw/AGjwliTfNO71WPHw==', 'secureToken2', true, 'info@flow-suite.de', 'z5RN8Uv5mdoAbmUn+dgLeEqzEHQsRed8tJaN87VIWj3ph32V0SJ8Vd+32haVU3nv');
 
 INSERT INTO users (customer_id, first_name_encrypted, last_name_encrypted, email_address_hash, email_address_encrypted, password_hash, role, is_account_locked, is_account_enabled, is_subscribed_to_newsletter, verification_token, token_expires_at)
 VALUES (1, 'Uztmz8Fii79yN2SY6wg5md6Ek5RLeBzMGYlNlqYutLyj', 'Uztmz8Fii79yN2SY6wg5md6Ek5RLeBzMGYlNlqYutLyj', 'Cb6R4BLpHhVMebqauEd3TZrhfdkR8hFjvulTHYUfbNM=', 'DMX3vfIVH7vta9jAgOUbwEWGRTa5jFiv2yLi6BMnNv4d7hcfQFdMGnUCRcJPfA==', '$2a$10$t0Olv0N4TdmUfd9yG242i.znX.NN7c.a3AU9DadUg1ro0Xsc8jvom', 'ADMIN', false, true, true, 'token1', NOW() + INTERVAL '30 minutes'),
@@ -173,7 +173,7 @@ VALUES
 -- 2024
 (2, 2, true, 'Produkt Frage', 'Deutsch', 'user@example.com', 'Test', '2024-03-25T09:00:00+01:00', '2024-03-25T09:00:00+01:00', 40, 'gpt-4', 1600, 1200, 2800, 'token1', NOW() + INTERVAL '30 minutes'),
 -- Week of March 25–31
-(2, 2, true, 'Produkt Frage', 'Deutsch', 'user@example.com', 'Test', '2025-03-25T09:00:00+01:00', '2025-03-25T09:00:00+01:00', 40, 'gpt-4', 1600, 1200, 2800, 'token2', NOW() + INTERVAL '30 minutes'),
+(1, 1, true, 'Produkt Frage', 'Deutsch', 'user@example.com', 'Test', '2025-03-25T09:00:00+01:00', '2025-03-25T09:00:00+01:00', 40, 'gpt-4', 1600, 1200, 2800, 'token2', NOW() + INTERVAL '30 minutes'),
 (2, 2, true, 'Buchungsanfrage', 'Deutsch', 'user@example.com', 'Test', '2025-03-27T14:30:00+01:00', '2025-03-27T14:30:00+01:00', 38, 'gpt-4', 1580, 1190, 2770, 'token3', NOW() + INTERVAL '30 minutes'),
 (2, 2, false, 'Support', 'Deutsch', 'user@example.com', 'Test', '2025-03-29T10:45:00+01:00', '2025-03-29T10:45:00+01:00', 35, 'gpt-4', 1550, 1150, 2700, 'token4', NOW() + INTERVAL '30 minutes'),
 
