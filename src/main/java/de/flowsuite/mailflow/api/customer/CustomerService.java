@@ -1,5 +1,6 @@
 package de.flowsuite.mailflow.api.customer;
 
+import de.flowsuite.mailflow.api.messagecategory.MessageCategoryService;
 import de.flowsuite.mailflow.common.entity.Customer;
 import de.flowsuite.mailflow.common.exception.EntityAlreadyExistsException;
 import de.flowsuite.mailflow.common.exception.EntityNotFoundException;
@@ -19,9 +20,12 @@ import java.util.Optional;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final MessageCategoryService messageCategoryService;
 
-    CustomerService(CustomerRepository customerRepository) {
+    CustomerService(
+            CustomerRepository customerRepository, MessageCategoryService messageCategoryService) {
         this.customerRepository = customerRepository;
+        this.messageCategoryService = messageCategoryService;
     }
 
     public Optional<Customer> getByRegistrationToken(String registrationToken) {
@@ -82,7 +86,11 @@ public class CustomerService {
             customer.setIonosPassword(AesUtil.encrypt(request.ionosPassword()));
         }
 
-        return customerRepository.save(customer);
+        Customer createdCustomer = customerRepository.save(customer);
+
+        messageCategoryService.createDefaultMessageCategory(createdCustomer.getId());
+
+        return createdCustomer;
     }
 
     List<Customer> listCustomers() {

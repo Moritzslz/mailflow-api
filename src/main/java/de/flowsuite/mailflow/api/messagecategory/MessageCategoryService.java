@@ -1,10 +1,7 @@
 package de.flowsuite.mailflow.api.messagecategory;
 
 import de.flowsuite.mailflow.common.entity.MessageCategory;
-import de.flowsuite.mailflow.common.exception.EntityAlreadyExistsException;
-import de.flowsuite.mailflow.common.exception.EntityNotFoundException;
-import de.flowsuite.mailflow.common.exception.IdConflictException;
-import de.flowsuite.mailflow.common.exception.IdorException;
+import de.flowsuite.mailflow.common.exception.*;
 import de.flowsuite.mailflow.common.util.AuthorisationUtil;
 
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -13,7 +10,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-class MessageCategoryService {
+public class MessageCategoryService {
+
+    private static final String DEFAULT_CATEGORY = "Default";
 
     private final MessageCategoryRepository messageCategoryRepository;
 
@@ -30,12 +29,31 @@ class MessageCategoryService {
             throw new IdConflictException();
         }
 
+        if (messageCategory.getCategory().equalsIgnoreCase(DEFAULT_CATEGORY)) {
+            throw new EntityAlreadyExistsException(MessageCategory.class.getSimpleName());
+        }
+
         if (messageCategoryRepository.existsByCustomerIdAndCategory(
                 customerId, messageCategory.getCategory())) {
             throw new EntityAlreadyExistsException(MessageCategory.class.getSimpleName());
         }
 
         return messageCategoryRepository.save(messageCategory);
+    }
+
+    public void createDefaultMessageCategory(long customerId) {
+        MessageCategory defaultMessageCategory =
+                MessageCategory.builder()
+                        .customerId(customerId)
+                        .category(DEFAULT_CATEGORY)
+                        .isReply(true)
+                        .isFunctionCall(false)
+                        .description(
+                                "This is the default/fallback category for messages that do not fit"
+                                        + " into any other defined category.")
+                        .build();
+
+        messageCategoryRepository.save(defaultMessageCategory);
     }
 
     MessageCategory getMessageCategory(long customerId, long id, Jwt jwt) {
@@ -99,6 +117,10 @@ class MessageCategoryService {
 
         if (!messageCategory.getCustomerId().equals(customerId)) {
             throw new IdorException();
+        }
+
+        if (messageCategory.getCategory().equalsIgnoreCase(DEFAULT_CATEGORY)) {
+            throw new DeleteConflictException("Unable to delete default category.");
         }
 
         messageCategoryRepository.delete(messageCategory);
