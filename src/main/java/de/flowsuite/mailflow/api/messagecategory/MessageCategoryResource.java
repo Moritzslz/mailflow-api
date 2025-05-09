@@ -41,6 +41,8 @@ class MessageCategoryResource {
                                 createdMessageCategory.getId())
                         .toUri();
 
+        // TODO notify mailbox-service with list of categories
+
         return ResponseEntity.created(location).body(createdMessageCategory);
     }
 
@@ -64,6 +66,7 @@ class MessageCategoryResource {
             @PathVariable long id,
             @RequestBody @Valid MessageCategory messageCategory,
             @AuthenticationPrincipal Jwt jwt) {
+        // TODO notify mailbox-service with list of categories
         return ResponseEntity.ok(
                 messageCategoryService.updateMessageCategory(customerId, id, messageCategory, jwt));
     }
@@ -74,6 +77,7 @@ class MessageCategoryResource {
             @PathVariable long id,
             @AuthenticationPrincipal Jwt jwt) {
         messageCategoryService.deleteMessageCategory(customerId, id, jwt);
+        // TODO notify mailbox-service with list of categories
         return ResponseEntity.noContent().build();
     }
 }
