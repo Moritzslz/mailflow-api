@@ -17,7 +17,7 @@ class ClientResource {
 
     private final ClientService clientService;
 
-    public ClientResource(ClientService clientService) {
+    ClientResource(ClientService clientService) {
         this.clientService = clientService;
     }
 

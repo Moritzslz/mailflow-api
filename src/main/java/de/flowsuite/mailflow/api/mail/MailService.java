@@ -40,7 +40,7 @@ public class MailService {
     private final String welcomeEmail;
     // spotless:on
 
-    public MailService(
+    MailService(
             @Value("${mailflow.frontend.url}") String mailflowFrontendUrl,
             JavaMailSender mailSender,
             ResourceLoader resourceLoader) {

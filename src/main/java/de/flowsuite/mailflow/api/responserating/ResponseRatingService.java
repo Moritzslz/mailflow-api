@@ -28,7 +28,7 @@ class ResponseRatingService {
     private final ResponseRatingRepository responseRatingRepository;
     private final MessageLogService messageLogService;
 
-    public ResponseRatingService(
+    ResponseRatingService(
             ResponseRatingRepository responseRatingRepository,
             MessageLogService messageLogService) {
         this.responseRatingRepository = responseRatingRepository;
