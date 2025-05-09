@@ -60,7 +60,7 @@ public class MailService {
 
         URI uri =
                 UriComponentsBuilder.fromUriString(mailflowFrontendUrl)
-                        .path("/customers/users/enable")
+                        .path("/register/enable")
                         .queryParam("token", token)
                         .build()
                         .toUri();
