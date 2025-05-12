@@ -93,14 +93,15 @@ class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/customers/users/password-reset").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/customers/users/password-reset").permitAll()
                         .requestMatchers(HttpMethod.GET, "/customers/users").access(hasAnyScope(Authorities.USERS_LIST.getAuthority(), Authorities.ADMIN.getAuthority()))
+                        .requestMatchers(HttpMethod.GET, "/customers/*/users/*/decrypted").access(hasScope(Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.GET, "/customers/*/users/*").access(hasAnyScope(Authorities.USERS_READ.getAuthority(), Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.PUT, "/customers/*/users/*").access(hasAnyScope(Authorities.USERS_WRITE.getAuthority(), Authorities.ADMIN.getAuthority()))
                         // Customer Resource
                         .requestMatchers(HttpMethod.POST, "/customers").access(hasScope(Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.GET, "/customers").access(hasAnyScope(Authorities.CUSTOMERS_LIST.getAuthority(), Authorities.ADMIN.getAuthority()))
+                        .requestMatchers(HttpMethod.PUT, "/customers/*/test-version").access(hasScope(Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.GET, "/customers/*").access(hasAnyScope(Authorities.CUSTOMERS_READ.getAuthority(), Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.PUT, "/customers/*").access(hasAnyScope(Authorities.CUSTOMERS_WRITE.getAuthority(), Authorities.ADMIN.getAuthority()))
-                        .requestMatchers(HttpMethod.PUT, "/customers/*/test-version").access(hasScope(Authorities.ADMIN.getAuthority()))
                         // CustomerSettings Resource
                         .requestMatchers(HttpMethod.POST, "/customers/*/users/*/settings").access(hasAnyScope(Authorities.SETTINGS_WRITE.getAuthority(), Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.GET, "/customers/*/users/*/settings").access(hasAnyScope(Authorities.SETTINGS_READ.getAuthority(), Authorities.ADMIN.getAuthority()))
