@@ -39,6 +39,8 @@ class BlacklistResource {
                         .buildAndExpand(customerId, userId, createdBlacklistEntry.getId())
                         .toUri();
 
+        // TODO notify mailbox-service with blacklist
+
         return ResponseEntity.created(location).body(createdBlacklistEntry);
     }
 
@@ -66,6 +68,7 @@ class BlacklistResource {
             @PathVariable long id,
             @AuthenticationPrincipal Jwt jwt) {
         blacklistService.deleteBlacklistEntry(customerId, userId, id, jwt);
+        // TODO notify mailbox-service with blacklist
         return ResponseEntity.noContent().build();
     }
 }
