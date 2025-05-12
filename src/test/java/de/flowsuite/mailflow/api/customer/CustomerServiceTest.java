@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import de.flowsuite.mailflow.api.BaseServiceTest;
+import de.flowsuite.mailflow.api.messagecategory.MessageCategoryService;
 import de.flowsuite.mailflow.common.entity.Customer;
 import de.flowsuite.mailflow.common.entity.User;
 import de.flowsuite.mailflow.common.exception.*;
@@ -25,6 +26,8 @@ import java.util.Optional;
 class CustomerServiceTest extends BaseServiceTest {
 
     @Mock private CustomerRepository customerRepository;
+
+    @Mock private MessageCategoryService messageCategoryService;
 
     @InjectMocks private CustomerService customerService;
 
@@ -80,6 +83,7 @@ class CustomerServiceTest extends BaseServiceTest {
                         createCustomerRequest.billingEmailAddress()))
                 .thenReturn(false);
         when(customerRepository.existsByRegistrationToken(anyString())).thenReturn(false);
+        when(customerRepository.save(any(Customer.class))).thenReturn(testCustomer);
 
         customerService.createCustomer(createCustomerRequest);
 
