@@ -88,7 +88,7 @@ public class CustomerService {
 
         Customer createdCustomer = customerRepository.save(customer);
 
-        messageCategoryService.createDefaultMessageCategory(createdCustomer.getId());
+        messageCategoryService.createDefaultMessageCategories(createdCustomer.getId());
 
         return createdCustomer;
     }

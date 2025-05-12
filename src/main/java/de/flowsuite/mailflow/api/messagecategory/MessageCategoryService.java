@@ -13,6 +13,7 @@ import java.util.List;
 public class MessageCategoryService {
 
     private static final String DEFAULT_CATEGORY = "Default";
+    private static final String NO_REPLY_CATEGORY = "No Reply";
 
     private final MessageCategoryRepository messageCategoryRepository;
 
@@ -41,7 +42,7 @@ public class MessageCategoryService {
         return messageCategoryRepository.save(messageCategory);
     }
 
-    public void createDefaultMessageCategory(long customerId) {
+    public void createDefaultMessageCategories(long customerId) {
         MessageCategory defaultMessageCategory =
                 MessageCategory.builder()
                         .customerId(customerId)
@@ -49,11 +50,31 @@ public class MessageCategoryService {
                         .isReply(true)
                         .isFunctionCall(false)
                         .description(
-                                "This is the default/fallback category for messages that do not fit"
-                                        + " into any other defined category.")
+                                "This is the default/fallback category for actionable emails that"
+                                    + " do not fit into any other defined category. If an email"
+                                    + " does not match any other category, it will be assigned"
+                                    + " here. This category is useful for handling edge cases and"
+                                    + " ensuring no email is left uncategorised.")
+                        .build();
+
+        MessageCategory noReplyMessageCategory =
+                MessageCategory.builder()
+                        .customerId(customerId)
+                        .category(NO_REPLY_CATEGORY)
+                        .isReply(false)
+                        .isFunctionCall(false)
+                        .description(
+                                "This category is for emails that do not require a response and are"
+                                    + " not actionable. This includes newsletters, promotional"
+                                    + " offers, automated notifications, and any other"
+                                    + " informational or unimportant emails that should not be"
+                                    + " replied to. Security-related emails such as one-time codes"
+                                    + " and password reset requests should NOT be categorized here,"
+                                    + " as they are actionable and important.")
                         .build();
 
         messageCategoryRepository.save(defaultMessageCategory);
+        messageCategoryRepository.save(noReplyMessageCategory);
     }
 
     MessageCategory getMessageCategory(long customerId, long id, Jwt jwt) {
