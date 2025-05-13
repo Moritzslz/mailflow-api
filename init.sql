@@ -199,7 +199,24 @@ VALUES
 (2, 2, true, 'Buchungsanfrage', 'Deutsch', 'user@example.com', 'Test', '2025-04-22T09:00:00+02:00', '2025-04-22T09:00:00+02:00', 41, 'gpt-4', 1600, 1200, 2800, 'token17', NOW() + INTERVAL '30 minutes'),
 (2, 2, true, 'Buchungsanfrage', 'Deutsch', 'user@example.com', 'Test', '2025-04-22T17:00:00+02:00', '2025-04-22T17:00:00+02:00', 40, 'gpt-4', 1600, 1200, 2800, 'token18', NOW() + INTERVAL '30 minutes'),
 (2, 2, false, 'Support', 'Deutsch', 'user@example.com', 'Test', '2025-04-22T10:00:00+02:00', '2025-04-22T10:00:00+02:00', 44, 'gpt-4', 1630, 1230, 2860, 'token19', NOW() + INTERVAL '30 minutes'),
-(2, 2, false, 'Support', 'Deutsch', 'user@example.com', 'Test', '2025-04-22T18:00:00+02:00', '2025-04-22T18:00:00+02:00', 46, 'gpt-4', 1650, 1250, 2900, 'token20', NOW() + INTERVAL '30 minutes');
+(2, 2, false, 'Support', 'Deutsch', 'user@example.com', 'Test', '2025-04-22T18:00:00+02:00', '2025-04-22T18:00:00+02:00', 46, 'gpt-4', 1650, 1250, 2900, 'token20', NOW() + INTERVAL '30 minutes'),
+
+-- Day before yesterday
+(2, 2, true, 'Produkt Frage', 'Deutsch', 'user@example.com', 'Test', NOW() - INTERVAL '48 hours 120 minutes', NOW() - INTERVAL '48 hours 119 minutes', 60, 'gpt-4', 1620, 1220, 2840, 'token21', NOW() + INTERVAL '30 minutes'),
+(2, 2, true, 'Produkt Frage', 'Deutsch', 'user@example.com', 'Test', NOW() - INTERVAL '48 hours 110 minutes', NOW() - INTERVAL '48 hours 109 minutes 40 seconds', 20, 'gpt-4', 1640, 1240, 2880, 'token22', NOW() + INTERVAL '30 minutes'),
+
+-- Yesterday
+(2, 2, true, 'Produkt Frage', 'Deutsch', 'user@example.com', 'Test', NOW() - INTERVAL '24 hours 120 minutes', NOW() - INTERVAL '24 hours 119 minutes', 60, 'gpt-4', 1620, 1220, 2840, 'token23', NOW() + INTERVAL '30 minutes'),
+(2, 2, true, 'Produkt Frage', 'Deutsch', 'user@example.com', 'Test', NOW() - INTERVAL '24 hours 110 minutes', NOW() - INTERVAL '24 hours 109 minutes 40 seconds', 20, 'gpt-4', 1640, 1240, 2880, 'token24', NOW() + INTERVAL '30 minutes'),
+(2, 2, true, 'Buchungsanfrage', 'Deutsch', 'user@example.com', 'Test', NOW() - INTERVAL '24 hours 90 minutes', NOW() - INTERVAL '24 hours 89 minutes 30 seconds', 30, 'gpt-4', 1600, 1200, 2800, 'token25', NOW() + INTERVAL '30 minutes'),
+
+-- Today
+(2, 2, true, 'Produkt Frage', 'Deutsch', 'user@example.com', 'Test', NOW() - INTERVAL '120 minutes', NOW() - INTERVAL '119 minutes', 60, 'gpt-4', 1620, 1220, 2840, 'token26', NOW() + INTERVAL '30 minutes'),
+(2, 2, true, 'Produkt Frage', 'Deutsch', 'user@example.com', 'Test', NOW() - INTERVAL '110 minutes', NOW() - INTERVAL '109 minutes 40 seconds', 20, 'gpt-4', 1640, 1240, 2880, 'token27', NOW() + INTERVAL '30 minutes'),
+(2, 2, true, 'Buchungsanfrage', 'Deutsch', 'user@example.com', 'Test', NOW() - INTERVAL '90 minutes', NOW() - INTERVAL '89 minutes 30 seconds', 30, 'gpt-4', 1600, 1200, 2800, 'token28', NOW() + INTERVAL '30 minutes'),
+(2, 2, true, 'Buchungsanfrage', 'Deutsch', 'user@example.com', 'Test', NOW() - INTERVAL '89 minutes', NOW() - INTERVAL '88 minutes 20 seconds', 40, 'gpt-4', 1600, 1200, 2800, 'token29', NOW() + INTERVAL '30 minutes'),
+(2, 2, false, 'Support', 'Deutsch', 'user@example.com', 'Test', NOW() - INTERVAL '30 minutes', NOW() - INTERVAL '29 minutes 40 seconds', 20, 'gpt-4', 1630, 1230, 2860, 'token30', NOW() + INTERVAL '30 minutes');
+
 
 INSERT INTO response_ratings (message_log_id, customer_id, user_id, is_satisfied, rating, feedback)
 VALUES (1, 2, 2, true, 4, 'Good'),
