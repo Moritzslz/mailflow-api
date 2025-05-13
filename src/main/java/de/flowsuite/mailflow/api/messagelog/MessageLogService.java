@@ -144,17 +144,17 @@ public class MessageLogService {
 
     MessageLogResource.MessageLogAnalyticsResponse getMessageLogAnalyticsForCustomer(
             long customerId, Date from, Date to, Timeframe timeframe, Jwt jwt) {
-        return getMessageLogAnalytics(null, customerId, from, to, timeframe, jwt, false);
+        return getMessageLogAnalytics(customerId, null, from, to, timeframe, jwt, false);
     }
 
     MessageLogResource.MessageLogAnalyticsResponse getMessageLogAnalyticsForUser(
             long customerId, long userId, Date from, Date to, Timeframe timeframe, Jwt jwt) {
-        return getMessageLogAnalytics(userId, customerId, from, to, timeframe, jwt, true);
+        return getMessageLogAnalytics(customerId, userId, from, to, timeframe, jwt, true);
     }
 
     private MessageLogResource.MessageLogAnalyticsResponse getMessageLogAnalytics(
-            Long userId,
             long customerId,
+            Long userId,
             Date from,
             Date to,
             Timeframe timeframe,
@@ -197,6 +197,10 @@ public class MessageLogService {
                                 .aggregateAvgProcessingTimeAndResponseRateByCustomer(
                                         customerId, startDate, endDate)
                                 .get(0);
+
+        if (analyticsRow[0] == null) {
+            throw new EntityNotFoundException(MessageLogEntry.class.getSimpleName());
+        }
 
         double averageProcessingTimeInSeconds =
                 (double) Math.round((double) analyticsRow[0] * 100) / 100;

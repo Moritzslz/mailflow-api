@@ -94,38 +94,26 @@ class ResponseRatingService {
 
     ResponseRatingResource.ResponseRatingAnalyticsResponse getResponseRatingAnalyticsForCustomer(
             long customerId, Date from, Date to, Timeframe timeframe, Jwt jwt) {
-        AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
-
-        if (timeframe == null) {
-            timeframe = Timeframe.DAILY;
-        }
-
-        ZonedDateTime startDate = AnalyticsUtil.resolveStartDate(from, timeframe);
-        ZonedDateTime endDate = AnalyticsUtil.resolveEndDate(to);
-
-        AnalyticsUtil.validateDateRange(startDate, endDate);
-
-        Object[] analyticsRow =
-                responseRatingRepository
-                        .aggregateCountAndAvgSatisfactionAndAvgRatingByCustomer(
-                                customerId, startDate, endDate)
-                        .get(0);
-
-        long count = (Long) analyticsRow[0];
-        double avgSatisfaction = (double) Math.round((double) analyticsRow[1] * 100) / 100;
-        double avgRating = (double) Math.round((double) analyticsRow[2] * 100) / 100;
-
-        int messageLogCount = messageLogService.countByCustomerId(customerId);
-        double ratingRate = (double) count / (double) messageLogCount;
-
-        return new ResponseRatingResource.ResponseRatingAnalyticsResponse(
-                avgSatisfaction, avgRating, ratingRate);
+        return getResponseRatingAnalytics(customerId, null, from, to, timeframe, jwt, false);
     }
 
     ResponseRatingResource.ResponseRatingAnalyticsResponse getResponseRatingAnalyticsForUser(
             long customerId, long userId, Date from, Date to, Timeframe timeframe, Jwt jwt) {
+        return getResponseRatingAnalytics(customerId, userId, from, to, timeframe, jwt, true);
+    }
+
+    ResponseRatingResource.ResponseRatingAnalyticsResponse getResponseRatingAnalytics(
+            long customerId,
+            Long userId,
+            Date from,
+            Date to,
+            Timeframe timeframe,
+            Jwt jwt,
+            boolean isUser) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
-        AuthorisationUtil.validateAccessToUser(customerId, jwt);
+        if (isUser) {
+            AuthorisationUtil.validateAccessToUser(userId, jwt);
+        }
 
         if (timeframe == null) {
             timeframe = Timeframe.DAILY;
@@ -137,17 +125,30 @@ class ResponseRatingService {
         AnalyticsUtil.validateDateRange(startDate, endDate);
 
         Object[] analyticsRow =
-                responseRatingRepository
-                        .aggregateCountAndAvgSatisfactionAndAvgRatingByUser(
-                                userId, startDate, endDate)
-                        .get(0);
+                isUser
+                        ? responseRatingRepository
+                                .aggregateCountAndAvgSatisfactionAndAvgRatingByUser(
+                                        userId, startDate, endDate)
+                                .get(0)
+                        : responseRatingRepository
+                                .aggregateCountAndAvgSatisfactionAndAvgRatingByCustomer(
+                                        customerId, startDate, endDate)
+                                .get(0);
 
         long count = (Long) analyticsRow[0];
+        if (count == 0) {
+            throw new EntityNotFoundException(ResponseRating.class.getSimpleName());
+        }
+
         double avgSatisfaction = (double) Math.round((double) analyticsRow[1] * 100) / 100;
         double avgRating = (double) Math.round((double) analyticsRow[2] * 100) / 100;
 
-        int messageLogCount = messageLogService.countByUserId(userId);
-        double ratingRate = (double) count / (double) messageLogCount;
+        int messageLogCount =
+                isUser
+                        ? messageLogService.countByUserId(userId)
+                        : messageLogService.countByCustomerId(customerId);
+
+        double ratingRate = (double) count / messageLogCount;
 
         return new ResponseRatingResource.ResponseRatingAnalyticsResponse(
                 avgSatisfaction, avgRating, ratingRate);
