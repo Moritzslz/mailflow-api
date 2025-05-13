@@ -52,7 +52,10 @@ interface MessageLogRepository extends CrudRepository<MessageLogEntry, Long> {
             """
             SELECT
                 AVG(m.processingTimeInSeconds) AS avgProcessingTime,
-                COUNT(CASE WHEN m.isReplied THEN 1 END) * 1.0 / COUNT(m) AS responseRate
+                CASE
+                    WHEN COUNT(m) = 0 THEN 0
+                    ELSE COUNT(CASE WHEN m.isReplied THEN 1 END) * 1.0 / COUNT(m)
+                END AS responseRate
             FROM MessageLogEntry m
             WHERE m.customerId = :customerId
               AND m.receivedAt BETWEEN :from AND :to
@@ -83,7 +86,10 @@ interface MessageLogRepository extends CrudRepository<MessageLogEntry, Long> {
             """
             SELECT
                 AVG(m.processingTimeInSeconds) AS avgProcessingTime,
-                COUNT(CASE WHEN m.isReplied THEN 1 END) * 1.0 / COUNT(m) AS responseRate
+                CASE
+                    WHEN COUNT(m) = 0 THEN 0
+                    ELSE COUNT(CASE WHEN m.isReplied THEN 1 END) * 1.0 / COUNT(m)
+                END AS responseRate
             FROM MessageLogEntry m
             WHERE m.userId = :userId
               AND m.receivedAt BETWEEN :from AND :to
