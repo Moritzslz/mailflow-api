@@ -137,7 +137,7 @@ class ResponseRatingService {
 
         long count = (Long) analyticsRow[0];
         if (count == 0) {
-            throw new EntityNotFoundException(ResponseRating.class.getSimpleName());
+            return null;
         }
 
         double avgSatisfaction = (double) Math.round((double) analyticsRow[1] * 100) / 100;

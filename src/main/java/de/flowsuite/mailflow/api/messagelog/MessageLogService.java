@@ -199,7 +199,7 @@ public class MessageLogService {
                                 .get(0);
 
         if (analyticsRow[0] == null) {
-            throw new EntityNotFoundException(MessageLogEntry.class.getSimpleName());
+            return null;
         }
 
         double averageProcessingTimeInSeconds =

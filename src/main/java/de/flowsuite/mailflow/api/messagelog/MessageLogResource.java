@@ -86,9 +86,15 @@ class MessageLogResource {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date to,
             @RequestParam(required = false) Timeframe timeframe,
             @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(
+        MessageLogAnalyticsResponse analyticsResponse =
                 messageLogService.getMessageLogAnalyticsForCustomer(
-                        customerId, from, to, timeframe, jwt));
+                        customerId, from, to, timeframe, jwt);
+
+        if (analyticsResponse == null) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.ok(analyticsResponse);
+        }
     }
 
     @GetMapping("/{customerId}/users/{userId}/message-log/analytics")
@@ -100,9 +106,15 @@ class MessageLogResource {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date to,
             @RequestParam(required = false) Timeframe timeframe,
             @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(
+        MessageLogAnalyticsResponse analyticsResponse =
                 messageLogService.getMessageLogAnalyticsForUser(
-                        customerId, userId, from, to, timeframe, jwt));
+                        customerId, userId, from, to, timeframe, jwt);
+
+        if (analyticsResponse == null) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.ok(analyticsResponse);
+        }
     }
 
     record CreateMessageLogEntryRequest(
