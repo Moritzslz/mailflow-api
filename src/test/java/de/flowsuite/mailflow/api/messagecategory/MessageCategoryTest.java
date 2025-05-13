@@ -38,7 +38,9 @@ class MessageCategoryTest extends BaseServiceTest {
                 .category("Category")
                 .isReply(true)
                 .isFunctionCall(true)
-                .description("Description")
+                .description(
+                        "This is a detailed mocked description used solely for testing purposes"
+                                + " that contains over one hundred characters.")
                 .build();
     }
 
@@ -72,6 +74,25 @@ class MessageCategoryTest extends BaseServiceTest {
         assertEquals(
                 testMessageCategory.getIsFunctionCall(), savedMessageCategory.getIsFunctionCall());
         assertEquals(testMessageCategory.getDescription(), savedMessageCategory.getDescription());
+    }
+
+    @Test
+    void testCreateBlacklistEntry_descriptionTooShort() {
+        when(messageCategoryRepository.existsByCustomerIdAndCategory(
+                        testUser.getCustomerId(), testMessageCategory.getCategory()))
+                .thenReturn(false);
+
+        testMessageCategory.setId(null);
+        testMessageCategory.setDescription("Too short description");
+        assertNull(testMessageCategory.getId());
+
+        assertThrows(
+                MessageCategoryDescriptionException.class,
+                () ->
+                        messageCategoryService.createMessageCategory(
+                                testUser.getCustomerId(), testMessageCategory, jwtMock));
+
+        verify(messageCategoryRepository, never()).save(any(MessageCategory.class));
     }
 
     @Test

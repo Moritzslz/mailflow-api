@@ -43,6 +43,10 @@ public class MessageCategoryService {
             throw new MessageCategoryLimitException();
         }
 
+        if (messageCategory.getDescription().length() < 100) {
+            throw new MessageCategoryDescriptionException();
+        }
+
         return messageCategoryRepository.save(messageCategory);
     }
 
