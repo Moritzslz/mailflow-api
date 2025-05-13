@@ -39,6 +39,10 @@ public class MessageCategoryService {
             throw new EntityAlreadyExistsException(MessageCategory.class.getSimpleName());
         }
 
+        if (messageCategoryRepository.countByCustomerId(customerId) >= 10) {
+            throw new MessageCategoryLimitException();
+        }
+
         return messageCategoryRepository.save(messageCategory);
     }
 
@@ -142,6 +146,10 @@ public class MessageCategoryService {
 
         if (messageCategory.getCategory().equalsIgnoreCase(DEFAULT_CATEGORY)) {
             throw new DeleteConflictException("Unable to delete default category.");
+        }
+
+        if (messageCategory.getCategory().equalsIgnoreCase(NO_REPLY_CATEGORY)) {
+            throw new DeleteConflictException("Unable to delete no reply category.");
         }
 
         messageCategoryRepository.delete(messageCategory);

@@ -13,4 +13,6 @@ interface MessageCategoryRepository extends CrudRepository<MessageCategory, Long
     List<MessageCategory> findByCustomerId(long customerId);
 
     boolean existsByCustomerIdAndCategory(long customerId, String category);
+
+    int countByCustomerId(long customerId);
 }
