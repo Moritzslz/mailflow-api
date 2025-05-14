@@ -70,9 +70,9 @@ class MessageCategoryTest extends BaseServiceTest {
         assertNotNull(savedMessageCategory);
         assertEquals(testMessageCategory.getCustomerId(), savedMessageCategory.getCustomerId());
         assertEquals(testMessageCategory.getCategory(), savedMessageCategory.getCategory());
-        assertEquals(testMessageCategory.getIsReply(), savedMessageCategory.getIsReply());
+        assertEquals(testMessageCategory.getReply(), savedMessageCategory.getReply());
         assertEquals(
-                testMessageCategory.getIsFunctionCall(), savedMessageCategory.getIsFunctionCall());
+                testMessageCategory.getFunctionCall(), savedMessageCategory.getFunctionCall());
         assertEquals(testMessageCategory.getDescription(), savedMessageCategory.getDescription());
     }
 

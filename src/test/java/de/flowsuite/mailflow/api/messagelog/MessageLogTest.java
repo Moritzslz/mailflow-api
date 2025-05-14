@@ -67,7 +67,7 @@ class MessageLogTest extends BaseServiceTest {
                 .id(1L)
                 .userId(createMessageLogEntryRequest.userId())
                 .customerId(createMessageLogEntryRequest.customerId())
-                .isReplied(createMessageLogEntryRequest.isReplied())
+                .replied(createMessageLogEntryRequest.isReplied())
                 .category(createMessageLogEntryRequest.category())
                 .language(createMessageLogEntryRequest.language())
                 .fromEmailAddress(ENCRYPTED_VALUE)

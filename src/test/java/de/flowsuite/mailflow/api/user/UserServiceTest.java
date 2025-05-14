@@ -192,7 +192,7 @@ class UserServiceTest extends BaseServiceTest {
 
     @Test
     void testEnableUser_alreadyEnabled() {
-        testUser.setIsAccountEnabled(true);
+        testUser.setAccountEnabled(true);
 
         when(userRepository.findByVerificationToken(anyString())).thenReturn(Optional.of(testUser));
 
@@ -375,7 +375,7 @@ class UserServiceTest extends BaseServiceTest {
         assertEquals(ENCRYPTED_VALUE, updatedUser.getLastName());
         assertNull(updatedUser.getPhoneNumber());
         assertEquals(updateUserRequest.position(), updatedUser.getPosition());
-        assertFalse(updatedUser.getIsSubscribedToNewsletter());
+        assertFalse(updatedUser.getSubscribedToNewsletter());
     }
 
     @Test

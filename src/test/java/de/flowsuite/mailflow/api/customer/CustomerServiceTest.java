@@ -66,7 +66,7 @@ class CustomerServiceTest extends BaseServiceTest {
                 .privacyPolicyUrl(createCustomerRequest.privacyPolicyUrl())
                 .ctaUrl(createCustomerRequest.ctaUrl())
                 .registrationToken("registrationToken")
-                .isTestVersion(false)
+                .testVersion(false)
                 .ionosUsername(createCustomerRequest.ionosUsername())
                 .ionosPassword(ENCRYPTED_VALUE)
                 .build();

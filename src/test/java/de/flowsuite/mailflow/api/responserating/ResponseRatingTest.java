@@ -62,7 +62,7 @@ class ResponseRatingTest extends BaseServiceTest {
                 .messageLogId(testMessageLogEntry.getId())
                 .customerId(testMessageLogEntry.getCustomerId())
                 .userId(testMessageLogEntry.getUserId())
-                .isSatisfied(createResponseRatingRequest.isSatisfied())
+                .satisfied(createResponseRatingRequest.isSatisfied())
                 .rating(createResponseRatingRequest.rating())
                 .feedback(createResponseRatingRequest.feedback())
                 .build();
