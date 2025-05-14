@@ -8,3 +8,5 @@ mailflow:
     url: https://dashboard.mail-flow.com
   api:
     base-url: https://api.mail-flow.com/api/v1
+  llm-service:
+    base-url: https://llm-service.mail-flow.com/api/v1
