@@ -123,8 +123,8 @@ public class UserService implements UserDetailsService {
                             .position(request.position())
                             .role(Authorities.USER.getAuthority())
                             .accountLocked(false)
-                            .isAccountEnabled(false)
-                            .isSubscribedToNewsletter(request.isSubscribedToNewsletter())
+                            .accountEnabled(false)
+                            .subscribedToNewsletter(request.isSubscribedToNewsletter())
                             .verificationToken(verificationToken)
                             .tokenExpiresAt(tokenExpiresAt)
                             .build();
