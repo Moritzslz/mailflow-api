@@ -37,7 +37,7 @@ class MessageCategoryTest extends BaseServiceTest {
                 .customerId(testUser.getCustomerId())
                 .category("Category")
                 .reply(true)
-                .isFunctionCall(true)
+                .functionCall(true)
                 .description(
                         "This is a detailed mocked description used solely for testing purposes"
                                 + " that contains over one hundred characters.")

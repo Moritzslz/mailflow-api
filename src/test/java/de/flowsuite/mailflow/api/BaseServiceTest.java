@@ -38,9 +38,9 @@ public abstract class BaseServiceTest {
                 .phoneNumber(ENCRYPTED_VALUE)
                 .position(null)
                 .role(Authorities.USER.getAuthority())
-                .isAccountLocked(false)
-                .isAccountEnabled(false)
-                .isSubscribedToNewsletter(true)
+                .accountLocked(false)
+                .accountEnabled(false)
+                .subscribedToNewsletter(true)
                 .verificationToken(VERIFICATION_TOKEN)
                 .tokenExpiresAt(ZonedDateTime.now().plusMinutes(30))
                 .build();
