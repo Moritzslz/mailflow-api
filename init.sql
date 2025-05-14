@@ -145,7 +145,8 @@ VALUES (1, 'Uztmz8Fii79yN2SY6wg5md6Ek5RLeBzMGYlNlqYutLyj', 'Uztmz8Fii79yN2SY6wg5
        (2, 'RtlBAwPz6EdINA4O51gu8uz0AuZ0UHE5FJPC26Xbquo=', 'RtlBAwPz6EdINA4O51gu8uz0AuZ0UHE5FJPC26Xbquo=', 'PCwU0vnyGsBYrljsDMd3Kf5Lq/fhqG7VLMc/aCKR+fU=', 'dUh6ZVPbVWlEXLriwsBEUoOiKaPsw0t4aEmkxSnMRdeTc1eJ50ViftqoRcKcEQ==', '$2a$10$t0Olv0N4TdmUfd9yG242i.znX.NN7c.a3AU9DadUg1ro0Xsc8jvom', 'USER', false, true, true, 'token2', NOW() + INTERVAL '30 minutes');
 
 INSERT INTO clients(client_name, client_secret_hash, scope)
-VALUES ('mailbox-service', '$2a$10$4/8k4VN17iFXP4PD840vVOV.RvKwWQ.pFP9cjOPSqYHYmeWMk1wXe', 'CLIENT users:list message_categories:list blacklist:list'),
+VALUES ('mailflow-api', '$2a$10$4/8k4VN17iFXP4PD840vVOV.RvKwWQ.pFP9cjOPSqYHYmeWMk1wXe', 'CLIENT'),
+       ('mailbox-service', '$2a$10$4/8k4VN17iFXP4PD840vVOV.RvKwWQ.pFP9cjOPSqYHYmeWMk1wXe', 'CLIENT users:list message_categories:list blacklist:list'),
        ('rag-service', '$2a$10$4/8k4VN17iFXP4PD840vVOV.RvKwWQ.pFP9cjOPSqYHYmeWMk1wXe', 'CLIENT rag_urls:list rag_urls:write settings:write'),
        ('llm-service', '$2a$10$4/8k4VN17iFXP4PD840vVOV.RvKwWQ.pFP9cjOPSqYHYmeWMk1wXe', 'CLIENT customers:read message_log:write');
 
