@@ -25,7 +25,7 @@ interface ResponseRatingRepository extends CrudRepository<ResponseRating, Long> 
                 COUNT(r) as count,
                 CASE
                     WHEN COUNT(r) = 0 THEN 0
-                    ELSE COUNT(CASE WHEN r.isSatisfied THEN 1 END) * 1.0 / COUNT(r)
+                    ELSE COUNT(CASE WHEN r.satisfied THEN 1 END) * 1.0 / COUNT(r)
                 END AS avgSatisfaction,
                 AVG(r.rating) AS avgRating
             FROM ResponseRating r
@@ -43,7 +43,7 @@ interface ResponseRatingRepository extends CrudRepository<ResponseRating, Long> 
                 COUNT(r) as count,
                 CASE
                     WHEN COUNT(r) = 0 THEN 0
-                    ELSE COUNT(CASE WHEN r.isSatisfied THEN 1 END) * 1.0 / COUNT(r)
+                    ELSE COUNT(CASE WHEN r.satisfied THEN 1 END) * 1.0 / COUNT(r)
                 END AS avgSatisfaction,
                 AVG(r.rating) AS avgRating
             FROM ResponseRating r

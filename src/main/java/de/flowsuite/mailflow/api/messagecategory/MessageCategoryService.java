@@ -55,8 +55,8 @@ public class MessageCategoryService {
                 MessageCategory.builder()
                         .customerId(customerId)
                         .category(DEFAULT_CATEGORY)
-                        .isReply(true)
-                        .isFunctionCall(false)
+                        .reply(true)
+                        .functionCall(false)
                         .description(
                                 "This is the default/fallback category for actionable emails that"
                                     + " do not fit into any other defined category. If an email"
@@ -69,8 +69,8 @@ public class MessageCategoryService {
                 MessageCategory.builder()
                         .customerId(customerId)
                         .category(NO_REPLY_CATEGORY)
-                        .isReply(false)
-                        .isFunctionCall(false)
+                        .reply(false)
+                        .functionCall(false)
                         .description(
                                 "This category is for emails that do not require a response and are"
                                     + " not actionable. This includes newsletters, promotional"

@@ -122,7 +122,7 @@ public class UserService implements UserDetailsService {
                             .phoneNumber(phoneNumberEncrypted)
                             .position(request.position())
                             .role(Authorities.USER.getAuthority())
-                            .isAccountLocked(false)
+                            .accountLocked(false)
                             .isAccountEnabled(false)
                             .isSubscribedToNewsletter(request.isSubscribedToNewsletter())
                             .verificationToken(verificationToken)
@@ -156,7 +156,7 @@ public class UserService implements UserDetailsService {
             }
 
             if (!isEnabled) {
-                user.setIsAccountEnabled(true);
+                user.setAccountEnabled(true);
                 userRepository.save(user);
                 mailService.sendWelcomeEmail(user.getId(), firstName, emailAddress);
             }
@@ -258,7 +258,7 @@ public class UserService implements UserDetailsService {
 
         user.setPhoneNumber(phoneNumberEncrypted);
         user.setPosition(request.position());
-        user.setIsSubscribedToNewsletter(request.isSubscribedToNewsletter());
+        user.setSubscribedToNewsletter(request.isSubscribedToNewsletter());
 
         return userRepository.save(user);
     }

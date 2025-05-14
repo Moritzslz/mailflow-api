@@ -74,7 +74,7 @@ public class CustomerService {
                         .privacyPolicyUrl(request.privacyPolicyUrl())
                         .ctaUrl(request.ctaUrl())
                         .registrationToken(registrationToken)
-                        .isTestVersion(request.isTestVersion())
+                        .testVersion(request.isTestVersion())
                         .build();
 
         if (request.ionosUsername() != null && !request.ionosUsername().isBlank()) {

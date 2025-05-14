@@ -84,7 +84,7 @@ public class MessageLogService {
                 MessageLogEntry.builder()
                         .userId(request.userId())
                         .customerId(request.customerId())
-                        .isReplied(request.isReplied())
+                        .replied(request.isReplied())
                         .category(request.category())
                         .language(request.language())
                         .subject(request.subject())
