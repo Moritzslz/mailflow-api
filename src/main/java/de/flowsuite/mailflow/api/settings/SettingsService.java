@@ -64,9 +64,9 @@ class SettingsService {
                         .orElseThrow(
                                 () -> new EntityNotFoundException(Customer.class.getSimpleName()));
 
-        settings.setExecutionEnabled(request.isExecutionEnabled());
-        settings.setAutoReplyEnabled(request.isAutoReplyEnabled());
-        settings.setResponseRatingEnabled(request.isResponseRatingEnabled());
+        settings.setExecutionEnabled(request.executionEnabled());
+        settings.setAutoReplyEnabled(request.autoReplyEnabled());
+        settings.setResponseRatingEnabled(request.responseRatingEnabled());
         settings.setCrawlFrequencyInHours(request.crawlFrequencyInHours());
         settings.setImapHost(request.imapHost());
         settings.setSmtpHost(request.smtpHost());

@@ -53,7 +53,7 @@ class ResponseRatingService {
                         .messageLogId(messageLogEntry.getId())
                         .customerId(messageLogEntry.getCustomerId())
                         .userId(messageLogEntry.getUserId())
-                        .satisfied(request.isSatisfied())
+                        .satisfied(request.satisfied())
                         .rating(request.rating())
                         .feedback(request.feedback())
                         .build();

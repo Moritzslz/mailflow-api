@@ -124,7 +124,7 @@ public class UserService implements UserDetailsService {
                             .role(Authorities.USER.getAuthority())
                             .accountLocked(false)
                             .accountEnabled(false)
-                            .subscribedToNewsletter(request.isSubscribedToNewsletter())
+                            .subscribedToNewsletter(request.subscribedToNewsletter())
                             .verificationToken(verificationToken)
                             .tokenExpiresAt(tokenExpiresAt)
                             .build();
@@ -258,7 +258,7 @@ public class UserService implements UserDetailsService {
 
         user.setPhoneNumber(phoneNumberEncrypted);
         user.setPosition(request.position());
-        user.setSubscribedToNewsletter(request.isSubscribedToNewsletter());
+        user.setSubscribedToNewsletter(request.subscribedToNewsletter());
 
         return userRepository.save(user);
     }
