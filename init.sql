@@ -7,6 +7,7 @@ CREATE TABLE customers (
     city VARCHAR(64) NOT NULL,
     billing_email_address VARCHAR(64) NOT NULL UNIQUE ,
     openai_api_key_encrypted TEXT NOT NULL,
+    prompt TEXT,
     source_of_contact VARCHAR(64),
     website_url TEXT,
     privacy_policy_url TEXT,
