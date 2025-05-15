@@ -7,21 +7,31 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestClient;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/customers")
 class UserResource {
 
-    private final UserService userService;
+    private static final Logger LOG = LoggerFactory.getLogger(UserResource.class);
+    private static final String NOTIFY_USER_URI = "/notifications/users/{userId}";
 
-    UserResource(UserService userService) {
+    private final UserService userService;
+    private final RestClient mailboxServiceRestClient;
+
+    UserResource(UserService userService, @Qualifier("mailboxServiceRestClient") RestClient mailboxServiceRestClient) {
         this.userService = userService;
+        this.mailboxServiceRestClient = mailboxServiceRestClient;
     }
 
     @PostMapping("/users/register")
@@ -74,7 +84,8 @@ class UserResource {
             @PathVariable long id,
             @RequestBody UpdateUserRequest request,
             @AuthenticationPrincipal Jwt jwt) {
-        // TODO notify mailbox-service with whole user object (including settings)
+        User updatedUser = userService.updateUser(customerId, id, request, jwt);
+        CompletableFuture.runAsync(() -> notifyMailboxService(id, updatedUser));
         return ResponseEntity.ok(userService.updateUser(customerId, id, request, jwt));
     }
 
@@ -88,6 +99,17 @@ class UserResource {
             String phoneNumber,
             String position,
             boolean isSubscribedToNewsletter) {}
+
+    private void notifyMailboxService(long userId, User user) {
+        LOG.debug("Notifying mailbox service of user change");
+
+        mailboxServiceRestClient
+                .put()
+                .uri(NOTIFY_USER_URI, userId)
+                .body(user)
+                .retrieve()
+                .toBodilessEntity();
+    }
 
     record RequestPasswordResetRequest(@NotBlank String emailAddress) {}
 
