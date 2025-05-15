@@ -43,8 +43,6 @@ class CustomerServiceTest extends BaseServiceTest {
                     "City",
                     "billing@example.com",
                     "openaiApiKey",
-                    "systemPrompt",
-                    "messagePrompt",
                     "LinkedIn",
                     "https://example.com",
                     "https://example.com/privacy-policy",

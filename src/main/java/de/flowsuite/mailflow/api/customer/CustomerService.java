@@ -69,8 +69,6 @@ public class CustomerService {
                         .city(request.city())
                         .billingEmailAddress(request.billingEmailAddress())
                         .openaiApiKey(AesUtil.encrypt(request.openaiApiKey()))
-                        .systemPrompt(request.systemPrompt())
-                        .messagePrompt(request.messagePrompt())
                         .sourceOfContact(request.sourceOfContact())
                         .websiteUrl(request.websiteUrl())
                         .privacyPolicyUrl(request.privacyPolicyUrl())
