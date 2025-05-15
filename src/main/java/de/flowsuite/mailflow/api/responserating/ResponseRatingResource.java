@@ -114,7 +114,7 @@ class ResponseRatingResource {
     }
 
     record CreateResponseRatingRequest(
-            boolean isSatisfied, @Min(0) @Max(5) int rating, String feedback) {}
+            boolean satisfied, @Min(0) @Max(5) int rating, String feedback) {}
 
     record ResponseRatingAnalyticsResponse(
             double avgSatisfaction, double avgRating, double ratingRate) {}

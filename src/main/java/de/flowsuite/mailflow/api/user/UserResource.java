@@ -111,7 +111,7 @@ class UserResource {
             @NotBlank String confirmationPassword,
             String phoneNumber,
             String position,
-            boolean isSubscribedToNewsletter) {}
+            boolean subscribedToNewsletter) {}
 
     record RequestPasswordResetRequest(@NotBlank String emailAddress) {}
 
@@ -125,5 +125,5 @@ class UserResource {
             @NotBlank String lastName,
             String phoneNumber,
             String position,
-            boolean isSubscribedToNewsletter) {}
+            boolean subscribedToNewsletter) {}
 }

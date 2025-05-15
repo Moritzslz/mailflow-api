@@ -100,13 +100,13 @@ class CustomerResource {
             String websiteUrl,
             String privacyPolicyUrl,
             String ctaUrl,
-            boolean isTestVersion,
+            boolean testVersion,
             @Email String ionosUsername,
             String ionosPassword) {}
 
     record UpdateCustomerTestVersionRequest(
             @NotNull Long id,
-            boolean isTestVersion,
+            boolean testVersion,
             @Email String ionosUsername,
             String ionosPassword) {}
 }

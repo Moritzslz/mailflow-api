@@ -114,9 +114,9 @@ class SettingsResource {
     record UpdateSettingsRequest(
             @NotNull Long userId,
             @NotNull Long customerId,
-            boolean isExecutionEnabled,
-            boolean isAutoReplyEnabled,
-            boolean isResponseRatingEnabled,
+            boolean executionEnabled,
+            boolean autoReplyEnabled,
+            boolean responseRatingEnabled,
             @Min(168) @Max(744) int crawlFrequencyInHours,
             ZonedDateTime lastCrawlAt,
             ZonedDateTime nextCrawlAt,
