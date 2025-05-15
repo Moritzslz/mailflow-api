@@ -43,6 +43,8 @@ class CustomerServiceTest extends BaseServiceTest {
                     "City",
                     "billing@example.com",
                     "openaiApiKey",
+                    "systemPrompt",
+                    "messagePrompt",
                     "LinkedIn",
                     "https://example.com",
                     "https://example.com/privacy-policy",
@@ -105,7 +107,7 @@ class CustomerServiceTest extends BaseServiceTest {
         assertEquals(createCustomerRequest.websiteUrl(), savedCustomer.getWebsiteUrl());
         assertEquals(createCustomerRequest.privacyPolicyUrl(), savedCustomer.getPrivacyPolicyUrl());
         assertEquals(createCustomerRequest.ctaUrl(), savedCustomer.getCtaUrl());
-        assertEquals(createCustomerRequest.isTestVersion(), savedCustomer.isTestVersion());
+        assertEquals(createCustomerRequest.testVersion(), savedCustomer.isTestVersion());
         assertEquals(createCustomerRequest.ionosUsername(), savedCustomer.getIonosUsername());
         assertEquals(ENCRYPTED_VALUE, savedCustomer.getIonosPassword());
         // spotless:on
