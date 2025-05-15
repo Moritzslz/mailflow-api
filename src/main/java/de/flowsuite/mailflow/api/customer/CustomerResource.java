@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import de.flowsuite.mailflow.common.entity.Customer;
 
-import de.flowsuite.mailflow.common.entity.User;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -34,7 +33,9 @@ class CustomerResource {
     private final CustomerService customerService;
     private final RestClient llmServiceRestClient;
 
-    CustomerResource(CustomerService customerService, @Qualifier("llmServiceRestClient") RestClient llmServiceRestClient) {
+    CustomerResource(
+            CustomerService customerService,
+            @Qualifier("llmServiceRestClient") RestClient llmServiceRestClient) {
         this.customerService = customerService;
         this.llmServiceRestClient = llmServiceRestClient;
     }
