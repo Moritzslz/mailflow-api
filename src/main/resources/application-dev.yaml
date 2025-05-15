@@ -12,3 +12,5 @@ mailflow:
     base-url: http://localhost:8081/api/v1
   llm-service:
     base-url: http://localhost:8082/api/v1
+  rag-service:
+    base-url: http://localhost:8083/api/v1
