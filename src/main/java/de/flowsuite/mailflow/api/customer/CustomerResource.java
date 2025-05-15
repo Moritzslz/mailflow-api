@@ -96,6 +96,8 @@ class CustomerResource {
             @NotBlank String city,
             @Email @NotBlank String billingEmailAddress,
             @NotBlank String openaiApiKey,
+            String systemPrompt,
+            String messagePrompt,
             @JsonIgnore String sourceOfContact,
             String websiteUrl,
             String privacyPolicyUrl,

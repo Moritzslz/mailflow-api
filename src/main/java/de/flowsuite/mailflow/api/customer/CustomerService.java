@@ -69,12 +69,14 @@ public class CustomerService {
                         .city(request.city())
                         .billingEmailAddress(request.billingEmailAddress())
                         .openaiApiKey(AesUtil.encrypt(request.openaiApiKey()))
+                        .systemPrompt(request.systemPrompt())
+                        .messagePrompt(request.messagePrompt())
                         .sourceOfContact(request.sourceOfContact())
                         .websiteUrl(request.websiteUrl())
                         .privacyPolicyUrl(request.privacyPolicyUrl())
                         .ctaUrl(request.ctaUrl())
                         .registrationToken(registrationToken)
-                        .testVersion(request.isTestVersion())
+                        .testVersion(request.testVersion())
                         .build();
 
         if (request.ionosUsername() != null && !request.ionosUsername().isBlank()) {
@@ -173,9 +175,9 @@ public class CustomerService {
                         .orElseThrow(
                                 () -> new EntityNotFoundException(Customer.class.getSimpleName()));
 
-        customer.setTestVersion(request.isTestVersion());
+        customer.setTestVersion(request.testVersion());
 
-        if (request.isTestVersion()) {
+        if (request.testVersion()) {
             customer.setIonosUsername(ionosUsername);
             customer.setIonosPassword(AesUtil.encrypt(request.ionosPassword()));
         } else {
