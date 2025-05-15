@@ -4,28 +4,39 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import de.flowsuite.mailflow.common.entity.Customer;
 
+import de.flowsuite.mailflow.common.entity.User;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/customers")
 class CustomerResource {
 
-    private final CustomerService customerService;
+    private final Logger LOG = LoggerFactory.getLogger(CustomerResource.class);
+    private static final String NOTIFY_CUSTOMERS_URI = "/notifications/customers/{customerId}";
 
-    CustomerResource(CustomerService customerService) {
+    private final CustomerService customerService;
+    private final RestClient llmServiceRestClient;
+
+    CustomerResource(CustomerService customerService, @Qualifier("llmServiceRestClient") RestClient llmServiceRestClient) {
         this.customerService = customerService;
+        this.llmServiceRestClient = llmServiceRestClient;
     }
 
     @PostMapping
@@ -55,7 +66,7 @@ class CustomerResource {
             @RequestBody @Valid Customer customer,
             @AuthenticationPrincipal Jwt jwt) {
         Customer updatedCustomer = customerService.updateCustomer(id, customer, jwt);
-        // Todo notify llm service
+        CompletableFuture.runAsync(() -> notifyLlmService(id, updatedCustomer));
         return ResponseEntity.ok(updatedCustomer);
     }
 
@@ -63,6 +74,17 @@ class CustomerResource {
     ResponseEntity<Customer> updateCustomerTestVersion(
             @PathVariable long id, @RequestBody @Valid UpdateCustomerTestVersionRequest request) {
         return ResponseEntity.ok(customerService.updateCustomerTestVersion(id, request));
+    }
+
+    private void notifyLlmService(long customerId, Customer customer) {
+        LOG.debug("Notifying llm service of customer change");
+
+        llmServiceRestClient
+                .put()
+                .uri(NOTIFY_CUSTOMERS_URI, customerId)
+                .body(customer)
+                .retrieve()
+                .toBodilessEntity();
     }
 
     record CreateCustomerRequest(
