@@ -54,7 +54,9 @@ class CustomerResource {
             @PathVariable long id,
             @RequestBody @Valid Customer customer,
             @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(customerService.updateCustomer(id, customer, jwt));
+        Customer updatedCustomer = customerService.updateCustomer(id, customer, jwt);
+        // Todo notify llm service
+        return ResponseEntity.ok(updatedCustomer);
     }
 
     @PutMapping("/{id}/test-version")

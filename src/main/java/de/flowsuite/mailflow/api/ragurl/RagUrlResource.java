@@ -37,6 +37,8 @@ class RagUrlResource {
                         .buildAndExpand(createdRagUrl.getCustomerId(), createdRagUrl.getId())
                         .toUri();
 
+        // Todo notify rag service
+
         return ResponseEntity.created(location).body(createdRagUrl);
     }
 
@@ -60,6 +62,7 @@ class RagUrlResource {
             @PathVariable long id,
             @AuthenticationPrincipal Jwt jwt) {
         ragUrlService.deleteRagUrl(customerId, id, jwt);
+        // Todo notify rag service
         return ResponseEntity.noContent().build();
     }
 }
