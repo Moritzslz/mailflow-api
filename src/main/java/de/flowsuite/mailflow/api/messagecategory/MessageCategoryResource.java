@@ -23,12 +23,15 @@ import java.util.concurrent.CompletableFuture;
 class MessageCategoryResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(MessageCategoryResource.class);
-    private static final String NOTIFY_MESSAGE_CATEGORIES_URI = "/notifications/customers/{customerId}/message-categories";
+    private static final String NOTIFY_MESSAGE_CATEGORIES_URI =
+            "/notifications/customers/{customerId}/message-categories";
 
     private final MessageCategoryService messageCategoryService;
     private final RestClient mailboxServiceRestClient;
 
-    MessageCategoryResource(MessageCategoryService messageCategoryService, @Qualifier("mailboxServiceRestClient") RestClient mailboxServiceRestClient) {
+    MessageCategoryResource(
+            MessageCategoryService messageCategoryService,
+            @Qualifier("mailboxServiceRestClient") RestClient mailboxServiceRestClient) {
         this.messageCategoryService = messageCategoryService;
         this.mailboxServiceRestClient = mailboxServiceRestClient;
     }
@@ -76,7 +79,8 @@ class MessageCategoryResource {
             @PathVariable long id,
             @RequestBody @Valid MessageCategory messageCategory,
             @AuthenticationPrincipal Jwt jwt) {
-        MessageCategory updatedMessageCategory = messageCategoryService.updateMessageCategory(customerId, id, messageCategory, jwt);
+        MessageCategory updatedMessageCategory =
+                messageCategoryService.updateMessageCategory(customerId, id, messageCategory, jwt);
         CompletableFuture.runAsync(() -> notifyMailboxService(customerId, jwt));
         return ResponseEntity.ok(updatedMessageCategory);
     }

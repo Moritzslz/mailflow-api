@@ -29,7 +29,9 @@ class UserResource {
     private final UserService userService;
     private final RestClient mailboxServiceRestClient;
 
-    UserResource(UserService userService, @Qualifier("mailboxServiceRestClient") RestClient mailboxServiceRestClient) {
+    UserResource(
+            UserService userService,
+            @Qualifier("mailboxServiceRestClient") RestClient mailboxServiceRestClient) {
         this.userService = userService;
         this.mailboxServiceRestClient = mailboxServiceRestClient;
     }
