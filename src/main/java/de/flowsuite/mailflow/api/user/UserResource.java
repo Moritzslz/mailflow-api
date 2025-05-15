@@ -91,17 +91,6 @@ class UserResource {
         return ResponseEntity.ok(userService.updateUser(customerId, id, request, jwt));
     }
 
-    record CreateUserRequest(
-            @NotNull String registrationToken,
-            @NotBlank String firstName,
-            @NotBlank String lastName,
-            @NotBlank String emailAddress,
-            @NotBlank String password,
-            @NotBlank String confirmationPassword,
-            String phoneNumber,
-            String position,
-            boolean isSubscribedToNewsletter) {}
-
     private void notifyMailboxService(long userId, User user) {
         LOG.debug("Notifying mailbox service of user change");
 
@@ -112,6 +101,17 @@ class UserResource {
                 .retrieve()
                 .toBodilessEntity();
     }
+
+    record CreateUserRequest(
+            @NotNull String registrationToken,
+            @NotBlank String firstName,
+            @NotBlank String lastName,
+            @NotBlank String emailAddress,
+            @NotBlank String password,
+            @NotBlank String confirmationPassword,
+            String phoneNumber,
+            String position,
+            boolean isSubscribedToNewsletter) {}
 
     record RequestPasswordResetRequest(@NotBlank String emailAddress) {}
 
