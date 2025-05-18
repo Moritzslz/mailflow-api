@@ -172,11 +172,17 @@ VALUES (1, 'PCwU0vnyGsBYrljsDMd3Kf5Lq/fhqG7VLMc/aCKR+fU=', 'ks5Bk+l9E29nDULdti6i
        (2, 'PCwU0vnyGsBYrljsDMd3Kf5Lq/fhqG7VLMc/aCKR+fU=', 'ks5Bk+l9E29nDULdti6ihyz8ZFfqwvc8wfxiRL2d0HSvtVOkPJZ8g3zDnnFhJQ==');
 
 INSERT INTO message_categories (customer_id, category, reply, function_call, description)
-VALUES (2, 'Produkt Frage', true, false, 'Allgemeine Fragen zum Produkt'),
-       (2, 'Buchungsanfrage', true, true, 'Buchungsanfragen für ein Hotelzimmer'),
-       (2, 'Support', false, false, 'Generelle Support Anfrage');
-
-INSERT INTO message_log (user_id, customer_id, replied, function_call, category, language, from_email_address_encrypted,subject, received_at, processed_at, processing_time_in_seconds,categorisation_llm_used, categorisation_input_tokens, categorisation_output_tokens, categorisation_total_tokens, llm_used, input_tokens, output_tokens, total_tokens, token, token_expires_at)
+VALUES
+    (1, 'Produkt Frage', true, false, 'Allgemeine Fragen zum Produkt'),
+    (1, 'Buchungsanfrage', true, true, 'Buchungsanfragen für ein Hotelzimmer'),
+    (1, 'Support', false, false, 'Generelle Support Anfrage'),
+    (1, 'Default', true, false, 'This is the default/fallback category for actionable emails that do not fit into any other defined category. If an email does not match any other category, it will be assigned here. This category is useful for handling edge cases and ensuring no email is left uncategorised.'),
+    (1, 'No Reply', false, false, 'This category is for emails that do not require a response and are not actionable. This includes newsletters, promotional offers, automated notifications, and any other informational or unimportant emails that should not be replied to. Security-related emails such as one-time codes and password reset requests should NOT be categorized here, as they are actionable and important.'),
+    (2, 'Produkt Frage', true, false, 'Allgemeine Fragen zum Produkt'),
+    (2, 'Buchungsanfrage', true, true, 'Buchungsanfragen für ein Hotelzimmer'),
+    (2, 'Support', false, false, 'Generelle Support Anfrage'),
+    (2, 'Default', true, false, 'This is the default/fallback category for actionable emails that do not fit into any other defined category. If an email does not match any other category, it will be assigned here. This category is useful for handling edge cases and ensuring no email is left uncategorised.'),
+    (2, 'No Reply', false, false, 'This category is for emails that do not require a response and are not actionable. This includes newsletters, promotional offers, automated notifications, and any other informational or unimportant emails that should not be replied to. Security-related emails such as one-time codes and password reset requests should NOT be categorized here, as they are actionable and important.');INSERT INTO message_log (user_id, customer_id, replied, function_call, category, language, from_email_address_encrypted,subject, received_at, processed_at, processing_time_in_seconds,categorisation_llm_used, categorisation_input_tokens, categorisation_output_tokens, categorisation_total_tokens, llm_used, input_tokens, output_tokens, total_tokens, token, token_expires_at)
 VALUES
 -- 2024
 (2, 2, true, false, 'Produkt Frage', 'Deutsch', 'user@example.com', 'Test', '2024-03-25T09:00:00+01:00', '2024-03-25T09:00:00+01:00', 40, 'gpt-4', 1600, 1200, 2800, 'gpt-4', 1600, 1200, 2800, 'token1', NOW() + INTERVAL '30 minutes'),
