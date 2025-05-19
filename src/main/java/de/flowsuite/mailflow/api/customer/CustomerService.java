@@ -2,10 +2,7 @@ package de.flowsuite.mailflow.api.customer;
 
 import de.flowsuite.mailflow.api.messagecategory.MessageCategoryService;
 import de.flowsuite.mailflow.common.entity.Customer;
-import de.flowsuite.mailflow.common.exception.EntityAlreadyExistsException;
-import de.flowsuite.mailflow.common.exception.EntityNotFoundException;
-import de.flowsuite.mailflow.common.exception.IdConflictException;
-import de.flowsuite.mailflow.common.exception.UpdateConflictException;
+import de.flowsuite.mailflow.common.exception.*;
 import de.flowsuite.mailflow.common.util.AesUtil;
 import de.flowsuite.mailflow.common.util.AuthorisationUtil;
 import de.flowsuite.mailflow.common.util.Util;
@@ -18,6 +15,9 @@ import java.util.Optional;
 
 @Service
 public class CustomerService {
+
+    private static final List<Integer> VALID_IMAP_PORTS = List.of(993);
+    private static final List<Integer> VALID_SMTP_PORTS = List.of(465, 587, 2525);
 
     private final CustomerRepository customerRepository;
     private final MessageCategoryService messageCategoryService;
@@ -75,6 +75,13 @@ public class CustomerService {
                         .ctaUrl(request.ctaUrl())
                         .registrationToken(registrationToken)
                         .testVersion(request.testVersion())
+                        .crawlFrequencyInHours(168)
+                        .lastCrawlAt(null)
+                        .nextCrawlAt(null)
+                        .defaultImapHost(request.defaultImapHost())
+                        .defaultSmtpHost(request.defaultSmtpHost())
+                        .defaultImapPort(request.defaultImapPort())
+                        .defaultSmtpPort(request.defaultImapPort())
                         .build();
 
         if (request.ionosUsername() != null && !request.ionosUsername().isBlank()) {
@@ -84,6 +91,11 @@ public class CustomerService {
 
         if (request.ionosPassword() != null && !request.ionosPassword().isBlank()) {
             customer.setIonosPassword(AesUtil.encrypt(request.ionosPassword()));
+        }
+
+        if (!VALID_IMAP_PORTS.contains(request.defaultImapPort())
+                || !VALID_SMTP_PORTS.contains(request.defaultSmtpPort())) {
+            throw new InvalidPortsException(VALID_IMAP_PORTS.toString(), VALID_SMTP_PORTS.toString());
         }
 
         Customer createdCustomer = customerRepository.save(customer);
@@ -113,10 +125,10 @@ public class CustomerService {
         return customer;
     }
 
-    Customer updateCustomer(long id, Customer customer, Jwt jwt) {
+    Customer updateCustomer(long id, Customer updatedCustomer, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(id, jwt);
 
-        if (!customer.getId().equals(id)) {
+        if (!updatedCustomer.getId().equals(id)) {
             throw new IdConflictException();
         }
 
@@ -126,11 +138,11 @@ public class CustomerService {
                         .orElseThrow(
                                 () -> new EntityNotFoundException(Customer.class.getSimpleName()));
 
-        if (!existingCustomer.getOpenaiApiKey().equals(customer.getOpenaiApiKey())) {
+        if (!existingCustomer.getOpenaiApiKey().equals(updatedCustomer.getOpenaiApiKey())) {
             throw new UpdateConflictException();
         }
 
-        String billingEmailAddress = customer.getBillingEmailAddress().toLowerCase();
+        String billingEmailAddress = updatedCustomer.getBillingEmailAddress().toLowerCase();
 
         if (!billingEmailAddress.equals(existingCustomer.getBillingEmailAddress())) {
             Util.validateEmailAddress(billingEmailAddress);
@@ -139,20 +151,33 @@ public class CustomerService {
                 throw new EntityAlreadyExistsException(Customer.class.getSimpleName());
             }
 
-            customer.setBillingEmailAddress(billingEmailAddress);
+            updatedCustomer.setBillingEmailAddress(billingEmailAddress);
         }
 
-        customer.setTestVersion(existingCustomer.isTestVersion());
+        updatedCustomer.setTestVersion(existingCustomer.isTestVersion());
 
         if (existingCustomer.isTestVersion()) {
-            customer.setIonosUsername(existingCustomer.getIonosUsername());
-            customer.setIonosPassword(existingCustomer.getIonosPassword());
+            updatedCustomer.setIonosUsername(existingCustomer.getIonosUsername());
+            updatedCustomer.setIonosPassword(existingCustomer.getIonosPassword());
         } else {
-            customer.setIonosUsername(null);
-            customer.setIonosPassword(null);
+            updatedCustomer.setIonosUsername(null);
+            updatedCustomer.setIonosPassword(null);
         }
 
-        return customerRepository.save(customer);
+        if (updatedCustomer.getLastCrawlAt() != null) {
+            if (existingCustomer.getLastCrawlAt() == null
+                    || updatedCustomer.getLastCrawlAt().isAfter(existingCustomer.getLastCrawlAt())) {
+                existingCustomer.setLastCrawlAt(updatedCustomer.getLastCrawlAt());
+            }
+        }
+        if (updatedCustomer.getNextCrawlAt() != null) {
+            if (existingCustomer.getNextCrawlAt() == null
+                    || updatedCustomer.getNextCrawlAt().isAfter(existingCustomer.getNextCrawlAt())) {
+                existingCustomer.setNextCrawlAt(updatedCustomer.getNextCrawlAt());
+            }
+        }
+
+        return customerRepository.save(updatedCustomer);
     }
 
     Customer updateCustomerTestVersion(
