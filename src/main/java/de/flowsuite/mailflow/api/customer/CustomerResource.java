@@ -102,7 +102,11 @@ class CustomerResource {
             String ctaUrl,
             boolean testVersion,
             @Email String ionosUsername,
-            String ionosPassword) {}
+            String ionosPassword,
+            @NotBlank String defaultImapHost,
+            @NotBlank String defaultSmtpHost,
+            @NotBlank Integer defaultImapPort,
+            @NotBlank Integer defaultSmtpPort) {}
 
     record UpdateCustomerTestVersionRequest(
             @NotNull Long id,
