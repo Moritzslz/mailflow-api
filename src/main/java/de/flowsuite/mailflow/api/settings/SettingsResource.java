@@ -49,11 +49,11 @@ class SettingsResource {
     ResponseEntity<Settings> createSettings(
             @PathVariable long customerId,
             @PathVariable long userId,
-            @RequestBody @Valid Settings settings,
+            @RequestBody @Valid CreateSettingsRequest request,
             @AuthenticationPrincipal Jwt jwt,
             UriComponentsBuilder uriBuilder) {
         Settings createdSettings =
-                settingsService.createSettings(customerId, userId, settings, jwt);
+                settingsService.createSettings(customerId, userId, request, jwt);
 
         URI location =
                 uriBuilder
@@ -111,15 +111,18 @@ class SettingsResource {
                 .toBodilessEntity();
     }
 
+    record CreateSettingsRequest(
+            @NotNull Long userId,
+            @NotNull Long customerId,
+            @NotBlank String mailboxPassword
+    ) {}
+
     record UpdateSettingsRequest(
             @NotNull Long userId,
             @NotNull Long customerId,
             boolean executionEnabled,
             boolean autoReplyEnabled,
             boolean responseRatingEnabled,
-            @Min(168) @Max(744) int crawlFrequencyInHours,
-            ZonedDateTime lastCrawlAt,
-            ZonedDateTime nextCrawlAt,
             String imapHost,
             String smtpHost,
             Integer imapPort,
