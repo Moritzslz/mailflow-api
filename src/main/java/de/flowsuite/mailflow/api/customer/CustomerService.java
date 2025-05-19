@@ -16,9 +16,6 @@ import java.util.Optional;
 @Service
 public class CustomerService {
 
-    private static final List<Integer> VALID_IMAP_PORTS = List.of(993);
-    private static final List<Integer> VALID_SMTP_PORTS = List.of(465, 587, 2525);
-
     private final CustomerRepository customerRepository;
     private final MessageCategoryService messageCategoryService;
 
@@ -76,8 +73,6 @@ public class CustomerService {
                         .registrationToken(registrationToken)
                         .testVersion(request.testVersion())
                         .crawlFrequencyInHours(168)
-                        .lastCrawlAt(null)
-                        .nextCrawlAt(null)
                         .defaultImapHost(request.defaultImapHost())
                         .defaultSmtpHost(request.defaultSmtpHost())
                         .defaultImapPort(request.defaultImapPort())
@@ -93,10 +88,8 @@ public class CustomerService {
             customer.setIonosPassword(AesUtil.encrypt(request.ionosPassword()));
         }
 
-        if (!VALID_IMAP_PORTS.contains(request.defaultImapPort())
-                || !VALID_SMTP_PORTS.contains(request.defaultSmtpPort())) {
-            throw new InvalidPortsException(VALID_IMAP_PORTS.toString(), VALID_SMTP_PORTS.toString());
-        }
+        Util.validateMailboxSettings(request.defaultImapHost(), request.defaultSmtpHost(),
+                request.defaultImapPort(), request.defaultSmtpPort());
 
         Customer createdCustomer = customerRepository.save(customer);
 
@@ -109,7 +102,7 @@ public class CustomerService {
         return (List<Customer>) customerRepository.findAll();
     }
 
-    Customer getCustomer(long id, Jwt jwt) {
+    public Customer getCustomer(long id, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(id, jwt);
 
         Customer customer =
