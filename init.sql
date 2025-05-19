@@ -16,7 +16,14 @@ CREATE TABLE customers (
     registration_token TEXT UNIQUE NOT NULL,
     test_version BOOLEAN,
     ionos_username VARCHAR(64),
-    ionos_password_encrypted TEXT
+    ionos_password_encrypted TEXT,
+    crawl_frequency_in_hours INTEGER DEFAULT 168 NOT NULL,
+    last_crawl_at TIMESTAMP WITH TIME ZONE,
+    next_crawl_at TIMESTAMP WITH TIME ZONE,
+    default_imap_host VARCHAR(64),
+    default_smtp_host VARCHAR(64),
+    default_imap_port INTEGER,
+    default_smtp_port INTEGER
 );
 CREATE INDEX idx_customers_registration_token ON customers(registration_token);
 
@@ -57,9 +64,6 @@ CREATE TABLE settings (
     execution_enabled BOOLEAN NOT NULL,
     auto_reply_enabled BOOLEAN DEFAULT FALSE NOT NULL,
     response_rating_enabled BOOLEAN DEFAULT TRUE NOT NULL,
-    crawl_frequency_in_hours INTEGER DEFAULT 168 NOT NULL,
-    last_crawl_at TIMESTAMP WITH TIME ZONE,
-    next_crawl_at TIMESTAMP WITH TIME ZONE,
     mailbox_password_hash TEXT NOT NULL,
     mailbox_password_encrypted TEXT NOT NULL,
     imap_host VARCHAR(64),
@@ -143,9 +147,9 @@ CREATE INDEX idx_response_ratings_user_id ON response_ratings(user_id);
 CREATE INDEX idx_response_ratings_rating ON response_ratings(rating);
 CREATE INDEX idx_response_ratings_rated_at ON response_ratings(created_at);
 
-INSERT INTO customers (company, street, house_number, postal_code, city, billing_email_address, openai_api_key_encrypted, registration_token, test_version, ionos_username, ionos_password_encrypted)
-VALUES ('FlowSuite', 'Straße', '69', '1337', 'München', 'rechnungen@flow-suite.de', 'SWvI2dniMcOCVvyinJk+gM+gqIhMAeRXZxJYxxGd2ARxD/gOcHUQzXSpb+ubHRQKLaqwaEl4CDb2jEBpIgXpfY+7doKZi1sdhQM3xPpCUwpAwvKADVCa35gL8ik48RFrrj0XWYpMfukp5VkasmUvqOp3dU6OaWTfm73smztqcZuRyWEFCnU1CEGCLrwKfSPRsxbK43sZvr1Isl7lFwLtMLVp9a5ufU1QvvL/vy5EBVat8L/J9G1lubw+RbS8u25I', 'secureToken1', true, 'test@flow-suite.de' , 'nxFNCTbBVAbIrQfJ2vSlDf261/MbLRyM8cclSjqNaz5sPT+kXl7PkheKR2A9Qd7i'),
-       ('Company', 'Street', '69', '1337', 'City', 'billing@example.de', 'SWvI2dniMcOCVvyinJk+gM+gqIhMAeRXZxJYxxGd2ARxD/gOcHUQzXSpb+ubHRQKLaqwaEl4CDb2jEBpIgXpfY+7doKZi1sdhQM3xPpCUwpAwvKADVCa35gL8ik48RFrrj0XWYpMfukp5VkasmUvqOp3dU6OaWTfm73smztqcZuRyWEFCnU1CEGCLrwKfSPRsxbK43sZvr1Isl7lFwLtMLVp9a5ufU1QvvL/vy5EBVat8L/J9G1lubw+RbS8u25I', 'secureToken2', true, 'info@flow-suite.de', 'z5RN8Uv5mdoAbmUn+dgLeEqzEHQsRed8tJaN87VIWj3ph32V0SJ8Vd+32haVU3nv');
+INSERT INTO customers (company, street, house_number, postal_code, city, billing_email_address, openai_api_key_encrypted, registration_token, test_version, ionos_username, ionos_password_encrypted, crawl_frequency_in_hours, imap_host, smtp_host, imap_port, smtp_port)
+VALUES ('FlowSuite', 'Straße', '69', '1337', 'München', 'rechnungen@flow-suite.de', 'SWvI2dniMcOCVvyinJk+gM+gqIhMAeRXZxJYxxGd2ARxD/gOcHUQzXSpb+ubHRQKLaqwaEl4CDb2jEBpIgXpfY+7doKZi1sdhQM3xPpCUwpAwvKADVCa35gL8ik48RFrrj0XWYpMfukp5VkasmUvqOp3dU6OaWTfm73smztqcZuRyWEFCnU1CEGCLrwKfSPRsxbK43sZvr1Isl7lFwLtMLVp9a5ufU1QvvL/vy5EBVat8L/J9G1lubw+RbS8u25I', 'secureToken1', true, 'test@flow-suite.de' , 'nxFNCTbBVAbIrQfJ2vSlDf261/MbLRyM8cclSjqNaz5sPT+kXl7PkheKR2A9Qd7i', 168, 'imap.ionos.de', 'smtp.ionos.de', 993, 465),
+       ('Company', 'Street', '69', '1337', 'City', 'billing@example.de', 'SWvI2dniMcOCVvyinJk+gM+gqIhMAeRXZxJYxxGd2ARxD/gOcHUQzXSpb+ubHRQKLaqwaEl4CDb2jEBpIgXpfY+7doKZi1sdhQM3xPpCUwpAwvKADVCa35gL8ik48RFrrj0XWYpMfukp5VkasmUvqOp3dU6OaWTfm73smztqcZuRyWEFCnU1CEGCLrwKfSPRsxbK43sZvr1Isl7lFwLtMLVp9a5ufU1QvvL/vy5EBVat8L/J9G1lubw+RbS8u25I', 'secureToken2', true, 'info@flow-suite.de', 'z5RN8Uv5mdoAbmUn+dgLeEqzEHQsRed8tJaN87VIWj3ph32V0SJ8Vd+32haVU3nv', 168, 'imap.ionos.de', 'smtp.ionos.de', 993, 465);
 
 INSERT INTO users (customer_id, first_name_encrypted, last_name_encrypted, email_address_hash, email_address_encrypted, password_hash, role, account_locked, account_enabled, subscribed_to_newsletter, verification_token, token_expires_at)
 VALUES (1, 'Uztmz8Fii79yN2SY6wg5md6Ek5RLeBzMGYlNlqYutLyj', 'Uztmz8Fii79yN2SY6wg5md6Ek5RLeBzMGYlNlqYutLyj', 'Cb6R4BLpHhVMebqauEd3TZrhfdkR8hFjvulTHYUfbNM=', 'DMX3vfIVH7vta9jAgOUbwEWGRTa5jFiv2yLi6BMnNv4d7hcfQFdMGnUCRcJPfA==', '$2a$10$t0Olv0N4TdmUfd9yG242i.znX.NN7c.a3AU9DadUg1ro0Xsc8jvom', 'ADMIN', false, true, true, 'token1', NOW() + INTERVAL '30 minutes'),
@@ -158,9 +162,9 @@ VALUES ('mailflow-api', '$2a$10$4/8k4VN17iFXP4PD840vVOV.RvKwWQ.pFP9cjOPSqYHYmeWM
        ('llm-service', '$2a$10$4/8k4VN17iFXP4PD840vVOV.RvKwWQ.pFP9cjOPSqYHYmeWMk1wXe', 'CLIENT customers:read message_log:write');
 
 
-INSERT INTO settings (user_id, customer_id, execution_enabled, auto_reply_enabled, response_rating_enabled, crawl_frequency_in_hours, mailbox_password_hash, mailbox_password_encrypted, imap_host, smtp_host, imap_port, smtp_port)
-VALUES (1, 1,true, false, true, 168, '41yeeikOtfki4nlr4piOQ1QVD8+ZeJFk8gGeTzHNFHw=', 'nxFNCTbBVAbIrQfJ2vSlDf261/MbLRyM8cclSjqNaz5sPT+kXl7PkheKR2A9Qd7i', 'imap.ionos.de', 'smtp.ionos.de', 993, 465),
-       (2, 2,true, false, true, 168, 'lCh3te1DelaKsFWzM7N58Ib8i9D7lB6Xr9HBQUoL57M=', 'z5RN8Uv5mdoAbmUn+dgLeEqzEHQsRed8tJaN87VIWj3ph32V0SJ8Vd+32haVU3nv', 'imap.ionos.de', 'smtp.ionos.de', 993, 465);
+INSERT INTO settings (user_id, customer_id, execution_enabled, auto_reply_enabled, response_rating_enabled, mailbox_password_hash, mailbox_password_encrypted, imap_host, smtp_host, imap_port, smtp_port)
+VALUES (1, 1,true, false, true,  '41yeeikOtfki4nlr4piOQ1QVD8+ZeJFk8gGeTzHNFHw=', 'nxFNCTbBVAbIrQfJ2vSlDf261/MbLRyM8cclSjqNaz5sPT+kXl7PkheKR2A9Qd7i', 'imap.ionos.de', 'smtp.ionos.de', 993, 465),
+       (2, 2,true, false, true,  'lCh3te1DelaKsFWzM7N58Ib8i9D7lB6Xr9HBQUoL57M=', 'z5RN8Uv5mdoAbmUn+dgLeEqzEHQsRed8tJaN87VIWj3ph32V0SJ8Vd+32haVU3nv', 'imap.ionos.de', 'smtp.ionos.de', 993, 465);
 
 INSERT INTO rag_urls (customer_id, url, last_crawl_successful)
 VALUES (1, 'https://www.flow-suite.de', NULL),
