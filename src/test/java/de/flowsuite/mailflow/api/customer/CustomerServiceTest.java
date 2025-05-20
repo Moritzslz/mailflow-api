@@ -19,11 +19,20 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class CustomerServiceTest extends BaseServiceTest {
+
+    protected static final int DEFAULT_CRAWL_FREQ = 168;
+    protected static final int UPDATED_CRAWL_FREQ = 200;
+
+    protected static final String DEFAULT_IMAP_HOST = "imapHost";
+    protected static final String DEFAULT_SMTP_HOST = "smtpHost";
+    protected static final String UPDATED_IMAP_HOST = "updated imapHost";
+    protected static final String UPDATED_SMTP_HOST = "update smtpHost";
 
     @Mock private CustomerRepository customerRepository;
 
@@ -49,9 +58,14 @@ class CustomerServiceTest extends BaseServiceTest {
                     "https://example.com/cta",
                     true,
                     "test@ionos.de",
-                    "password");
+                    "password",
+                    DEFAULT_IMAP_HOST,
+                    DEFAULT_SMTP_HOST,
+                    993,
+                    465);
 
     private Customer buildTestCustomer() {
+        ZonedDateTime now = ZonedDateTime.now();
         return Customer.builder()
                 .id(testUser.getCustomerId())
                 .company(createCustomerRequest.company())
@@ -69,6 +83,15 @@ class CustomerServiceTest extends BaseServiceTest {
                 .testVersion(false)
                 .ionosUsername(createCustomerRequest.ionosUsername())
                 .ionosPassword(ENCRYPTED_VALUE)
+                .crawlFrequencyInHours(DEFAULT_CRAWL_FREQ)
+                .defaultImapHost(DEFAULT_IMAP_HOST)
+                .defaultSmtpHost(DEFAULT_SMTP_HOST)
+                .defaultImapPort(993)
+                .defaultSmtpPort(465)
+                .systemPrompt("system prompt")
+                .messagePrompt("message prompt")
+                .lastCrawlAt(now)
+                .nextCrawlAt(now.plusHours(DEFAULT_CRAWL_FREQ))
                 .build();
     }
 
@@ -108,6 +131,15 @@ class CustomerServiceTest extends BaseServiceTest {
         assertEquals(createCustomerRequest.testVersion(), savedCustomer.isTestVersion());
         assertEquals(createCustomerRequest.ionosUsername(), savedCustomer.getIonosUsername());
         assertEquals(ENCRYPTED_VALUE, savedCustomer.getIonosPassword());
+        assertEquals(DEFAULT_CRAWL_FREQ, savedCustomer.getCrawlFrequencyInHours());
+        assertEquals(createCustomerRequest.defaultImapHost(), savedCustomer.getDefaultImapHost());
+        assertEquals(createCustomerRequest.defaultSmtpHost(), savedCustomer.getDefaultSmtpHost());
+        assertEquals(createCustomerRequest.defaultImapPort(), savedCustomer.getDefaultImapPort());
+        assertEquals(createCustomerRequest.defaultSmtpPort(), savedCustomer.getDefaultSmtpPort());
+        assertNull(savedCustomer.getSystemPrompt());
+        assertNull(savedCustomer.getMessagePrompt());
+        assertNull(savedCustomer.getLastCrawlAt());
+        assertNull(savedCustomer.getNextCrawlAt());
         // spotless:on
     }
 

@@ -5,6 +5,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import de.flowsuite.mailflow.api.BaseServiceTest;
+import de.flowsuite.mailflow.api.customer.CustomerService;
+import de.flowsuite.mailflow.common.entity.Customer;
 import de.flowsuite.mailflow.common.entity.Settings;
 import de.flowsuite.mailflow.common.entity.User;
 import de.flowsuite.mailflow.common.exception.*;
@@ -18,49 +20,47 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.ZonedDateTime;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class SettingsTest extends BaseServiceTest {
 
-    protected static final int DEFAULT_CRAWL_FREQ = 168;
-    protected static final int UPDATED_CRAWL_FREQ = 200;
-
     protected static final String DEFAULT_IMAP_HOST = "imapHost";
     protected static final String DEFAULT_SMTP_HOST = "smtpHost";
     protected static final String UPDATED_IMAP_HOST = "updated imapHost";
     protected static final String UPDATED_SMTP_HOST = "update smtpHost";
-
-    protected static final int DEFAULT_PORT = 1;
-    protected static final int UPDATED_PORT = 2;
+    protected static final int DEFAULT_IMAP_PORT = 993;
+    protected static final int DEFAULT_SMTP_PORT = 465;
 
     @Mock SettingsRepository settingsRepository;
+
+    @Mock CustomerService customerService;
 
     @InjectMocks SettingsService settingsService;
 
     private final User testUser = buildTestUser();
+    private SettingsResource.CreateSettingsRequest testCreateSettingsRequest =
+            buildCreateSettingsRequest(testUser.getId(), testUser.getCustomerId());
     private Settings testSettings;
 
+    private SettingsResource.CreateSettingsRequest buildCreateSettingsRequest(
+            long userId, long customerId) {
+        return new SettingsResource.CreateSettingsRequest(userId, customerId, "password");
+    }
+
     private Settings bulildTestSettings() {
-
-        ZonedDateTime now = ZonedDateTime.now();
-
         return Settings.builder()
                 .userId(testUser.getId())
                 .customerId(testUser.getCustomerId())
                 .executionEnabled(true)
                 .autoReplyEnabled(false)
                 .responseRatingEnabled(true)
-                .crawlFrequencyInHours(DEFAULT_CRAWL_FREQ)
-                .lastCrawlAt(now)
-                .nextCrawlAt(now.plusHours(DEFAULT_CRAWL_FREQ))
                 .mailboxPasswordHash(HASHED_VALUE)
                 .mailboxPassword(ENCRYPTED_VALUE)
                 .imapHost(DEFAULT_IMAP_HOST)
                 .smtpHost(DEFAULT_SMTP_HOST)
-                .imapPort(DEFAULT_PORT)
-                .smtpPort(DEFAULT_PORT)
+                .imapPort(DEFAULT_IMAP_PORT)
+                .smtpPort(DEFAULT_SMTP_PORT)
                 .build();
     }
 
@@ -73,9 +73,21 @@ class SettingsTest extends BaseServiceTest {
     @Test
     void testCreateSettings_success() {
         when(settingsRepository.existsByUserId(testUser.getId())).thenReturn(false);
+        when(customerService.getCustomer(testUser.getCustomerId(), jwtMock))
+                .thenReturn(
+                        Customer.builder()
+                                .id(testUser.getCustomerId())
+                                .defaultImapHost(DEFAULT_IMAP_HOST)
+                                .defaultSmtpHost(DEFAULT_SMTP_HOST)
+                                .defaultImapPort(993)
+                                .defaultSmtpPort(465)
+                                .build());
 
         settingsService.createSettings(
-                testSettings.getCustomerId(), testSettings.getUserId(), testSettings, jwtMock);
+                testSettings.getCustomerId(),
+                testSettings.getUserId(),
+                testCreateSettingsRequest,
+                jwtMock);
 
         ArgumentCaptor<Settings> settingsCaptor = ArgumentCaptor.forClass(Settings.class);
         verify(settingsRepository).save(settingsCaptor.capture());
@@ -95,7 +107,7 @@ class SettingsTest extends BaseServiceTest {
                         settingsService.createSettings(
                                 testSettings.getCustomerId(),
                                 testSettings.getUserId(),
-                                testSettings,
+                                testCreateSettingsRequest,
                                 jwtMock));
 
         verify(settingsRepository, never()).save(any(Settings.class));
@@ -103,8 +115,10 @@ class SettingsTest extends BaseServiceTest {
 
     @Test
     void testCreateSettings_idConflict() {
-        Settings testSettingsIdConflict1 = bulildTestSettings();
-        testSettingsIdConflict1.setCustomerId(testSettings.getCustomerId() + 1);
+        SettingsResource.CreateSettingsRequest request1 =
+                buildCreateSettingsRequest(testUser.getId() + 1, testUser.getCustomerId());
+        SettingsResource.CreateSettingsRequest request2 =
+                buildCreateSettingsRequest(testUser.getId(), testUser.getCustomerId() + 1);
 
         Settings testSettingsIdConflict2 = bulildTestSettings();
         testSettingsIdConflict2.setUserId(testSettings.getUserId() + 1);
@@ -115,7 +129,7 @@ class SettingsTest extends BaseServiceTest {
                         settingsService.createSettings(
                                 testSettings.getCustomerId(),
                                 testSettings.getUserId(),
-                                testSettingsIdConflict1,
+                                request1,
                                 jwtMock));
         assertThrows(
                 IdConflictException.class,
@@ -123,7 +137,7 @@ class SettingsTest extends BaseServiceTest {
                         settingsService.createSettings(
                                 testSettings.getCustomerId(),
                                 testSettings.getUserId(),
-                                testSettingsIdConflict2,
+                                request2,
                                 jwtMock));
 
         verify(settingsRepository, never()).save(any(Settings.class));
@@ -137,7 +151,7 @@ class SettingsTest extends BaseServiceTest {
                         settingsService.createSettings(
                                 testSettings.getCustomerId() + 1,
                                 testSettings.getUserId(),
-                                testSettings,
+                                testCreateSettingsRequest,
                                 jwtMock));
         assertThrows(
                 IdorException.class,
@@ -145,14 +159,14 @@ class SettingsTest extends BaseServiceTest {
                         settingsService.createSettings(
                                 testSettings.getCustomerId(),
                                 testSettings.getUserId() + 1,
-                                testSettings,
+                                testCreateSettingsRequest,
                                 jwtMock));
 
         verify(settingsRepository, never()).save(any(Settings.class));
     }
 
     @Test
-    void getResponseRating_success() {
+    void getSettings_success() {
         when(settingsRepository.findById(testSettings.getUserId()))
                 .thenReturn(Optional.of(testSettings));
 
@@ -165,7 +179,7 @@ class SettingsTest extends BaseServiceTest {
     }
 
     @Test
-    void getResponseRating_notFound() {
+    void getSettings_notFound() {
         when(settingsRepository.findById(testSettings.getUserId())).thenReturn(Optional.empty());
 
         assertThrows(
@@ -176,7 +190,7 @@ class SettingsTest extends BaseServiceTest {
     }
 
     @Test
-    void getResponseRating_idor() {
+    void getSettings_idor() {
         assertThrows(
                 IdorException.class,
                 () ->
@@ -196,12 +210,9 @@ class SettingsTest extends BaseServiceTest {
     }
 
     @Test
-    void testUpdateMessageCategory_success() {
+    void testUpdateSettings_success() {
         when(settingsRepository.findById(testSettings.getUserId()))
                 .thenReturn(Optional.of(testSettings));
-
-        ZonedDateTime lastCrawlAt = ZonedDateTime.now();
-        ZonedDateTime nextCrawlAt = lastCrawlAt.plusHours(UPDATED_CRAWL_FREQ);
 
         SettingsResource.UpdateSettingsRequest updateSettingsRequest =
                 new SettingsResource.UpdateSettingsRequest(
@@ -210,13 +221,10 @@ class SettingsTest extends BaseServiceTest {
                         true,
                         true,
                         true,
-                        UPDATED_CRAWL_FREQ,
-                        lastCrawlAt,
-                        nextCrawlAt,
                         UPDATED_IMAP_HOST,
                         UPDATED_SMTP_HOST,
-                        UPDATED_PORT,
-                        UPDATED_PORT);
+                        DEFAULT_IMAP_PORT,
+                        DEFAULT_SMTP_PORT);
 
         settingsService.updateSettings(
                 testUser.getCustomerId(), testUser.getId(), updateSettingsRequest, jwtMock);
@@ -228,18 +236,11 @@ class SettingsTest extends BaseServiceTest {
         assertNotNull(savedSettings);
         assertEquals(updateSettingsRequest.userId(), savedSettings.getCustomerId());
         assertEquals(updateSettingsRequest.customerId(), savedSettings.getUserId());
+        assertEquals(updateSettingsRequest.executionEnabled(), savedSettings.isExecutionEnabled());
+        assertEquals(updateSettingsRequest.autoReplyEnabled(), savedSettings.isAutoReplyEnabled());
         assertEquals(
-                updateSettingsRequest.isExecutionEnabled(), savedSettings.isExecutionEnabled());
-        assertEquals(
-                updateSettingsRequest.isAutoReplyEnabled(), savedSettings.isAutoReplyEnabled());
-        assertEquals(
-                updateSettingsRequest.isResponseRatingEnabled(),
+                updateSettingsRequest.responseRatingEnabled(),
                 savedSettings.isResponseRatingEnabled());
-        assertEquals(
-                updateSettingsRequest.crawlFrequencyInHours(),
-                savedSettings.getCrawlFrequencyInHours());
-        assertEquals(updateSettingsRequest.lastCrawlAt(), savedSettings.getLastCrawlAt());
-        assertEquals(updateSettingsRequest.nextCrawlAt(), savedSettings.getNextCrawlAt());
         assertEquals(updateSettingsRequest.imapHost(), savedSettings.getImapHost());
         assertEquals(updateSettingsRequest.smtpHost(), savedSettings.getSmtpHost());
         assertEquals(updateSettingsRequest.imapPort(), savedSettings.getImapPort());
@@ -247,10 +248,7 @@ class SettingsTest extends BaseServiceTest {
     }
 
     @Test
-    void testUpdateMessageCategory_idConflict() {
-        ZonedDateTime lastCrawlAt = ZonedDateTime.now();
-        ZonedDateTime nextCrawlAt = lastCrawlAt.plusHours(UPDATED_CRAWL_FREQ);
-
+    void testUpdateSettings_idConflict() {
         SettingsResource.UpdateSettingsRequest updateSettingsRequestIdConflict1 =
                 new SettingsResource.UpdateSettingsRequest(
                         testUser.getId() + 1,
@@ -258,13 +256,10 @@ class SettingsTest extends BaseServiceTest {
                         true,
                         true,
                         true,
-                        UPDATED_CRAWL_FREQ,
-                        lastCrawlAt,
-                        nextCrawlAt,
                         UPDATED_IMAP_HOST,
                         UPDATED_SMTP_HOST,
-                        UPDATED_PORT,
-                        UPDATED_PORT);
+                        DEFAULT_IMAP_PORT,
+                        DEFAULT_SMTP_PORT);
 
         SettingsResource.UpdateSettingsRequest updateSettingsRequestIdConflict2 =
                 new SettingsResource.UpdateSettingsRequest(
@@ -273,13 +268,10 @@ class SettingsTest extends BaseServiceTest {
                         true,
                         true,
                         true,
-                        UPDATED_CRAWL_FREQ,
-                        lastCrawlAt,
-                        nextCrawlAt,
                         UPDATED_IMAP_HOST,
                         UPDATED_SMTP_HOST,
-                        UPDATED_PORT,
-                        UPDATED_PORT);
+                        DEFAULT_IMAP_PORT,
+                        DEFAULT_SMTP_PORT);
 
         assertThrows(
                 IdConflictException.class,
@@ -303,11 +295,8 @@ class SettingsTest extends BaseServiceTest {
     }
 
     @Test
-    void testUpdateMessageCategory_notFound() {
+    void testUpdateSettings_notFound() {
         when(settingsRepository.findById(testSettings.getUserId())).thenReturn(Optional.empty());
-
-        ZonedDateTime lastCrawlAt = ZonedDateTime.now();
-        ZonedDateTime nextCrawlAt = lastCrawlAt.plusHours(UPDATED_CRAWL_FREQ);
 
         SettingsResource.UpdateSettingsRequest updateSettingsRequest =
                 new SettingsResource.UpdateSettingsRequest(
@@ -316,13 +305,10 @@ class SettingsTest extends BaseServiceTest {
                         true,
                         true,
                         true,
-                        UPDATED_CRAWL_FREQ,
-                        lastCrawlAt,
-                        nextCrawlAt,
                         UPDATED_IMAP_HOST,
                         UPDATED_SMTP_HOST,
-                        UPDATED_PORT,
-                        UPDATED_PORT);
+                        DEFAULT_IMAP_PORT,
+                        DEFAULT_SMTP_PORT);
 
         assertThrows(
                 EntityNotFoundException.class,
@@ -337,10 +323,7 @@ class SettingsTest extends BaseServiceTest {
     }
 
     @Test
-    void testUpdateMessageCategory_idor() {
-        ZonedDateTime lastCrawlAt = ZonedDateTime.now();
-        ZonedDateTime nextCrawlAt = lastCrawlAt.plusHours(UPDATED_CRAWL_FREQ);
-
+    void testUpdateSettings_idor() {
         SettingsResource.UpdateSettingsRequest updateSettingsRequest =
                 new SettingsResource.UpdateSettingsRequest(
                         testUser.getId(),
@@ -348,13 +331,10 @@ class SettingsTest extends BaseServiceTest {
                         true,
                         true,
                         true,
-                        UPDATED_CRAWL_FREQ,
-                        lastCrawlAt,
-                        nextCrawlAt,
                         UPDATED_IMAP_HOST,
                         UPDATED_SMTP_HOST,
-                        UPDATED_PORT,
-                        UPDATED_PORT);
+                        DEFAULT_IMAP_PORT,
+                        DEFAULT_SMTP_PORT);
 
         assertThrows(
                 IdorException.class,
