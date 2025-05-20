@@ -21,7 +21,6 @@ public class CustomerService {
     private static final int DEFAULT_IONOS_IMAP_PORT = 993;
     private static final int DEFAULT_IONOS_SMTP_PORT = 465;
 
-
     private final CustomerRepository customerRepository;
     private final MessageCategoryService messageCategoryService;
 
