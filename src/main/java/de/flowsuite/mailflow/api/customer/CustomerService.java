@@ -76,7 +76,7 @@ public class CustomerService {
                         .defaultImapHost(request.defaultImapHost())
                         .defaultSmtpHost(request.defaultSmtpHost())
                         .defaultImapPort(request.defaultImapPort())
-                        .defaultSmtpPort(request.defaultImapPort())
+                        .defaultSmtpPort(request.defaultSmtpPort())
                         .build();
 
         if (request.ionosUsername() != null && !request.ionosUsername().isBlank()) {
