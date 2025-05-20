@@ -16,6 +16,12 @@ import java.util.Optional;
 @Service
 public class CustomerService {
 
+    private static final String DEFAULT_IONOS_IMAP_HOST = "imap.ionos.de";
+    private static final String DEFAULT_IONOS_SMTP_HOST = "smtp.ionos.de";
+    private static final int DEFAULT_IONOS_IMAP_PORT = 993;
+    private static final int DEFAULT_IONOS_SMTP_PORT = 465;
+
+
     private final CustomerRepository customerRepository;
     private final MessageCategoryService messageCategoryService;
 
@@ -55,6 +61,12 @@ public class CustomerService {
             Util.validateUrl(request.ctaUrl());
         }
 
+        Util.validateMailboxSettings(
+                request.defaultImapHost(),
+                request.defaultSmtpHost(),
+                request.defaultImapPort(),
+                request.defaultSmtpPort());
+
         String registrationToken = generateRegistrationToken();
 
         Customer customer =
@@ -79,6 +91,13 @@ public class CustomerService {
                         .defaultSmtpPort(request.defaultSmtpPort())
                         .build();
 
+        if (request.testVersion()) {
+            customer.setDefaultImapHost(DEFAULT_IONOS_IMAP_HOST);
+            customer.setDefaultSmtpHost(DEFAULT_IONOS_SMTP_HOST);
+            customer.setDefaultImapPort(DEFAULT_IONOS_IMAP_PORT);
+            customer.setDefaultSmtpPort(DEFAULT_IONOS_SMTP_PORT);
+        }
+
         if (request.ionosUsername() != null && !request.ionosUsername().isBlank()) {
             Util.validateEmailAddress(request.ionosUsername());
             customer.setIonosUsername(request.ionosUsername());
@@ -87,12 +106,6 @@ public class CustomerService {
         if (request.ionosPassword() != null && !request.ionosPassword().isBlank()) {
             customer.setIonosPassword(AesUtil.encrypt(request.ionosPassword()));
         }
-
-        Util.validateMailboxSettings(
-                request.defaultImapHost(),
-                request.defaultSmtpHost(),
-                request.defaultImapPort(),
-                request.defaultSmtpPort());
 
         Customer createdCustomer = customerRepository.save(customer);
 

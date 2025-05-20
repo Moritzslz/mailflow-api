@@ -103,10 +103,10 @@ class CustomerResource {
             boolean testVersion,
             @Email String ionosUsername,
             String ionosPassword,
-            @NotBlank String defaultImapHost,
-            @NotBlank String defaultSmtpHost,
-            @NotBlank Integer defaultImapPort,
-            @NotBlank Integer defaultSmtpPort) {}
+            String defaultImapHost,
+            String defaultSmtpHost,
+            Integer defaultImapPort,
+            Integer defaultSmtpPort) {}
 
     record UpdateCustomerTestVersionRequest(
             @NotNull Long id,
