@@ -7,12 +7,10 @@ import de.flowsuite.mailflow.common.exception.*;
 import de.flowsuite.mailflow.common.util.AesUtil;
 import de.flowsuite.mailflow.common.util.AuthorisationUtil;
 import de.flowsuite.mailflow.common.util.HmacUtil;
-
 import de.flowsuite.mailflow.common.util.Util;
+
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 class SettingsService {
@@ -25,7 +23,8 @@ class SettingsService {
         this.customerService = customerService;
     }
 
-    Settings createSettings(long customerId, long userId, SettingsResource.CreateSettingsRequest request, Jwt jwt) {
+    Settings createSettings(
+            long customerId, long userId, SettingsResource.CreateSettingsRequest request, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
         AuthorisationUtil.validateAccessToUser(userId, jwt);
 
@@ -87,7 +86,8 @@ class SettingsService {
         settings.setImapPort(request.imapPort());
         settings.setSmtpPort(request.smtpPort());
 
-        Util.validateMailboxSettings(request.imapHost(), request.smtpHost(), request.imapPort(), request.smtpPort());
+        Util.validateMailboxSettings(
+                request.imapHost(), request.smtpHost(), request.imapPort(), request.smtpPort());
 
         return settingsRepository.save(settings);
     }

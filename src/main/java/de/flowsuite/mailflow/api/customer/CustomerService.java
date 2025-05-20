@@ -88,8 +88,11 @@ public class CustomerService {
             customer.setIonosPassword(AesUtil.encrypt(request.ionosPassword()));
         }
 
-        Util.validateMailboxSettings(request.defaultImapHost(), request.defaultSmtpHost(),
-                request.defaultImapPort(), request.defaultSmtpPort());
+        Util.validateMailboxSettings(
+                request.defaultImapHost(),
+                request.defaultSmtpHost(),
+                request.defaultImapPort(),
+                request.defaultSmtpPort());
 
         Customer createdCustomer = customerRepository.save(customer);
 
@@ -159,13 +162,17 @@ public class CustomerService {
 
         if (updatedCustomer.getLastCrawlAt() != null) {
             if (existingCustomer.getLastCrawlAt() == null
-                    || updatedCustomer.getLastCrawlAt().isAfter(existingCustomer.getLastCrawlAt())) {
+                    || updatedCustomer
+                            .getLastCrawlAt()
+                            .isAfter(existingCustomer.getLastCrawlAt())) {
                 existingCustomer.setLastCrawlAt(updatedCustomer.getLastCrawlAt());
             }
         }
         if (updatedCustomer.getNextCrawlAt() != null) {
             if (existingCustomer.getNextCrawlAt() == null
-                    || updatedCustomer.getNextCrawlAt().isAfter(existingCustomer.getNextCrawlAt())) {
+                    || updatedCustomer
+                            .getNextCrawlAt()
+                            .isAfter(existingCustomer.getNextCrawlAt())) {
                 existingCustomer.setNextCrawlAt(updatedCustomer.getNextCrawlAt());
             }
         }
