@@ -20,6 +20,7 @@ public class CustomerService {
     private static final String DEFAULT_IONOS_SMTP_HOST = "smtp.ionos.de";
     private static final int DEFAULT_IONOS_IMAP_PORT = 993;
     private static final int DEFAULT_IONOS_SMTP_PORT = 465;
+    private static final int DEFAULT_CRAWL_FREQ = 3;
 
     private final CustomerRepository customerRepository;
     private final MessageCategoryService messageCategoryService;
@@ -83,7 +84,7 @@ public class CustomerService {
                         .ctaUrl(request.ctaUrl())
                         .registrationToken(registrationToken)
                         .testVersion(request.testVersion())
-                        .crawlFrequencyInHours(168)
+                        .crawlFrequencyInDays(DEFAULT_CRAWL_FREQ)
                         .defaultImapHost(request.defaultImapHost())
                         .defaultSmtpHost(request.defaultSmtpHost())
                         .defaultImapPort(request.defaultImapPort())
@@ -173,19 +174,19 @@ public class CustomerService {
         }
 
         if (updatedCustomer.getLastCrawlAt() != null) {
-            if (existingCustomer.getLastCrawlAt() == null
-                    || updatedCustomer
+            if (existingCustomer.getLastCrawlAt() != null
+                    && updatedCustomer
                             .getLastCrawlAt()
-                            .isAfter(existingCustomer.getLastCrawlAt())) {
-                existingCustomer.setLastCrawlAt(updatedCustomer.getLastCrawlAt());
+                            .isBefore(existingCustomer.getLastCrawlAt())) {
+                throw new UpdateConflictException();
             }
         }
         if (updatedCustomer.getNextCrawlAt() != null) {
-            if (existingCustomer.getNextCrawlAt() == null
-                    || updatedCustomer
+            if (existingCustomer.getNextCrawlAt() != null
+                    && updatedCustomer
                             .getNextCrawlAt()
-                            .isAfter(existingCustomer.getNextCrawlAt())) {
-                existingCustomer.setNextCrawlAt(updatedCustomer.getNextCrawlAt());
+                            .isBefore(existingCustomer.getNextCrawlAt())) {
+                throw new UpdateConflictException();
             }
         }
 

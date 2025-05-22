@@ -20,14 +20,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class CustomerServiceTest extends BaseServiceTest {
 
-    protected static final int DEFAULT_CRAWL_FREQ = 168;
-    protected static final int UPDATED_CRAWL_FREQ = 200;
+    protected static final int DEFAULT_CRAWL_FREQ = 3;
 
     protected static final String DEFAULT_IMAP_HOST = "imapHost";
     protected static final String DEFAULT_SMTP_HOST = "smtpHost";
@@ -83,7 +83,7 @@ class CustomerServiceTest extends BaseServiceTest {
                 .testVersion(false)
                 .ionosUsername(createCustomerRequest.ionosUsername())
                 .ionosPassword(ENCRYPTED_VALUE)
-                .crawlFrequencyInHours(DEFAULT_CRAWL_FREQ)
+                .crawlFrequencyInDays(DEFAULT_CRAWL_FREQ)
                 .defaultImapHost(DEFAULT_IMAP_HOST)
                 .defaultSmtpHost(DEFAULT_SMTP_HOST)
                 .defaultImapPort(993)
@@ -131,7 +131,7 @@ class CustomerServiceTest extends BaseServiceTest {
         assertEquals(createCustomerRequest.testVersion(), savedCustomer.isTestVersion());
         assertEquals(createCustomerRequest.ionosUsername(), savedCustomer.getIonosUsername());
         assertEquals(ENCRYPTED_VALUE, savedCustomer.getIonosPassword());
-        assertEquals(DEFAULT_CRAWL_FREQ, savedCustomer.getCrawlFrequencyInHours());
+        assertEquals(DEFAULT_CRAWL_FREQ, savedCustomer.getCrawlFrequencyInDays());
         assertEquals(createCustomerRequest.defaultImapHost(), savedCustomer.getDefaultImapHost());
         assertEquals(createCustomerRequest.defaultSmtpHost(), savedCustomer.getDefaultSmtpHost());
         assertEquals(createCustomerRequest.defaultImapPort(), savedCustomer.getDefaultImapPort());
