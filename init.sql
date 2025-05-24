@@ -169,7 +169,7 @@ VALUES (1, 1,true, false, true,  '41yeeikOtfki4nlr4piOQ1QVD8+ZeJFk8gGeTzHNFHw=',
        (2, 2,true, false, true,  'lCh3te1DelaKsFWzM7N58Ib8i9D7lB6Xr9HBQUoL57M=', 'z5RN8Uv5mdoAbmUn+dgLeEqzEHQsRed8tJaN87VIWj3ph32V0SJ8Vd+32haVU3nv', 'imap.ionos.de', 'smtp.ionos.de', 993, 465);
 
 INSERT INTO rag_urls (customer_id, url, last_crawl_successful, description)
-VALUES (1, 'https://www.flow-suite.de', NULL),
+VALUES (1, 'https://www.flow-suite.de', NULL, 'Flow Suite Website'),
        (2, 'https://products.pulspower.com/en/cp5-121.html', NULL, 'product: cp5-121'),
        (2, 'https://products.pulspower.com/en/cp5-241.html', NULL, 'product: cp5-241'),
        (2, 'https://products.pulspower.com/en/cp5-241-c1.html', NULL, 'product: cp5-241-c1'),
