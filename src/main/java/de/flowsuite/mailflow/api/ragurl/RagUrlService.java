@@ -61,6 +61,25 @@ class RagUrlService {
         return ragUrlRepository.findByCustomerId(customerId);
     }
 
+    void updateRagUrl(long customerId, long id, RagUrl updatedRagUrl, Jwt jwt) {
+        AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
+
+        if (!updatedRagUrl.getCustomerId().equals(customerId) || !updatedRagUrl.getId().equals(id)) {
+            throw new IdConflictException();
+        }
+
+        RagUrl ragUrl =
+                ragUrlRepository
+                        .findById(id)
+                        .orElseThrow(() -> new EntityNotFoundException(RagUrl.class.getSimpleName()));
+
+        if (!ragUrl.getCustomerId().equals(customerId)) {
+            throw new IdorException();
+        }
+
+        ragUrlRepository.save(updatedRagUrl);
+    }
+
     void deleteRagUrl(long customerId, long id, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
 
