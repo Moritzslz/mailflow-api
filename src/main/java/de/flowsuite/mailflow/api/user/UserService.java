@@ -220,6 +220,11 @@ public class UserService implements UserDetailsService {
         return (List<User>) userRepository.findAll();
     }
 
+    List<User> listUsersByCustomer(long customerId, Jwt jwt) {
+        AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
+        return userRepository.findAllByCustomerId(customerId);
+    }
+
     User getUser(long customerId, long id, boolean decrypted, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
         AuthorisationUtil.validateAccessToUser(id, jwt);
