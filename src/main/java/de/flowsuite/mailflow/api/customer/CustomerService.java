@@ -134,6 +134,11 @@ public class CustomerService {
         return customer;
     }
 
+    public boolean getCustomerTestVersion(long id, Jwt jwt) {
+        AuthorisationUtil.validateAccessToCustomer(id, jwt);
+        return customerRepository.existsByIdAndTestVersionTrue(id);
+    }
+
     Customer updateCustomer(long id, Customer updatedCustomer, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(id, jwt);
 

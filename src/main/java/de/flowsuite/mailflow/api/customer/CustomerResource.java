@@ -56,6 +56,11 @@ class CustomerResource {
         return ResponseEntity.ok(customerService.getCustomer(id, jwt));
     }
 
+    @GetMapping("/{id}/test-version")
+    ResponseEntity<Boolean> getCustomerTestVersion(@PathVariable long id, @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(customerService.getCustomerTestVersion(id, jwt));
+    }
+
     @GetMapping()
     ResponseEntity<List<Customer>> listCustomers() {
         return ResponseEntity.ok(customerService.listCustomers());
@@ -74,6 +79,7 @@ class CustomerResource {
     @PutMapping("/{id}/test-version")
     ResponseEntity<Customer> updateCustomerTestVersion(
             @PathVariable long id, @RequestBody @Valid UpdateCustomerTestVersionRequest request) {
+        // TODO notify mailbox service
         return ResponseEntity.ok(customerService.updateCustomerTestVersion(id, request));
     }
 
