@@ -33,6 +33,9 @@ class ClientServiceTest extends BaseServiceTest {
 
     private Client testClient;
 
+    private ClientResource.CreateClientRequest createClientRequest =
+            new ClientResource.CreateClientRequest("test-client", "secret", "CLIENT");
+
     private Client buildTestClient() {
         return Client.builder().id(1L).clientName("test-client").clientSecret("secret").build();
     }
@@ -50,7 +53,7 @@ class ClientServiceTest extends BaseServiceTest {
         testClient.setId(null);
         assertNull(testClient.getId());
 
-        clientService.createClient(testClient);
+        clientService.createClient(createClientRequest);
 
         ArgumentCaptor<Client> clientCaptor = ArgumentCaptor.forClass(Client.class);
         verify(clientRepository).save(clientCaptor.capture());
@@ -63,7 +66,8 @@ class ClientServiceTest extends BaseServiceTest {
 
     @Test
     void testCreateClient_idConflict() {
-        assertThrows(IdConflictException.class, () -> clientService.createClient(testClient));
+        assertThrows(
+                IdConflictException.class, () -> clientService.createClient(createClientRequest));
 
         verify(clientRepository, never()).save(any());
     }
@@ -76,7 +80,8 @@ class ClientServiceTest extends BaseServiceTest {
         assertNull(testClient.getId());
 
         assertThrows(
-                EntityAlreadyExistsException.class, () -> clientService.createClient(testClient));
+                EntityAlreadyExistsException.class,
+                () -> clientService.createClient(createClientRequest));
 
         verify(clientRepository, never()).save(any(Client.class));
     }
