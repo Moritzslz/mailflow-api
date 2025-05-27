@@ -132,14 +132,18 @@ class MessageLogTest extends BaseServiceTest {
         assertEquals(
                 createMessageLogEntryRequest.processingTimeInSeconds(),
                 savedMessageLogEntry.getProcessingTimeInSeconds());
-        assertEquals(createMessageLogEntryRequest.categorisationLlmUsed(), savedMessageLogEntry.getCategorisationLlmUsed());
         assertEquals(
-                createMessageLogEntryRequest.categorisationInputTokens(), savedMessageLogEntry.getCategorisationInputTokens());
+                createMessageLogEntryRequest.categorisationLlmUsed(),
+                savedMessageLogEntry.getCategorisationLlmUsed());
+        assertEquals(
+                createMessageLogEntryRequest.categorisationInputTokens(),
+                savedMessageLogEntry.getCategorisationInputTokens());
         assertEquals(
                 createMessageLogEntryRequest.categorisationOutputTokens(),
                 savedMessageLogEntry.getCategorisationOutputTokens());
         assertEquals(
-                createMessageLogEntryRequest.categorisationTotalTokens(), savedMessageLogEntry.getCategorisationTotalTokens());
+                createMessageLogEntryRequest.categorisationTotalTokens(),
+                savedMessageLogEntry.getCategorisationTotalTokens());
         assertEquals(createMessageLogEntryRequest.llmUsed(), savedMessageLogEntry.getLlmUsed());
         assertEquals(
                 createMessageLogEntryRequest.inputTokens(), savedMessageLogEntry.getInputTokens());
