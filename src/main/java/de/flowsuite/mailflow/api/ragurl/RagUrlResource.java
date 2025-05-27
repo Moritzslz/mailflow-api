@@ -57,7 +57,7 @@ class RagUrlResource {
     }
 
     @PutMapping("/{customerId}/rag-urls/{}id")
-    ResponseEntity<List<RagUrl>> updateRagUrl(
+    ResponseEntity<RagUrl> updateRagUrl(
             @PathVariable long customerId,
             @PathVariable long id,
             @RequestBody @Valid RagUrl ragUrl,

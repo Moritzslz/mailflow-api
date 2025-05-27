@@ -61,7 +61,7 @@ class RagUrlService {
         return ragUrlRepository.findByCustomerId(customerId);
     }
 
-    void updateRagUrl(long customerId, long id, RagUrl updatedRagUrl, Jwt jwt) {
+    RagUrl updateRagUrl(long customerId, long id, RagUrl updatedRagUrl, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
 
         if (!updatedRagUrl.getCustomerId().equals(customerId)
@@ -79,7 +79,7 @@ class RagUrlService {
             throw new IdorException();
         }
 
-        ragUrlRepository.save(updatedRagUrl);
+        return ragUrlRepository.save(updatedRagUrl);
     }
 
     void deleteRagUrl(long customerId, long id, Jwt jwt) {
