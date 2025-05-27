@@ -62,7 +62,7 @@ class RagUrlResource {
             @PathVariable long id,
             @RequestBody @Valid RagUrl ragUrl,
             @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(ragUrlService.updateRagUrl(customerId, jwt));
+        return ResponseEntity.ok(ragUrlService.updateRagUrl(customerId, id, ragUrl, jwt));
     }
 
     @DeleteMapping("/{customerId}/rag-urls/{id}")
