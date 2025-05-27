@@ -56,7 +56,7 @@ class RagUrlResource {
         return ResponseEntity.ok(ragUrlService.listRagUrls(customerId, jwt));
     }
 
-    @PutMapping("/{customerId}/rag-urls/{}id")
+    @PutMapping("/{customerId}/rag-urls/{id}")
     ResponseEntity<RagUrl> updateRagUrl(
             @PathVariable long customerId,
             @PathVariable long id,
