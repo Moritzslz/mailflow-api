@@ -32,12 +32,15 @@ class CustomerResource {
 
     private final CustomerService customerService;
     private final RestClient llmServiceRestClient;
+    private final RestClient apiRestClient;
 
     CustomerResource(
             CustomerService customerService,
-            @Qualifier("llmServiceRestClient") RestClient llmServiceRestClient) {
+            @Qualifier("llmServiceRestClient") RestClient llmServiceRestClient,
+            @Qualifier("apiRestClient") RestClient apiRestClient) {
         this.customerService = customerService;
         this.llmServiceRestClient = llmServiceRestClient;
+        this.apiRestClient = apiRestClient;
     }
 
     @PostMapping
@@ -80,14 +83,26 @@ class CustomerResource {
     @PutMapping("/{id}/test-version")
     ResponseEntity<Customer> updateCustomerTestVersion(
             @PathVariable long id, @RequestBody @Valid UpdateCustomerTestVersionRequest request) {
-        // TODO notify mailbox service
-        return ResponseEntity.ok(customerService.updateCustomerTestVersion(id, request));
+        Customer updatedCustomer = customerService.updateCustomerTestVersion(id, request);
+        CompletableFuture.runAsync(() -> notifyMailboxService(id, updatedCustomer));
+        return ResponseEntity.ok(updatedCustomer);
     }
 
     private void notifyLlmService(long customerId, Customer customer) {
         LOG.debug("Notifying llm service of customer change");
 
         llmServiceRestClient
+                .put()
+                .uri(NOTIFY_CUSTOMERS_URI, customerId)
+                .body(customer)
+                .retrieve()
+                .toBodilessEntity();
+    }
+
+    private void notifyMailboxService(long customerId, Customer customer) {
+        LOG.debug("Notifying mailbox service of customer test version change");
+
+        apiRestClient
                 .put()
                 .uri(NOTIFY_CUSTOMERS_URI, customerId)
                 .body(customer)
