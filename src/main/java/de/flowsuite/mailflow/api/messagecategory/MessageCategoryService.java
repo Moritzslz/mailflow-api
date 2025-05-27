@@ -130,6 +130,10 @@ public class MessageCategoryService {
             throw new IdorException();
         }
 
+        if (updatedMessageCategory.getDescription().length() < 100) {
+            throw new MessageCategoryDescriptionException();
+        }
+
         return messageCategoryRepository.save(updatedMessageCategory);
     }
 
