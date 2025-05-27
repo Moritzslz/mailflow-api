@@ -99,7 +99,7 @@ class SecurityConfig {
                         // Customer Resource
                         .requestMatchers(HttpMethod.POST, "/customers").access(hasScope(Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.GET, "/customers").access(hasAnyScope(Authorities.CUSTOMERS_LIST.getAuthority(), Authorities.ADMIN.getAuthority()))
-                        .requestMatchers(HttpMethod.PUT, "/customers/*/test-version").access(hasScope(Authorities.ADMIN.getAuthority()))
+                        .requestMatchers(HttpMethod.PUT, "/customers/*/test-version").access(hasAnyScope(Authorities.CLIENT.getAuthority(), Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.GET, "/customers/*").access(hasAnyScope(Authorities.CUSTOMERS_READ.getAuthority(), Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.PUT, "/customers/*").access(hasAnyScope(Authorities.CUSTOMERS_WRITE.getAuthority(), Authorities.MANAGER.getAuthority(), Authorities.ADMIN.getAuthority()))
                         // CustomerSettings Resource
