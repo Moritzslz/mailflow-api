@@ -159,7 +159,7 @@ VALUES (1, 'Uztmz8Fii79yN2SY6wg5md6Ek5RLeBzMGYlNlqYutLyj', 'Uztmz8Fii79yN2SY6wg5
 
 INSERT INTO clients(client_name, client_secret_hash, scope)
 VALUES ('mailflow-api', '$2a$10$4/8k4VN17iFXP4PD840vVOV.RvKwWQ.pFP9cjOPSqYHYmeWMk1wXe', 'CLIENT'),
-       ('mailbox-service', '$2a$10$4/8k4VN17iFXP4PD840vVOV.RvKwWQ.pFP9cjOPSqYHYmeWMk1wXe', 'CLIENT users:list message_categories:list blacklist:list'),
+       ('mailbox-service', '$2a$10$4/8k4VN17iFXP4PD840vVOV.RvKwWQ.pFP9cjOPSqYHYmeWMk1wXe', 'CLIENT users:list customers:read message_categories:list blacklist:list'),
        ('rag-service', '$2a$10$4/8k4VN17iFXP4PD840vVOV.RvKwWQ.pFP9cjOPSqYHYmeWMk1wXe', 'CLIENT rag_urls:write rag_urls:list customers:list customers:write customers:read'),
        ('llm-service', '$2a$10$4/8k4VN17iFXP4PD840vVOV.RvKwWQ.pFP9cjOPSqYHYmeWMk1wXe', 'CLIENT customers:read message_log:write');
 
