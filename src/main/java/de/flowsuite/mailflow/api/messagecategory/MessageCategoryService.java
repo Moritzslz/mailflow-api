@@ -14,6 +14,8 @@ public class MessageCategoryService {
 
     private static final String DEFAULT_CATEGORY = "Default";
     private static final String NO_REPLY_CATEGORY = "No Reply";
+    private static final int MAX_CATEGORIES_PER_CUSTOMER = 10;
+    private static final int MIN_DESCRIPTION_LENGTH = 100;
 
     private final MessageCategoryRepository messageCategoryRepository;
 
@@ -39,12 +41,13 @@ public class MessageCategoryService {
             throw new EntityAlreadyExistsException(MessageCategory.class.getSimpleName());
         }
 
-        if (messageCategoryRepository.countByCustomerId(customerId) >= 10) {
-            throw new MessageCategoryLimitException();
+        if (messageCategoryRepository.countByCustomerId(customerId)
+                >= MAX_CATEGORIES_PER_CUSTOMER) {
+            throw new MessageCategoryLimitException(MAX_CATEGORIES_PER_CUSTOMER);
         }
 
-        if (messageCategory.getDescription().length() < 100) {
-            throw new MessageCategoryDescriptionException();
+        if (messageCategory.getDescription().length() < MIN_DESCRIPTION_LENGTH) {
+            throw new MessageCategoryDescriptionException(MIN_DESCRIPTION_LENGTH);
         }
 
         return messageCategoryRepository.save(messageCategory);
@@ -130,8 +133,8 @@ public class MessageCategoryService {
             throw new IdorException();
         }
 
-        if (updatedMessageCategory.getDescription().length() < 100) {
-            throw new MessageCategoryDescriptionException();
+        if (updatedMessageCategory.getDescription().length() < MIN_DESCRIPTION_LENGTH) {
+            throw new MessageCategoryDescriptionException(MIN_DESCRIPTION_LENGTH);
         }
 
         return messageCategoryRepository.save(updatedMessageCategory);
