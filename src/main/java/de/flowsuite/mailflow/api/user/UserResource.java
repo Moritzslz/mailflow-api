@@ -66,8 +66,7 @@ class UserResource {
 
     @GetMapping("/{customerId}/users")
     ResponseEntity<List<User>> listUsersByCustomer(
-            @PathVariable long customerId,
-            @AuthenticationPrincipal Jwt jwt) {
+            @PathVariable long customerId, @AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity.ok(userService.listUsersByCustomer(customerId, jwt));
     }
 

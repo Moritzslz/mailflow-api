@@ -23,5 +23,4 @@ interface UserRepository extends CrudRepository<User, Long> {
     boolean existsByVerificationToken(String verificationToken);
 
     List<User> findAllByCustomerId(long customerId);
-
 }
