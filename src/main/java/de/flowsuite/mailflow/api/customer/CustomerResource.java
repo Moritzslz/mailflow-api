@@ -57,7 +57,8 @@ class CustomerResource {
     }
 
     @GetMapping("/{id}/test-version")
-    ResponseEntity<Boolean> getCustomerTestVersion(@PathVariable long id, @AuthenticationPrincipal Jwt jwt) {
+    ResponseEntity<Boolean> getCustomerTestVersion(
+            @PathVariable long id, @AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity.ok(customerService.getCustomerTestVersion(id, jwt));
     }
 
