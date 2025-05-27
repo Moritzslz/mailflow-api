@@ -55,7 +55,7 @@ class CustomerServiceTest extends BaseServiceTest {
                     "https://example.com",
                     "https://example.com/privacy-policy",
                     "https://example.com/cta",
-                    true,
+                    false,
                     "test@ionos.de",
                     "password",
                     DEFAULT_IMAP_HOST,
@@ -230,6 +230,8 @@ class CustomerServiceTest extends BaseServiceTest {
 
         Customer updatedCustomer = buildTestCustomer();
         updatedCustomer.setCompany("Updated Company");
+        updatedCustomer.setDefaultImapHost(UPDATED_IMAP_HOST);
+        updatedCustomer.setDefaultSmtpHost(UPDATED_SMTP_HOST);
 
         customerService.updateCustomer(testCustomer.getId(), updatedCustomer, jwtMock);
 

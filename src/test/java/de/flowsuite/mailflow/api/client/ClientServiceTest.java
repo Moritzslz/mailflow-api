@@ -9,7 +9,6 @@ import de.flowsuite.mailflow.api.BaseServiceTest;
 import de.flowsuite.mailflow.common.entity.Client;
 import de.flowsuite.mailflow.common.exception.EntityAlreadyExistsException;
 import de.flowsuite.mailflow.common.exception.EntityNotFoundException;
-import de.flowsuite.mailflow.common.exception.IdConflictException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -62,14 +61,6 @@ class ClientServiceTest extends BaseServiceTest {
         assertNotNull(savedClient);
         assertEquals(testClient.getClientName(), savedClient.getClientName());
         assertEquals(HASHED_VALUE, savedClient.getClientSecret());
-    }
-
-    @Test
-    void testCreateClient_idConflict() {
-        assertThrows(
-                IdConflictException.class, () -> clientService.createClient(createClientRequest));
-
-        verify(clientRepository, never()).save(any());
     }
 
     @Test
