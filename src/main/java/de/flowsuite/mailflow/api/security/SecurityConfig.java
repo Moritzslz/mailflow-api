@@ -99,9 +99,9 @@ class SecurityConfig {
                         // Customer Resource
                         .requestMatchers(HttpMethod.POST, "/customers").access(hasScope(Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.GET, "/customers").access(hasAnyScope(Authorities.CUSTOMERS_LIST.getAuthority(), Authorities.ADMIN.getAuthority()))
-                        .requestMatchers(HttpMethod.PUT, "/customers/*/test-version").access(hasAnyScope(Authorities.CLIENT.getAuthority(), Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.GET, "/customers/*").access(hasAnyScope(Authorities.CUSTOMERS_READ.getAuthority(), Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.PUT, "/customers/*").access(hasAnyScope(Authorities.CUSTOMERS_WRITE.getAuthority(), Authorities.MANAGER.getAuthority(), Authorities.ADMIN.getAuthority()))
+                        .requestMatchers(HttpMethod.PUT, "/customers/*/test-version").access(hasScope(Authorities.ADMIN.getAuthority()))
                         // CustomerSettings Resource
                         .requestMatchers(HttpMethod.POST, "/customers/*/users/*/settings").access(hasAnyScope(Authorities.SETTINGS_WRITE.getAuthority(), Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.GET, "/customers/*/users/*/settings").access(hasAnyScope(Authorities.SETTINGS_READ.getAuthority(), Authorities.ADMIN.getAuthority()))
@@ -110,6 +110,7 @@ class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/customers/*/rag-urls").access(hasAnyScope(Authorities.MANAGER.getAuthority(), Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.GET, "/customers/*/rag-urls").access(hasAnyScope(Authorities.RAG_URLS_LIST.getAuthority(), Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.GET, "/customers/*/rag-urls/*").access(hasAnyScope(Authorities.RAG_URLS_READ.getAuthority(), Authorities.ADMIN.getAuthority()))
+                        .requestMatchers(HttpMethod.PUT, "/customers/*/rag-urls/*").access(hasAnyScope(Authorities.RAG_URLS_WRITE.getAuthority(), Authorities.ADMIN.getAuthority()))
                         .requestMatchers(HttpMethod.DELETE, "/customers/*/rag-urls/*").access(hasAnyScope(Authorities.MANAGER.getAuthority(), Authorities.ADMIN.getAuthority()))
                         // Blacklist Resource
                         .requestMatchers(HttpMethod.POST, "/customers/*/users/*/blacklist").access(hasAnyScope(Authorities.BLACKLIST_WRITE.getAuthority(), Authorities.ADMIN.getAuthority()))
