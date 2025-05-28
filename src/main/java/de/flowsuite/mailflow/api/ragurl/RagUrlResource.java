@@ -62,7 +62,17 @@ class RagUrlResource {
             @PathVariable long id,
             @RequestBody @Valid RagUrl ragUrl,
             @AuthenticationPrincipal Jwt jwt) {
+        // Todo notify rag service
         return ResponseEntity.ok(ragUrlService.updateRagUrl(customerId, id, ragUrl, jwt));
+    }
+
+    @PutMapping("/{customerId}/rag-urls/{id}/crawl-status")
+    ResponseEntity<RagUrl> updateRagUrlCrawlStatus(
+            @PathVariable long customerId,
+            @PathVariable long id,
+            @RequestBody boolean lastCrawlSuccessful,
+            @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(ragUrlService.updateRagUrlCrawlStatus(customerId, id, lastCrawlSuccessful, jwt));
     }
 
     @DeleteMapping("/{customerId}/rag-urls/{id}")

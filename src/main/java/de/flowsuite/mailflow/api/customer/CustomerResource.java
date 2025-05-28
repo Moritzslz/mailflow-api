@@ -2,6 +2,7 @@ package de.flowsuite.mailflow.api.customer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import de.flowsuite.mailflow.common.dto.UpdateCustomerCrawlStatusRequest;
 import de.flowsuite.mailflow.common.entity.Customer;
 
 import jakarta.validation.Valid;
@@ -86,6 +87,12 @@ class CustomerResource {
         Customer updatedCustomer = customerService.updateCustomerTestVersion(id, request);
         CompletableFuture.runAsync(() -> notifyMailboxService(id, updatedCustomer));
         return ResponseEntity.ok(updatedCustomer);
+    }
+
+    @PutMapping("/{id}/crawl-status")
+    ResponseEntity<Customer> updateCustomerCrawlStatus(
+            @PathVariable long id, @RequestBody @Valid UpdateCustomerCrawlStatusRequest request, @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(customerService.updateCustomerCrawlStatus(id, request, jwt));
     }
 
     private void notifyLlmService(long customerId, Customer customer) {

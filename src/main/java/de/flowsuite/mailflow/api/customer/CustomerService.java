@@ -1,6 +1,7 @@
 package de.flowsuite.mailflow.api.customer;
 
 import de.flowsuite.mailflow.api.messagecategory.MessageCategoryService;
+import de.flowsuite.mailflow.common.dto.UpdateCustomerCrawlStatusRequest;
 import de.flowsuite.mailflow.common.entity.Customer;
 import de.flowsuite.mailflow.common.exception.*;
 import de.flowsuite.mailflow.common.util.AesUtil;
@@ -224,6 +225,34 @@ public class CustomerService {
         } else {
             customer.setIonosUsername(null);
             customer.setIonosPassword(null);
+        }
+
+        return customerRepository.save(customer);
+    }
+
+    Customer updateCustomerCrawlStatus(
+            long id, UpdateCustomerCrawlStatusRequest request, Jwt jwt) {
+        AuthorisationUtil.validateAccessToCustomer(id, jwt);
+
+        if (!request.id().equals(id)) {
+            throw new IdConflictException();
+        }
+
+        Customer customer =
+                customerRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () -> new EntityNotFoundException(Customer.class.getSimpleName()));
+
+        if (customer.getLastCrawlAt() != null
+                && request.lastCrawlAt()
+                .isBefore(customer.getLastCrawlAt())) {
+            throw new UpdateConflictException();
+        }
+        if (customer.getNextCrawlAt() != null
+                && request.nextCrawlAt()
+                .isBefore(customer.getNextCrawlAt())) {
+            throw new UpdateConflictException();
         }
 
         return customerRepository.save(customer);
