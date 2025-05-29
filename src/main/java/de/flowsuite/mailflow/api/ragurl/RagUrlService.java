@@ -100,7 +100,7 @@ class RagUrlService {
         return ragUrlRepository.save(ragUrl);
     }
 
-    void deleteRagUrl(long customerId, long id, Jwt jwt) {
+    RagUrl deleteRagUrl(long customerId, long id, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
 
         RagUrl ragUrl =
@@ -114,5 +114,7 @@ class RagUrlService {
         }
 
         ragUrlRepository.delete(ragUrl);
+
+        return ragUrl;
     }
 }
