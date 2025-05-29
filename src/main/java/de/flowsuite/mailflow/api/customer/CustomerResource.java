@@ -77,7 +77,7 @@ class CustomerResource {
             @RequestBody @Valid Customer customer,
             @AuthenticationPrincipal Jwt jwt) {
         Customer updatedCustomer = customerService.updateCustomer(id, customer, jwt);
-        CompletableFuture.runAsync(() -> notifyLlmService(id, updatedCustomer));
+        CompletableFuture.runAsync(() -> notifyLlmService(updatedCustomer));
         return ResponseEntity.ok(updatedCustomer);
     }
 
@@ -85,7 +85,7 @@ class CustomerResource {
     ResponseEntity<Customer> updateCustomerTestVersion(
             @PathVariable long id, @RequestBody @Valid UpdateCustomerTestVersionRequest request) {
         Customer updatedCustomer = customerService.updateCustomerTestVersion(id, request);
-        CompletableFuture.runAsync(() -> notifyMailboxService(id, updatedCustomer));
+        CompletableFuture.runAsync(() -> notifyMailboxService(updatedCustomer));
         return ResponseEntity.ok(updatedCustomer);
     }
 
@@ -95,23 +95,23 @@ class CustomerResource {
         return ResponseEntity.ok(customerService.updateCustomerCrawlStatus(id, request, jwt));
     }
 
-    private void notifyLlmService(long customerId, Customer customer) {
+    private void notifyLlmService(Customer customer) {
         LOG.debug("Notifying llm service of customer change");
 
         llmServiceRestClient
                 .put()
-                .uri(NOTIFY_CUSTOMERS_URI, customerId)
+                .uri(NOTIFY_CUSTOMERS_URI, customer.getId())
                 .body(customer)
                 .retrieve()
                 .toBodilessEntity();
     }
 
-    private void notifyMailboxService(long customerId, Customer customer) {
+    private void notifyMailboxService(Customer customer) {
         LOG.debug("Notifying mailbox service of customer test version change");
 
         apiRestClient
                 .put()
-                .uri(NOTIFY_CUSTOMERS_URI, customerId)
+                .uri(NOTIFY_CUSTOMERS_URI, customer.getId())
                 .body(customer)
                 .retrieve()
                 .toBodilessEntity();
