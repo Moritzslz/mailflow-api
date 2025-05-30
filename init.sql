@@ -175,7 +175,9 @@ VALUES (1, 'https://www.flow-suite.de', NULL, 'Flow Suite Website'),
        (2, 'https://products.pulspower.com/en/cp5-241-c1.html', NULL, 'product: cp5-241-c1'),
        (2, 'https://products.pulspower.com/en/cp10-241-etc.html', NULL, 'product: cp10-241-etc'),
        (2, 'https://products.pulspower.com/en/fpt500-241-001-102.html', NULL, 'product: fpt500-241-001-102'),
-       (2, 'https://products.pulspower.com/en/cp5-121.html', NULL, 'product: cp5-121');
+       (2, 'https://products.pulspower.com/en/cp5-121.html', NULL, 'product: cp5-121'),
+       (2, 'https://www.pulspower.com/support/downloads/company-certificates/', NULL, 'Company certificates');
+
 
 
 INSERT INTO blacklist (user_id, blacklisted_email_address_hash, blacklisted_email_address_encrypted)
