@@ -8,10 +8,7 @@ import static org.mockito.Mockito.never;
 import de.flowsuite.mailflow.api.BaseServiceTest;
 import de.flowsuite.mailflow.common.entity.MessageCategory;
 import de.flowsuite.mailflow.common.entity.User;
-import de.flowsuite.mailflow.common.exception.EntityAlreadyExistsException;
-import de.flowsuite.mailflow.common.exception.EntityNotFoundException;
-import de.flowsuite.mailflow.common.exception.IdConflictException;
-import de.flowsuite.mailflow.common.exception.IdorException;
+import de.flowsuite.mailflow.common.exception.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,9 +36,11 @@ class MessageCategoryTest extends BaseServiceTest {
                 .id(1L)
                 .customerId(testUser.getCustomerId())
                 .category("Category")
-                .isReply(true)
-                .isFunctionCall(true)
-                .description("Description")
+                .reply(true)
+                .functionCall(true)
+                .description(
+                        "This is a detailed mocked description used solely for testing purposes"
+                                + " that contains over one hundred characters.")
                 .build();
     }
 
@@ -71,10 +70,28 @@ class MessageCategoryTest extends BaseServiceTest {
         assertNotNull(savedMessageCategory);
         assertEquals(testMessageCategory.getCustomerId(), savedMessageCategory.getCustomerId());
         assertEquals(testMessageCategory.getCategory(), savedMessageCategory.getCategory());
-        assertEquals(testMessageCategory.getIsReply(), savedMessageCategory.getIsReply());
-        assertEquals(
-                testMessageCategory.getIsFunctionCall(), savedMessageCategory.getIsFunctionCall());
+        assertEquals(testMessageCategory.getReply(), savedMessageCategory.getReply());
+        assertEquals(testMessageCategory.getFunctionCall(), savedMessageCategory.getFunctionCall());
         assertEquals(testMessageCategory.getDescription(), savedMessageCategory.getDescription());
+    }
+
+    @Test
+    void testCreateBlacklistEntry_descriptionTooShort() {
+        when(messageCategoryRepository.existsByCustomerIdAndCategory(
+                        testUser.getCustomerId(), testMessageCategory.getCategory()))
+                .thenReturn(false);
+
+        testMessageCategory.setId(null);
+        testMessageCategory.setDescription("Too short description");
+        assertNull(testMessageCategory.getId());
+
+        assertThrows(
+                MessageCategoryDescriptionException.class,
+                () ->
+                        messageCategoryService.createMessageCategory(
+                                testUser.getCustomerId(), testMessageCategory, jwtMock));
+
+        verify(messageCategoryRepository, never()).save(any(MessageCategory.class));
     }
 
     @Test
@@ -88,6 +105,25 @@ class MessageCategoryTest extends BaseServiceTest {
 
         assertThrows(
                 EntityAlreadyExistsException.class,
+                () ->
+                        messageCategoryService.createMessageCategory(
+                                testUser.getCustomerId(), testMessageCategory, jwtMock));
+
+        verify(messageCategoryRepository, never()).save(any(MessageCategory.class));
+    }
+
+    @Test
+    void testCreateBlacklistEntry_limitReached() {
+        when(messageCategoryRepository.existsByCustomerIdAndCategory(
+                        testUser.getCustomerId(), testMessageCategory.getCategory()))
+                .thenReturn(false);
+        when(messageCategoryRepository.countByCustomerId(testUser.getCustomerId())).thenReturn(10);
+
+        testMessageCategory.setId(null);
+        assertNull(testMessageCategory.getId());
+
+        assertThrows(
+                MessageCategoryLimitException.class,
                 () ->
                         messageCategoryService.createMessageCategory(
                                 testUser.getCustomerId(), testMessageCategory, jwtMock));

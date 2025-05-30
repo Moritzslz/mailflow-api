@@ -2,6 +2,7 @@ package de.flowsuite.mailflow.api.customer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import de.flowsuite.mailflow.common.dto.UpdateCustomerCrawlStatusRequest;
 import de.flowsuite.mailflow.common.entity.Customer;
 
 import jakarta.validation.Valid;
@@ -9,23 +10,38 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/customers")
 class CustomerResource {
 
-    private final CustomerService customerService;
+    private final Logger LOG = LoggerFactory.getLogger(CustomerResource.class);
+    private static final String NOTIFY_CUSTOMERS_URI = "/notifications/customers/{customerId}";
 
-    CustomerResource(CustomerService customerService) {
+    private final CustomerService customerService;
+    private final RestClient llmServiceRestClient;
+    private final RestClient apiRestClient;
+
+    CustomerResource(
+            CustomerService customerService,
+            @Qualifier("llmServiceRestClient") RestClient llmServiceRestClient,
+            @Qualifier("apiRestClient") RestClient apiRestClient) {
         this.customerService = customerService;
+        this.llmServiceRestClient = llmServiceRestClient;
+        this.apiRestClient = apiRestClient;
     }
 
     @PostMapping
@@ -44,6 +60,12 @@ class CustomerResource {
         return ResponseEntity.ok(customerService.getCustomer(id, jwt));
     }
 
+    @GetMapping("/{id}/test-version")
+    ResponseEntity<Boolean> getCustomerTestVersion(
+            @PathVariable long id, @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(customerService.getCustomerTestVersion(id, jwt));
+    }
+
     @GetMapping()
     ResponseEntity<List<Customer>> listCustomers() {
         return ResponseEntity.ok(customerService.listCustomers());
@@ -54,13 +76,47 @@ class CustomerResource {
             @PathVariable long id,
             @RequestBody @Valid Customer customer,
             @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(customerService.updateCustomer(id, customer, jwt));
+        Customer updatedCustomer = customerService.updateCustomer(id, customer, jwt);
+        CompletableFuture.runAsync(() -> notifyLlmService(updatedCustomer));
+        return ResponseEntity.ok(updatedCustomer);
     }
 
     @PutMapping("/{id}/test-version")
     ResponseEntity<Customer> updateCustomerTestVersion(
             @PathVariable long id, @RequestBody @Valid UpdateCustomerTestVersionRequest request) {
-        return ResponseEntity.ok(customerService.updateCustomerTestVersion(id, request));
+        Customer updatedCustomer = customerService.updateCustomerTestVersion(id, request);
+        CompletableFuture.runAsync(() -> notifyMailboxService(updatedCustomer));
+        return ResponseEntity.ok(updatedCustomer);
+    }
+
+    @PutMapping("/{id}/crawl-status")
+    ResponseEntity<Customer> updateCustomerCrawlStatus(
+            @PathVariable long id,
+            @RequestBody @Valid UpdateCustomerCrawlStatusRequest request,
+            @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(customerService.updateCustomerCrawlStatus(id, request, jwt));
+    }
+
+    private void notifyLlmService(Customer customer) {
+        LOG.debug("Notifying llm service of customer change");
+
+        llmServiceRestClient
+                .put()
+                .uri(NOTIFY_CUSTOMERS_URI, customer.getId())
+                .body(customer)
+                .retrieve()
+                .toBodilessEntity();
+    }
+
+    private void notifyMailboxService(Customer customer) {
+        LOG.debug("Notifying mailbox service of customer test version change");
+
+        apiRestClient
+                .put()
+                .uri(NOTIFY_CUSTOMERS_URI, customer.getId())
+                .body(customer)
+                .retrieve()
+                .toBodilessEntity();
     }
 
     record CreateCustomerRequest(
@@ -75,13 +131,17 @@ class CustomerResource {
             String websiteUrl,
             String privacyPolicyUrl,
             String ctaUrl,
-            boolean isTestVersion,
+            boolean testVersion,
             @Email String ionosUsername,
-            String ionosPassword) {}
+            String ionosPassword,
+            String defaultImapHost,
+            String defaultSmtpHost,
+            Integer defaultImapPort,
+            Integer defaultSmtpPort) {}
 
     record UpdateCustomerTestVersionRequest(
             @NotNull Long id,
-            boolean isTestVersion,
+            boolean testVersion,
             @Email String ionosUsername,
             String ionosPassword) {}
 }

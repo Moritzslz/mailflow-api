@@ -3,6 +3,7 @@ package de.flowsuite.mailflow.api.client;
 import de.flowsuite.mailflow.common.entity.Client;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,14 +18,14 @@ class ClientResource {
 
     private final ClientService clientService;
 
-    public ClientResource(ClientService clientService) {
+    ClientResource(ClientService clientService) {
         this.clientService = clientService;
     }
 
     @PostMapping
     ResponseEntity<Client> createClient(
-            @RequestBody @Valid Client client, UriComponentsBuilder uriBuilder) {
-        Client createdClient = clientService.createClient(client);
+            @RequestBody @Valid CreateClientRequest request, UriComponentsBuilder uriBuilder) {
+        Client createdClient = clientService.createClient(request);
 
         URI location =
                 uriBuilder.path("/clients/{id}").buildAndExpand(createdClient.getId()).toUri();
@@ -41,4 +42,7 @@ class ClientResource {
     ResponseEntity<List<Client>> listClients() {
         return ResponseEntity.ok(clientService.listClients());
     }
+
+    record CreateClientRequest(
+            @NotBlank String clientName, @NotBlank String clientSecret, @NotBlank String scope) {}
 }

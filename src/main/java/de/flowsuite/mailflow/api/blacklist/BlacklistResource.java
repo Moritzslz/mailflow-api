@@ -4,23 +4,35 @@ import de.flowsuite.mailflow.common.entity.BlacklistEntry;
 
 import jakarta.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/customers")
 class BlacklistResource {
 
-    private final BlacklistService blacklistService;
+    private static final Logger LOG = LoggerFactory.getLogger(BlacklistResource.class);
+    private static final String NOTIFY_BLACKLIST_URI = "/notifications/users/{userId}/blacklist";
 
-    BlacklistResource(BlacklistService blacklistService) {
+    private final BlacklistService blacklistService;
+    private final RestClient mailboxServiceRestClient;
+
+    BlacklistResource(
+            BlacklistService blacklistService,
+            @Qualifier("mailboxServiceRestClient") RestClient mailboxServiceRestClient) {
         this.blacklistService = blacklistService;
+        this.mailboxServiceRestClient = mailboxServiceRestClient;
     }
 
     @PostMapping("/{customerId}/users/{userId}/blacklist")
@@ -38,6 +50,8 @@ class BlacklistResource {
                         .path("/customers/{customerId}/users/{userId}/blacklist/{id}")
                         .buildAndExpand(customerId, userId, createdBlacklistEntry.getId())
                         .toUri();
+
+        CompletableFuture.runAsync(() -> notifyMailboxService(customerId, userId, jwt));
 
         return ResponseEntity.created(location).body(createdBlacklistEntry);
     }
@@ -66,6 +80,21 @@ class BlacklistResource {
             @PathVariable long id,
             @AuthenticationPrincipal Jwt jwt) {
         blacklistService.deleteBlacklistEntry(customerId, userId, id, jwt);
+        CompletableFuture.runAsync(() -> notifyMailboxService(customerId, userId, jwt));
         return ResponseEntity.noContent().build();
+    }
+
+    private void notifyMailboxService(long customerId, long userId, Jwt jwt) {
+        LOG.debug("Notifying mailbox service of blacklist change");
+
+        List<BlacklistEntry> blacklistEntries =
+                blacklistService.listBlacklistEntries(customerId, userId, jwt);
+
+        mailboxServiceRestClient
+                .put()
+                .uri(NOTIFY_BLACKLIST_URI, userId)
+                .body(blacklistEntries)
+                .retrieve()
+                .toBodilessEntity();
     }
 }

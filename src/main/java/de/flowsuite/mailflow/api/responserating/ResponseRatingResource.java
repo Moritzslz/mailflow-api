@@ -82,9 +82,15 @@ class ResponseRatingResource {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date to,
             @RequestParam(required = false) Timeframe timeframe,
             @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(
+        ResponseRatingAnalyticsResponse analyticsResponse =
                 responseRatingService.getResponseRatingAnalyticsForCustomer(
-                        customerId, from, to, timeframe, jwt));
+                        customerId, from, to, timeframe, jwt);
+
+        if (analyticsResponse == null) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.ok(analyticsResponse);
+        }
     }
 
     @GetMapping("/{customerId}/users/{userId}/response-ratings/analytics")
@@ -96,13 +102,19 @@ class ResponseRatingResource {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date to,
             @RequestParam(required = false) Timeframe timeframe,
             @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(
+        ResponseRatingAnalyticsResponse analyticsResponse =
                 responseRatingService.getResponseRatingAnalyticsForUser(
-                        customerId, userId, from, to, timeframe, jwt));
+                        customerId, userId, from, to, timeframe, jwt);
+
+        if (analyticsResponse == null) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.ok(analyticsResponse);
+        }
     }
 
     record CreateResponseRatingRequest(
-            boolean isSatisfied, @Min(0) @Max(5) int rating, String feedback) {}
+            boolean satisfied, @Min(0) @Max(5) int rating, String feedback) {}
 
     record ResponseRatingAnalyticsResponse(
             double avgSatisfaction, double avgRating, double ratingRate) {}

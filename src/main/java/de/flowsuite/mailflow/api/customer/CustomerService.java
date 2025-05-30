@@ -1,11 +1,9 @@
 package de.flowsuite.mailflow.api.customer;
 
 import de.flowsuite.mailflow.api.messagecategory.MessageCategoryService;
+import de.flowsuite.mailflow.common.dto.UpdateCustomerCrawlStatusRequest;
 import de.flowsuite.mailflow.common.entity.Customer;
-import de.flowsuite.mailflow.common.exception.EntityAlreadyExistsException;
-import de.flowsuite.mailflow.common.exception.EntityNotFoundException;
-import de.flowsuite.mailflow.common.exception.IdConflictException;
-import de.flowsuite.mailflow.common.exception.UpdateConflictException;
+import de.flowsuite.mailflow.common.exception.*;
 import de.flowsuite.mailflow.common.util.AesUtil;
 import de.flowsuite.mailflow.common.util.AuthorisationUtil;
 import de.flowsuite.mailflow.common.util.Util;
@@ -18,6 +16,12 @@ import java.util.Optional;
 
 @Service
 public class CustomerService {
+
+    private static final String DEFAULT_IONOS_IMAP_HOST = "imap.ionos.de";
+    private static final String DEFAULT_IONOS_SMTP_HOST = "smtp.ionos.de";
+    private static final int DEFAULT_IONOS_IMAP_PORT = 993;
+    private static final int DEFAULT_IONOS_SMTP_PORT = 465;
+    private static final int DEFAULT_CRAWL_FREQ = 3;
 
     private final CustomerRepository customerRepository;
     private final MessageCategoryService messageCategoryService;
@@ -58,6 +62,12 @@ public class CustomerService {
             Util.validateUrl(request.ctaUrl());
         }
 
+        Util.validateMailboxSettings(
+                request.defaultImapHost(),
+                request.defaultSmtpHost(),
+                request.defaultImapPort(),
+                request.defaultSmtpPort());
+
         String registrationToken = generateRegistrationToken();
 
         Customer customer =
@@ -74,8 +84,20 @@ public class CustomerService {
                         .privacyPolicyUrl(request.privacyPolicyUrl())
                         .ctaUrl(request.ctaUrl())
                         .registrationToken(registrationToken)
-                        .isTestVersion(request.isTestVersion())
+                        .testVersion(request.testVersion())
+                        .crawlFrequencyInDays(DEFAULT_CRAWL_FREQ)
+                        .defaultImapHost(request.defaultImapHost())
+                        .defaultSmtpHost(request.defaultSmtpHost())
+                        .defaultImapPort(request.defaultImapPort())
+                        .defaultSmtpPort(request.defaultSmtpPort())
                         .build();
+
+        if (request.testVersion()) {
+            customer.setDefaultImapHost(DEFAULT_IONOS_IMAP_HOST);
+            customer.setDefaultSmtpHost(DEFAULT_IONOS_SMTP_HOST);
+            customer.setDefaultImapPort(DEFAULT_IONOS_IMAP_PORT);
+            customer.setDefaultSmtpPort(DEFAULT_IONOS_SMTP_PORT);
+        }
 
         if (request.ionosUsername() != null && !request.ionosUsername().isBlank()) {
             Util.validateEmailAddress(request.ionosUsername());
@@ -88,7 +110,7 @@ public class CustomerService {
 
         Customer createdCustomer = customerRepository.save(customer);
 
-        messageCategoryService.createDefaultMessageCategory(createdCustomer.getId());
+        messageCategoryService.createDefaultMessageCategories(createdCustomer.getId());
 
         return createdCustomer;
     }
@@ -97,7 +119,7 @@ public class CustomerService {
         return (List<Customer>) customerRepository.findAll();
     }
 
-    Customer getCustomer(long id, Jwt jwt) {
+    public Customer getCustomer(long id, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(id, jwt);
 
         Customer customer =
@@ -113,10 +135,15 @@ public class CustomerService {
         return customer;
     }
 
-    Customer updateCustomer(long id, Customer customer, Jwt jwt) {
+    public boolean getCustomerTestVersion(long id, Jwt jwt) {
+        AuthorisationUtil.validateAccessToCustomer(id, jwt);
+        return customerRepository.existsByIdAndTestVersionTrue(id);
+    }
+
+    Customer updateCustomer(long id, Customer updatedCustomer, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(id, jwt);
 
-        if (!customer.getId().equals(id)) {
+        if (!updatedCustomer.getId().equals(id)) {
             throw new IdConflictException();
         }
 
@@ -126,11 +153,11 @@ public class CustomerService {
                         .orElseThrow(
                                 () -> new EntityNotFoundException(Customer.class.getSimpleName()));
 
-        if (!existingCustomer.getOpenaiApiKey().equals(customer.getOpenaiApiKey())) {
+        if (!existingCustomer.getOpenaiApiKey().equals(updatedCustomer.getOpenaiApiKey())) {
             throw new UpdateConflictException();
         }
 
-        String billingEmailAddress = customer.getBillingEmailAddress().toLowerCase();
+        String billingEmailAddress = updatedCustomer.getBillingEmailAddress().toLowerCase();
 
         if (!billingEmailAddress.equals(existingCustomer.getBillingEmailAddress())) {
             Util.validateEmailAddress(billingEmailAddress);
@@ -139,20 +166,37 @@ public class CustomerService {
                 throw new EntityAlreadyExistsException(Customer.class.getSimpleName());
             }
 
-            customer.setBillingEmailAddress(billingEmailAddress);
+            updatedCustomer.setBillingEmailAddress(billingEmailAddress);
         }
 
-        customer.setTestVersion(existingCustomer.isTestVersion());
+        updatedCustomer.setTestVersion(existingCustomer.isTestVersion());
 
         if (existingCustomer.isTestVersion()) {
-            customer.setIonosUsername(existingCustomer.getIonosUsername());
-            customer.setIonosPassword(existingCustomer.getIonosPassword());
+            updatedCustomer.setIonosUsername(existingCustomer.getIonosUsername());
+            updatedCustomer.setIonosPassword(existingCustomer.getIonosPassword());
         } else {
-            customer.setIonosUsername(null);
-            customer.setIonosPassword(null);
+            updatedCustomer.setIonosUsername(null);
+            updatedCustomer.setIonosPassword(null);
         }
 
-        return customerRepository.save(customer);
+        if (updatedCustomer.getLastCrawlAt() != null) {
+            if (existingCustomer.getLastCrawlAt() != null
+                    && updatedCustomer
+                            .getLastCrawlAt()
+                            .isBefore(existingCustomer.getLastCrawlAt())) {
+                throw new UpdateConflictException();
+            }
+        }
+        if (updatedCustomer.getNextCrawlAt() != null) {
+            if (existingCustomer.getNextCrawlAt() != null
+                    && updatedCustomer
+                            .getNextCrawlAt()
+                            .isBefore(existingCustomer.getNextCrawlAt())) {
+                throw new UpdateConflictException();
+            }
+        }
+
+        return customerRepository.save(updatedCustomer);
     }
 
     Customer updateCustomerTestVersion(
@@ -173,14 +217,39 @@ public class CustomerService {
                         .orElseThrow(
                                 () -> new EntityNotFoundException(Customer.class.getSimpleName()));
 
-        customer.setTestVersion(request.isTestVersion());
+        customer.setTestVersion(request.testVersion());
 
-        if (request.isTestVersion()) {
+        if (request.testVersion()) {
             customer.setIonosUsername(ionosUsername);
             customer.setIonosPassword(AesUtil.encrypt(request.ionosPassword()));
         } else {
             customer.setIonosUsername(null);
             customer.setIonosPassword(null);
+        }
+
+        return customerRepository.save(customer);
+    }
+
+    Customer updateCustomerCrawlStatus(long id, UpdateCustomerCrawlStatusRequest request, Jwt jwt) {
+        AuthorisationUtil.validateAccessToCustomer(id, jwt);
+
+        if (!request.id().equals(id)) {
+            throw new IdConflictException();
+        }
+
+        Customer customer =
+                customerRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () -> new EntityNotFoundException(Customer.class.getSimpleName()));
+
+        if (customer.getLastCrawlAt() != null
+                && request.lastCrawlAt().isBefore(customer.getLastCrawlAt())) {
+            throw new UpdateConflictException();
+        }
+        if (customer.getNextCrawlAt() != null
+                && request.nextCrawlAt().isBefore(customer.getNextCrawlAt())) {
+            throw new UpdateConflictException();
         }
 
         return customerRepository.save(customer);

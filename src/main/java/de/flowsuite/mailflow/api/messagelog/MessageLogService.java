@@ -3,6 +3,7 @@ package de.flowsuite.mailflow.api.messagelog;
 import static de.flowsuite.mailflow.common.util.Util.BERLIN_ZONE;
 
 import de.flowsuite.mailflow.common.constant.Timeframe;
+import de.flowsuite.mailflow.common.dto.CreateMessageLogEntryRequest;
 import de.flowsuite.mailflow.common.entity.MessageLogEntry;
 import de.flowsuite.mailflow.common.exception.EntityNotFoundException;
 import de.flowsuite.mailflow.common.exception.IdConflictException;
@@ -69,10 +70,7 @@ public class MessageLogService {
     }
 
     MessageLogEntry createMessageLogEntry(
-            long customerId,
-            long userId,
-            MessageLogResource.CreateMessageLogEntryRequest request,
-            Jwt jwt) {
+            long customerId, long userId, CreateMessageLogEntryRequest request, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
         AuthorisationUtil.validateAccessToUser(userId, jwt);
 
@@ -84,13 +82,17 @@ public class MessageLogService {
                 MessageLogEntry.builder()
                         .userId(request.userId())
                         .customerId(request.customerId())
-                        .isReplied(request.isReplied())
+                        .replied(request.replied())
                         .category(request.category())
                         .language(request.language())
                         .subject(request.subject())
                         .receivedAt(request.receivedAt())
                         .processedAt(request.processedAt())
                         .processingTimeInSeconds(request.processingTimeInSeconds())
+                        .categorisationLlmUsed(request.categorisationLlmUsed())
+                        .categorisationInputTokens(request.categorisationInputTokens())
+                        .categorisationOutputTokens(request.categorisationOutputTokens())
+                        .categorisationTotalTokens(request.categorisationTotalTokens())
                         .llmUsed(request.llmUsed())
                         .inputTokens(request.inputTokens())
                         .outputTokens(request.outputTokens())
@@ -144,17 +146,17 @@ public class MessageLogService {
 
     MessageLogResource.MessageLogAnalyticsResponse getMessageLogAnalyticsForCustomer(
             long customerId, Date from, Date to, Timeframe timeframe, Jwt jwt) {
-        return getMessageLogAnalytics(null, customerId, from, to, timeframe, jwt, false);
+        return getMessageLogAnalytics(customerId, null, from, to, timeframe, jwt, false);
     }
 
     MessageLogResource.MessageLogAnalyticsResponse getMessageLogAnalyticsForUser(
             long customerId, long userId, Date from, Date to, Timeframe timeframe, Jwt jwt) {
-        return getMessageLogAnalytics(userId, customerId, from, to, timeframe, jwt, true);
+        return getMessageLogAnalytics(customerId, userId, from, to, timeframe, jwt, true);
     }
 
     private MessageLogResource.MessageLogAnalyticsResponse getMessageLogAnalytics(
-            Long userId,
             long customerId,
+            Long userId,
             Date from,
             Date to,
             Timeframe timeframe,
@@ -197,6 +199,10 @@ public class MessageLogService {
                                 .aggregateAvgProcessingTimeAndResponseRateByCustomer(
                                         customerId, startDate, endDate)
                                 .get(0);
+
+        if (analyticsRow[0] == null) {
+            return null;
+        }
 
         double averageProcessingTimeInSeconds =
                 (double) Math.round((double) analyticsRow[0] * 100) / 100;

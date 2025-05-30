@@ -23,7 +23,10 @@ interface ResponseRatingRepository extends CrudRepository<ResponseRating, Long> 
             """
             SELECT
                 COUNT(r) as count,
-                COUNT(CASE WHEN r.isSatisfied THEN 1 END) * 1.0 / COUNT(r) AS avgSatisfaction,
+                CASE
+                    WHEN COUNT(r) = 0 THEN 0
+                    ELSE COUNT(CASE WHEN r.satisfied THEN 1 END) * 1.0 / COUNT(r)
+                END AS avgSatisfaction,
                 AVG(r.rating) AS avgRating
             FROM ResponseRating r
             WHERE r.customerId = :customerId
@@ -38,7 +41,10 @@ interface ResponseRatingRepository extends CrudRepository<ResponseRating, Long> 
             """
             SELECT
                 COUNT(r) as count,
-                COUNT(CASE WHEN r.isSatisfied THEN 1 END) * 1.0 / COUNT(r) AS avgSatisfaction,
+                CASE
+                    WHEN COUNT(r) = 0 THEN 0
+                    ELSE COUNT(CASE WHEN r.satisfied THEN 1 END) * 1.0 / COUNT(r)
+                END AS avgSatisfaction,
                 AVG(r.rating) AS avgRating
             FROM ResponseRating r
             WHERE r.userId = :userId

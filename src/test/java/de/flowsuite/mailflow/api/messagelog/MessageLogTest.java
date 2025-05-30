@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import de.flowsuite.mailflow.api.BaseServiceTest;
+import de.flowsuite.mailflow.common.dto.CreateMessageLogEntryRequest;
 import de.flowsuite.mailflow.common.entity.MessageLogEntry;
 import de.flowsuite.mailflow.common.entity.User;
 import de.flowsuite.mailflow.common.exception.EntityNotFoundException;
@@ -35,19 +36,19 @@ class MessageLogTest extends BaseServiceTest {
     @InjectMocks private MessageLogService messageLogService;
 
     private final User testUser = buildTestUser();
-    private final MessageLogResource.CreateMessageLogEntryRequest createMessageLogEntryRequest =
+    private final CreateMessageLogEntryRequest createMessageLogEntryRequest =
             buildCreateCustomerRequest(testUser.getId(), testUser.getCustomerId());
     private MessageLogEntry testMessageLogEntry;
 
-    private MessageLogResource.CreateMessageLogEntryRequest buildCreateCustomerRequest(
-            long userId, long customerId) {
+    private CreateMessageLogEntryRequest buildCreateCustomerRequest(long userId, long customerId) {
         int processingTimeInSeconds = 30;
         ZonedDateTime processAt = ZonedDateTime.now(BERLIN_ZONE);
         ZonedDateTime receivedAt = processAt.minusSeconds(processingTimeInSeconds);
 
-        return new MessageLogResource.CreateMessageLogEntryRequest(
+        return new CreateMessageLogEntryRequest(
                 userId,
                 customerId,
+                true,
                 true,
                 "Category",
                 "Language",
@@ -56,7 +57,11 @@ class MessageLogTest extends BaseServiceTest {
                 receivedAt,
                 processAt,
                 processingTimeInSeconds,
-                "LLM",
+                "Categorisation LLM",
+                1500,
+                1000,
+                2500,
+                "Generation LLM",
                 1500,
                 1000,
                 2500);
@@ -67,7 +72,7 @@ class MessageLogTest extends BaseServiceTest {
                 .id(1L)
                 .userId(createMessageLogEntryRequest.userId())
                 .customerId(createMessageLogEntryRequest.customerId())
-                .isReplied(createMessageLogEntryRequest.isReplied())
+                .replied(createMessageLogEntryRequest.replied())
                 .category(createMessageLogEntryRequest.category())
                 .language(createMessageLogEntryRequest.language())
                 .fromEmailAddress(ENCRYPTED_VALUE)
@@ -114,7 +119,7 @@ class MessageLogTest extends BaseServiceTest {
         assertEquals(
                 createMessageLogEntryRequest.customerId(), savedMessageLogEntry.getCustomerId());
         assertEquals(createMessageLogEntryRequest.userId(), savedMessageLogEntry.getUserId());
-        assertEquals(createMessageLogEntryRequest.isReplied(), savedMessageLogEntry.isReplied());
+        assertEquals(createMessageLogEntryRequest.replied(), savedMessageLogEntry.isReplied());
         assertEquals(createMessageLogEntryRequest.category(), savedMessageLogEntry.getCategory());
         assertEquals(createMessageLogEntryRequest.category(), savedMessageLogEntry.getCategory());
         assertEquals(createMessageLogEntryRequest.language(), savedMessageLogEntry.getLanguage());
@@ -127,6 +132,18 @@ class MessageLogTest extends BaseServiceTest {
         assertEquals(
                 createMessageLogEntryRequest.processingTimeInSeconds(),
                 savedMessageLogEntry.getProcessingTimeInSeconds());
+        assertEquals(
+                createMessageLogEntryRequest.categorisationLlmUsed(),
+                savedMessageLogEntry.getCategorisationLlmUsed());
+        assertEquals(
+                createMessageLogEntryRequest.categorisationInputTokens(),
+                savedMessageLogEntry.getCategorisationInputTokens());
+        assertEquals(
+                createMessageLogEntryRequest.categorisationOutputTokens(),
+                savedMessageLogEntry.getCategorisationOutputTokens());
+        assertEquals(
+                createMessageLogEntryRequest.categorisationTotalTokens(),
+                savedMessageLogEntry.getCategorisationTotalTokens());
         assertEquals(createMessageLogEntryRequest.llmUsed(), savedMessageLogEntry.getLlmUsed());
         assertEquals(
                 createMessageLogEntryRequest.inputTokens(), savedMessageLogEntry.getInputTokens());
@@ -141,9 +158,9 @@ class MessageLogTest extends BaseServiceTest {
     void testCreateMessageLogEntry_idConflict() {
         mockJwtWithUserAndCustomerClaims(testUser);
 
-        MessageLogResource.CreateMessageLogEntryRequest request1 =
+        CreateMessageLogEntryRequest request1 =
                 buildCreateCustomerRequest(testUser.getId() + 1, testUser.getCustomerId());
-        MessageLogResource.CreateMessageLogEntryRequest request2 =
+        CreateMessageLogEntryRequest request2 =
                 buildCreateCustomerRequest(testUser.getId(), testUser.getCustomerId() + 1);
 
         assertThrows(

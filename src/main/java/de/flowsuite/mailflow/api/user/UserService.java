@@ -122,9 +122,9 @@ public class UserService implements UserDetailsService {
                             .phoneNumber(phoneNumberEncrypted)
                             .position(request.position())
                             .role(Authorities.USER.getAuthority())
-                            .isAccountLocked(false)
-                            .isAccountEnabled(false)
-                            .isSubscribedToNewsletter(request.isSubscribedToNewsletter())
+                            .accountLocked(false)
+                            .accountEnabled(false)
+                            .subscribedToNewsletter(request.subscribedToNewsletter())
                             .verificationToken(verificationToken)
                             .tokenExpiresAt(tokenExpiresAt)
                             .build();
@@ -156,7 +156,7 @@ public class UserService implements UserDetailsService {
             }
 
             if (!isEnabled) {
-                user.setIsAccountEnabled(true);
+                user.setAccountEnabled(true);
                 userRepository.save(user);
                 mailService.sendWelcomeEmail(user.getId(), firstName, emailAddress);
             }
@@ -220,13 +220,25 @@ public class UserService implements UserDetailsService {
         return (List<User>) userRepository.findAll();
     }
 
-    User getUser(long customerId, long id, Jwt jwt) {
+    List<User> listUsersByCustomer(long customerId, Jwt jwt) {
+        AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
+        return userRepository.findAllByCustomerId(customerId);
+    }
+
+    User getUser(long customerId, long id, boolean decrypted, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
         AuthorisationUtil.validateAccessToUser(id, jwt);
 
         User user = getById(id);
         user.setFirstName(AesUtil.decrypt(user.getFirstName()));
         user.setLastName(AesUtil.decrypt(user.getLastName()));
+
+        if (decrypted) {
+            user.setEmailAddress(AesUtil.decrypt(user.getEmailAddress()));
+            if (user.getPhoneNumber() != null) {
+                user.setPhoneNumber(AesUtil.decrypt(user.getPhoneNumber()));
+            }
+        }
 
         return user;
     }
@@ -251,7 +263,7 @@ public class UserService implements UserDetailsService {
 
         user.setPhoneNumber(phoneNumberEncrypted);
         user.setPosition(request.position());
-        user.setIsSubscribedToNewsletter(request.isSubscribedToNewsletter());
+        user.setSubscribedToNewsletter(request.subscribedToNewsletter());
 
         return userRepository.save(user);
     }

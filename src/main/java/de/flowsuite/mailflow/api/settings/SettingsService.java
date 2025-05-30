@@ -1,14 +1,13 @@
 package de.flowsuite.mailflow.api.settings;
 
+import de.flowsuite.mailflow.api.customer.CustomerService;
 import de.flowsuite.mailflow.common.entity.Customer;
 import de.flowsuite.mailflow.common.entity.Settings;
-import de.flowsuite.mailflow.common.exception.EntityAlreadyExistsException;
-import de.flowsuite.mailflow.common.exception.EntityNotFoundException;
-import de.flowsuite.mailflow.common.exception.IdConflictException;
-import de.flowsuite.mailflow.common.exception.UpdateConflictException;
+import de.flowsuite.mailflow.common.exception.*;
 import de.flowsuite.mailflow.common.util.AesUtil;
 import de.flowsuite.mailflow.common.util.AuthorisationUtil;
 import de.flowsuite.mailflow.common.util.HmacUtil;
+import de.flowsuite.mailflow.common.util.Util;
 
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -17,16 +16,19 @@ import org.springframework.stereotype.Service;
 class SettingsService {
 
     private final SettingsRepository settingsRepository;
+    private final CustomerService customerService;
 
-    SettingsService(SettingsRepository settingsRepository) {
+    SettingsService(SettingsRepository settingsRepository, CustomerService customerService) {
         this.settingsRepository = settingsRepository;
+        this.customerService = customerService;
     }
 
-    Settings createSettings(long customerId, long userId, Settings settings, Jwt jwt) {
+    Settings createSettings(
+            long customerId, long userId, SettingsResource.CreateSettingsRequest request, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
         AuthorisationUtil.validateAccessToUser(userId, jwt);
 
-        if (!settings.getUserId().equals(userId) || !settings.getCustomerId().equals(customerId)) {
+        if (!request.userId().equals(userId) || !request.customerId().equals(customerId)) {
             throw new IdConflictException();
         }
 
@@ -34,8 +36,20 @@ class SettingsService {
             throw new EntityAlreadyExistsException(Settings.class.getSimpleName());
         }
 
-        settings.setMailboxPasswordHash(HmacUtil.hash(settings.getMailboxPassword()));
-        settings.setMailboxPassword(AesUtil.encrypt(settings.getMailboxPassword()));
+        Customer customer = customerService.getCustomer(customerId, jwt);
+
+        Settings settings = new Settings();
+        settings.setUserId(userId);
+        settings.setCustomerId(customerId);
+        settings.setExecutionEnabled(true);
+        settings.setAutoReplyEnabled(false);
+        settings.setResponseRatingEnabled(true);
+        settings.setMailboxPasswordHash(HmacUtil.hash(request.mailboxPassword()));
+        settings.setMailboxPassword(AesUtil.encrypt(request.mailboxPassword()));
+        settings.setImapHost(customer.getDefaultImapHost());
+        settings.setSmtpHost(customer.getDefaultSmtpHost());
+        settings.setImapPort(customer.getDefaultImapPort());
+        settings.setSmtpPort(customer.getDefaultSmtpPort());
 
         return settingsRepository.save(settings);
     }
@@ -64,27 +78,16 @@ class SettingsService {
                         .orElseThrow(
                                 () -> new EntityNotFoundException(Customer.class.getSimpleName()));
 
-        settings.setExecutionEnabled(request.isExecutionEnabled());
-        settings.setAutoReplyEnabled(request.isAutoReplyEnabled());
-        settings.setResponseRatingEnabled(request.isResponseRatingEnabled());
-        settings.setCrawlFrequencyInHours(request.crawlFrequencyInHours());
+        settings.setExecutionEnabled(request.executionEnabled());
+        settings.setAutoReplyEnabled(request.autoReplyEnabled());
+        settings.setResponseRatingEnabled(request.responseRatingEnabled());
         settings.setImapHost(request.imapHost());
         settings.setSmtpHost(request.smtpHost());
         settings.setImapPort(request.imapPort());
         settings.setSmtpPort(request.smtpPort());
 
-        if (request.lastCrawlAt() != null) {
-            if (settings.getLastCrawlAt() == null
-                    || request.lastCrawlAt().isAfter(settings.getLastCrawlAt())) {
-                settings.setLastCrawlAt(request.lastCrawlAt());
-            }
-        }
-        if (request.nextCrawlAt() != null) {
-            if (settings.getNextCrawlAt() == null
-                    || request.nextCrawlAt().isAfter(settings.getNextCrawlAt())) {
-                settings.setNextCrawlAt(request.nextCrawlAt());
-            }
-        }
+        Util.validateMailboxSettings(
+                request.imapHost(), request.smtpHost(), request.imapPort(), request.smtpPort());
 
         return settingsRepository.save(settings);
     }

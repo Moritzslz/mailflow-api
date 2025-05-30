@@ -9,7 +9,6 @@ import de.flowsuite.mailflow.api.BaseServiceTest;
 import de.flowsuite.mailflow.common.entity.Client;
 import de.flowsuite.mailflow.common.exception.EntityAlreadyExistsException;
 import de.flowsuite.mailflow.common.exception.EntityNotFoundException;
-import de.flowsuite.mailflow.common.exception.IdConflictException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,6 +32,9 @@ class ClientServiceTest extends BaseServiceTest {
 
     private Client testClient;
 
+    private ClientResource.CreateClientRequest createClientRequest =
+            new ClientResource.CreateClientRequest("test-client", "secret", "CLIENT");
+
     private Client buildTestClient() {
         return Client.builder().id(1L).clientName("test-client").clientSecret("secret").build();
     }
@@ -50,7 +52,7 @@ class ClientServiceTest extends BaseServiceTest {
         testClient.setId(null);
         assertNull(testClient.getId());
 
-        clientService.createClient(testClient);
+        clientService.createClient(createClientRequest);
 
         ArgumentCaptor<Client> clientCaptor = ArgumentCaptor.forClass(Client.class);
         verify(clientRepository).save(clientCaptor.capture());
@@ -62,13 +64,6 @@ class ClientServiceTest extends BaseServiceTest {
     }
 
     @Test
-    void testCreateClient_idConflict() {
-        assertThrows(IdConflictException.class, () -> clientService.createClient(testClient));
-
-        verify(clientRepository, never()).save(any());
-    }
-
-    @Test
     void testCreateClient_alreadyExists() {
         when(clientRepository.existsByClientName(testClient.getClientName())).thenReturn(true);
 
@@ -76,7 +71,8 @@ class ClientServiceTest extends BaseServiceTest {
         assertNull(testClient.getId());
 
         assertThrows(
-                EntityAlreadyExistsException.class, () -> clientService.createClient(testClient));
+                EntityAlreadyExistsException.class,
+                () -> clientService.createClient(createClientRequest));
 
         verify(clientRepository, never()).save(any(Client.class));
     }

@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import de.flowsuite.mailflow.api.BaseServiceTest;
+import de.flowsuite.mailflow.api.messagecategory.MessageCategoryService;
 import de.flowsuite.mailflow.common.entity.Customer;
 import de.flowsuite.mailflow.common.entity.User;
 import de.flowsuite.mailflow.common.exception.*;
@@ -18,13 +19,23 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class CustomerServiceTest extends BaseServiceTest {
 
+    protected static final int DEFAULT_CRAWL_FREQ = 3;
+
+    protected static final String DEFAULT_IMAP_HOST = "imapHost";
+    protected static final String DEFAULT_SMTP_HOST = "smtpHost";
+    protected static final String UPDATED_IMAP_HOST = "updated imapHost";
+    protected static final String UPDATED_SMTP_HOST = "update smtpHost";
+
     @Mock private CustomerRepository customerRepository;
+
+    @Mock private MessageCategoryService messageCategoryService;
 
     @InjectMocks private CustomerService customerService;
 
@@ -44,11 +55,16 @@ class CustomerServiceTest extends BaseServiceTest {
                     "https://example.com",
                     "https://example.com/privacy-policy",
                     "https://example.com/cta",
-                    true,
+                    false,
                     "test@ionos.de",
-                    "password");
+                    "password",
+                    DEFAULT_IMAP_HOST,
+                    DEFAULT_SMTP_HOST,
+                    993,
+                    465);
 
     private Customer buildTestCustomer() {
+        ZonedDateTime now = ZonedDateTime.now();
         return Customer.builder()
                 .id(testUser.getCustomerId())
                 .company(createCustomerRequest.company())
@@ -63,9 +79,18 @@ class CustomerServiceTest extends BaseServiceTest {
                 .privacyPolicyUrl(createCustomerRequest.privacyPolicyUrl())
                 .ctaUrl(createCustomerRequest.ctaUrl())
                 .registrationToken("registrationToken")
-                .isTestVersion(false)
+                .testVersion(false)
                 .ionosUsername(createCustomerRequest.ionosUsername())
                 .ionosPassword(ENCRYPTED_VALUE)
+                .crawlFrequencyInDays(DEFAULT_CRAWL_FREQ)
+                .defaultImapHost(DEFAULT_IMAP_HOST)
+                .defaultSmtpHost(DEFAULT_SMTP_HOST)
+                .defaultImapPort(993)
+                .defaultSmtpPort(465)
+                .systemPrompt("system prompt")
+                .messagePrompt("message prompt")
+                .lastCrawlAt(now)
+                .nextCrawlAt(now.plusHours(DEFAULT_CRAWL_FREQ))
                 .build();
     }
 
@@ -80,6 +105,7 @@ class CustomerServiceTest extends BaseServiceTest {
                         createCustomerRequest.billingEmailAddress()))
                 .thenReturn(false);
         when(customerRepository.existsByRegistrationToken(anyString())).thenReturn(false);
+        when(customerRepository.save(any(Customer.class))).thenReturn(testCustomer);
 
         customerService.createCustomer(createCustomerRequest);
 
@@ -101,9 +127,18 @@ class CustomerServiceTest extends BaseServiceTest {
         assertEquals(createCustomerRequest.websiteUrl(), savedCustomer.getWebsiteUrl());
         assertEquals(createCustomerRequest.privacyPolicyUrl(), savedCustomer.getPrivacyPolicyUrl());
         assertEquals(createCustomerRequest.ctaUrl(), savedCustomer.getCtaUrl());
-        assertEquals(createCustomerRequest.isTestVersion(), savedCustomer.isTestVersion());
+        assertEquals(createCustomerRequest.testVersion(), savedCustomer.isTestVersion());
         assertEquals(createCustomerRequest.ionosUsername(), savedCustomer.getIonosUsername());
         assertEquals(ENCRYPTED_VALUE, savedCustomer.getIonosPassword());
+        assertEquals(DEFAULT_CRAWL_FREQ, savedCustomer.getCrawlFrequencyInDays());
+        assertEquals(createCustomerRequest.defaultImapHost(), savedCustomer.getDefaultImapHost());
+        assertEquals(createCustomerRequest.defaultSmtpHost(), savedCustomer.getDefaultSmtpHost());
+        assertEquals(createCustomerRequest.defaultImapPort(), savedCustomer.getDefaultImapPort());
+        assertEquals(createCustomerRequest.defaultSmtpPort(), savedCustomer.getDefaultSmtpPort());
+        assertNull(savedCustomer.getSystemPrompt());
+        assertNull(savedCustomer.getMessagePrompt());
+        assertNull(savedCustomer.getLastCrawlAt());
+        assertNull(savedCustomer.getNextCrawlAt());
         // spotless:on
     }
 
@@ -195,6 +230,8 @@ class CustomerServiceTest extends BaseServiceTest {
 
         Customer updatedCustomer = buildTestCustomer();
         updatedCustomer.setCompany("Updated Company");
+        updatedCustomer.setDefaultImapHost(UPDATED_IMAP_HOST);
+        updatedCustomer.setDefaultSmtpHost(UPDATED_SMTP_HOST);
 
         customerService.updateCustomer(testCustomer.getId(), updatedCustomer, jwtMock);
 

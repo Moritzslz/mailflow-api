@@ -1,11 +1,10 @@
 package de.flowsuite.mailflow.api.messagelog;
 
 import de.flowsuite.mailflow.common.constant.Timeframe;
+import de.flowsuite.mailflow.common.dto.CreateMessageLogEntryRequest;
 import de.flowsuite.mailflow.common.entity.MessageLogEntry;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -86,9 +84,15 @@ class MessageLogResource {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date to,
             @RequestParam(required = false) Timeframe timeframe,
             @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(
+        MessageLogAnalyticsResponse analyticsResponse =
                 messageLogService.getMessageLogAnalyticsForCustomer(
-                        customerId, from, to, timeframe, jwt));
+                        customerId, from, to, timeframe, jwt);
+
+        if (analyticsResponse == null) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.ok(analyticsResponse);
+        }
     }
 
     @GetMapping("/{customerId}/users/{userId}/message-log/analytics")
@@ -100,26 +104,16 @@ class MessageLogResource {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date to,
             @RequestParam(required = false) Timeframe timeframe,
             @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(
+        MessageLogAnalyticsResponse analyticsResponse =
                 messageLogService.getMessageLogAnalyticsForUser(
-                        customerId, userId, from, to, timeframe, jwt));
-    }
+                        customerId, userId, from, to, timeframe, jwt);
 
-    record CreateMessageLogEntryRequest(
-            @NotNull Long userId,
-            @NotNull Long customerId,
-            boolean isReplied,
-            @NotBlank String category,
-            @NotBlank String language,
-            String fromEmailAddress,
-            String subject,
-            @NotNull ZonedDateTime receivedAt,
-            @NotNull ZonedDateTime processedAt,
-            @NotNull Integer processingTimeInSeconds,
-            @NotBlank String llmUsed,
-            @NotNull Integer inputTokens,
-            @NotNull Integer outputTokens,
-            @NotNull Integer totalTokens) {}
+        if (analyticsResponse == null) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.ok(analyticsResponse);
+        }
+    }
 
     record MessageLogAnalyticsResponse(
             double avgProcessingTimeInSeconds,

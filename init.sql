@@ -7,14 +7,23 @@ CREATE TABLE customers (
     city VARCHAR(64) NOT NULL,
     billing_email_address VARCHAR(64) NOT NULL UNIQUE ,
     openai_api_key_encrypted TEXT NOT NULL,
+    system_prompt TEXT,
+    message_prompt TEXT,
     source_of_contact VARCHAR(64),
     website_url TEXT,
     privacy_policy_url TEXT,
     cta_url TEXT,
     registration_token TEXT UNIQUE NOT NULL,
-    is_test_version BOOLEAN,
+    test_version BOOLEAN,
     ionos_username VARCHAR(64),
-    ionos_password_encrypted TEXT
+    ionos_password_encrypted TEXT,
+    crawl_frequency_in_days INTEGER DEFAULT 3 NOT NULL,
+    last_crawl_at TIMESTAMP WITH TIME ZONE,
+    next_crawl_at TIMESTAMP WITH TIME ZONE,
+    default_imap_host VARCHAR(64),
+    default_smtp_host VARCHAR(64),
+    default_imap_port INTEGER,
+    default_smtp_port INTEGER
 );
 CREATE INDEX idx_customers_registration_token ON customers(registration_token);
 
@@ -29,9 +38,9 @@ CREATE TABLE users (
     phone_number_encrypted TEXT,
     position VARCHAR(64),
     role VARCHAR(16) DEFAULT 'USER' NOT NULL,
-    is_account_locked BOOLEAN NOT NULL,
-    is_account_enabled BOOLEAN NOT NULL,
-    is_subscribed_to_newsletter BOOLEAN NOT NULL,
+    account_locked BOOLEAN NOT NULL,
+    account_enabled BOOLEAN NOT NULL,
+    subscribed_to_newsletter BOOLEAN NOT NULL,
     verification_token TEXT UNIQUE NOT NULL,
     token_expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
     last_login_at TIMESTAMP WITH TIME ZONE,
@@ -52,12 +61,9 @@ CREATE TABLE clients (
 CREATE TABLE settings (
     user_id BIGSERIAL PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
     customer_id BIGINT REFERENCES customers(id) ON DELETE CASCADE NOT NULL,
-    is_execution_enabled BOOLEAN NOT NULL,
-    is_auto_reply_enabled BOOLEAN DEFAULT FALSE NOT NULL,
-    is_response_rating_enabled BOOLEAN DEFAULT TRUE NOT NULL,
-    crawl_frequency_in_hours INTEGER DEFAULT 168 NOT NULL,
-    last_crawl_at TIMESTAMP WITH TIME ZONE,
-    next_crawl_at TIMESTAMP WITH TIME ZONE,
+    execution_enabled BOOLEAN NOT NULL,
+    auto_reply_enabled BOOLEAN DEFAULT FALSE NOT NULL,
+    response_rating_enabled BOOLEAN DEFAULT TRUE NOT NULL,
     mailbox_password_hash TEXT NOT NULL,
     mailbox_password_encrypted TEXT NOT NULL,
     imap_host VARCHAR(64),
@@ -70,7 +76,8 @@ CREATE TABLE rag_urls (
     id BIGSERIAL PRIMARY KEY,
     customer_id BIGINT REFERENCES customers(id) ON DELETE CASCADE NOT NULL,
     url TEXT NOT NULL,
-    is_last_crawl_successful BOOLEAN
+    last_crawl_successful BOOLEAN,
+    description TEXT
 );
 CREATE INDEX idx_rag_urls_customer_id ON rag_urls(customer_id);
 
@@ -87,8 +94,8 @@ CREATE TABLE message_categories (
     id BIGSERIAL PRIMARY KEY,
     customer_id BIGINT REFERENCES customers(id) ON DELETE CASCADE NOT NULL,
     category VARCHAR(64) NOT NULL,
-    is_reply BOOLEAN DEFAULT FALSE NOT NULL,
-    is_function_call BOOLEAN DEFAULT FALSE NOT NULL,
+    reply BOOLEAN DEFAULT FALSE NOT NULL,
+    function_call BOOLEAN DEFAULT FALSE NOT NULL,
     description TEXT NOT NULL,
     UNIQUE (customer_id, category)
 );
@@ -98,18 +105,23 @@ CREATE TABLE message_log (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT REFERENCES users(id) ON DELETE CASCADE NOT NULL,
     customer_id BIGINT REFERENCES customers(id) ON DELETE CASCADE NOT NULL,
-    is_replied BOOLEAN NOT NULL,
+    replied BOOLEAN NOT NULL,
+    function_call BOOLEAN NOT NULL,
     category VARCHAR(64) NOT NULL,
-    language VARCHAR(64) NOT NULL,
+    language VARCHAR(64),
     from_email_address_encrypted TEXT,
     subject TEXT,
     received_at TIMESTAMP WITH TIME ZONE NOT NULL,
     processed_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     processing_time_in_seconds INTEGER NOT NULL,
-    llm_used VARCHAR(64) NOT NULL,
-    input_tokens INTEGER NOT NULL,
-    output_tokens INTEGER NOT NULL,
-    total_tokens INTEGER NOT NULL,
+    categorisation_llm_used VARCHAR(64),
+    categorisation_input_tokens INTEGER,
+    categorisation_output_tokens INTEGER,
+    categorisation_total_tokens INTEGER,
+    llm_used VARCHAR(64),
+    input_tokens INTEGER,
+    output_tokens INTEGER,
+    total_tokens INTEGER,
     token TEXT UNIQUE NOT NULL,
     token_expires_at TIMESTAMP WITH TIME ZONE NOT NULL
 );
@@ -125,7 +137,7 @@ CREATE TABLE response_ratings (
     message_log_id BIGSERIAL PRIMARY KEY REFERENCES message_log(id) ON DELETE CASCADE,
     customer_id BIGINT REFERENCES customers(id) ON DELETE CASCADE NOT NULL,
     user_id BIGINT REFERENCES users(id) ON DELETE CASCADE NOT NULL,
-    is_satisfied BOOLEAN NOT NULL,
+    satisfied BOOLEAN NOT NULL,
     rating INTEGER CHECK (rating BETWEEN 1 AND 5) NOT NULL,
     feedback TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
@@ -136,77 +148,110 @@ CREATE INDEX idx_response_ratings_user_id ON response_ratings(user_id);
 CREATE INDEX idx_response_ratings_rating ON response_ratings(rating);
 CREATE INDEX idx_response_ratings_rated_at ON response_ratings(created_at);
 
-INSERT INTO customers (company, street, house_number, postal_code, city, billing_email_address, openai_api_key_encrypted, registration_token, is_test_version, ionos_username, ionos_password_encrypted)
-VALUES ('FlowSuite', 'Straße', '69', '1337', 'München', 'rechnungen@flow-suite.de', 'R0p2fHYTSBAHIq5YEWzN1Jwnfar/IwvyqnPhw/AGjwliTfNO71WPHw==', 'secureToken1', true, 'test@flow-suite.de' , 'nxFNCTbBVAbIrQfJ2vSlDf261/MbLRyM8cclSjqNaz5sPT+kXl7PkheKR2A9Qd7i'),
-       ('Company', 'Street', '69', '1337', 'City', 'billing@example.de', 'R0p2fHYTSBAHIq5YEWzN1Jwnfar/IwvyqnPhw/AGjwliTfNO71WPHw==', 'secureToken2', true, 'info@flow-suite.de', 'z5RN8Uv5mdoAbmUn+dgLeEqzEHQsRed8tJaN87VIWj3ph32V0SJ8Vd+32haVU3nv');
+INSERT INTO customers (company, street, house_number, postal_code, city, billing_email_address, openai_api_key_encrypted, registration_token, test_version, ionos_username, ionos_password_encrypted, crawl_frequency_in_days, default_imap_host, default_smtp_host, default_imap_port, default_smtp_port)
+VALUES ('FlowSuite', 'Straße', '69', '1337', 'München', 'rechnungen@flow-suite.de', 'SWvI2dniMcOCVvyinJk+gM+gqIhMAeRXZxJYxxGd2ARxD/gOcHUQzXSpb+ubHRQKLaqwaEl4CDb2jEBpIgXpfY+7doKZi1sdhQM3xPpCUwpAwvKADVCa35gL8ik48RFrrj0XWYpMfukp5VkasmUvqOp3dU6OaWTfm73smztqcZuRyWEFCnU1CEGCLrwKfSPRsxbK43sZvr1Isl7lFwLtMLVp9a5ufU1QvvL/vy5EBVat8L/J9G1lubw+RbS8u25I', 'secureToken1', true, 'test@flow-suite.de' , 'nxFNCTbBVAbIrQfJ2vSlDf261/MbLRyM8cclSjqNaz5sPT+kXl7PkheKR2A9Qd7i', 3, 'imap.ionos.de', 'smtp.ionos.de', 993, 465),
+       ('Company', 'Street', '69', '1337', 'City', 'billing@example.de', 'SWvI2dniMcOCVvyinJk+gM+gqIhMAeRXZxJYxxGd2ARxD/gOcHUQzXSpb+ubHRQKLaqwaEl4CDb2jEBpIgXpfY+7doKZi1sdhQM3xPpCUwpAwvKADVCa35gL8ik48RFrrj0XWYpMfukp5VkasmUvqOp3dU6OaWTfm73smztqcZuRyWEFCnU1CEGCLrwKfSPRsxbK43sZvr1Isl7lFwLtMLVp9a5ufU1QvvL/vy5EBVat8L/J9G1lubw+RbS8u25I', 'secureToken2', true, 'info@flow-suite.de', 'z5RN8Uv5mdoAbmUn+dgLeEqzEHQsRed8tJaN87VIWj3ph32V0SJ8Vd+32haVU3nv', 3, 'imap.ionos.de', 'smtp.ionos.de', 993, 465);
 
-INSERT INTO users (customer_id, first_name_encrypted, last_name_encrypted, email_address_hash, email_address_encrypted, password_hash, role, is_account_locked, is_account_enabled, is_subscribed_to_newsletter, verification_token, token_expires_at)
+INSERT INTO users (customer_id, first_name_encrypted, last_name_encrypted, email_address_hash, email_address_encrypted, password_hash, role, account_locked, account_enabled, subscribed_to_newsletter, verification_token, token_expires_at)
 VALUES (1, 'Uztmz8Fii79yN2SY6wg5md6Ek5RLeBzMGYlNlqYutLyj', 'Uztmz8Fii79yN2SY6wg5md6Ek5RLeBzMGYlNlqYutLyj', 'Cb6R4BLpHhVMebqauEd3TZrhfdkR8hFjvulTHYUfbNM=', 'DMX3vfIVH7vta9jAgOUbwEWGRTa5jFiv2yLi6BMnNv4d7hcfQFdMGnUCRcJPfA==', '$2a$10$t0Olv0N4TdmUfd9yG242i.znX.NN7c.a3AU9DadUg1ro0Xsc8jvom', 'ADMIN', false, true, true, 'token1', NOW() + INTERVAL '30 minutes'),
-       (2, 'RtlBAwPz6EdINA4O51gu8uz0AuZ0UHE5FJPC26Xbquo=', 'RtlBAwPz6EdINA4O51gu8uz0AuZ0UHE5FJPC26Xbquo=', 'PCwU0vnyGsBYrljsDMd3Kf5Lq/fhqG7VLMc/aCKR+fU=', 'dUh6ZVPbVWlEXLriwsBEUoOiKaPsw0t4aEmkxSnMRdeTc1eJ50ViftqoRcKcEQ==', '$2a$10$t0Olv0N4TdmUfd9yG242i.znX.NN7c.a3AU9DadUg1ro0Xsc8jvom', 'USER', false, true, true, 'token2', NOW() + INTERVAL '30 minutes');
+       (2, 'RtlBAwPz6EdINA4O51gu8uz0AuZ0UHE5FJPC26Xbquo=', 'RtlBAwPz6EdINA4O51gu8uz0AuZ0UHE5FJPC26Xbquo=', 'PCwU0vnyGsBYrljsDMd3Kf5Lq/fhqG7VLMc/aCKR+fU=', 'dUh6ZVPbVWlEXLriwsBEUoOiKaPsw0t4aEmkxSnMRdeTc1eJ50ViftqoRcKcEQ==', '$2a$10$t0Olv0N4TdmUfd9yG242i.znX.NN7c.a3AU9DadUg1ro0Xsc8jvom', 'MANAGER', false, true, true, 'token2', NOW() + INTERVAL '30 minutes');
+
 
 INSERT INTO clients(client_name, client_secret_hash, scope)
-VALUES ('mailbox-service', '$2a$10$4/8k4VN17iFXP4PD840vVOV.RvKwWQ.pFP9cjOPSqYHYmeWMk1wXe', 'CLIENT customers:list customers:read settings:read'),
-       ('rag-service', '$2a$10$4/8k4VN17iFXP4PD840vVOV.RvKwWQ.pFP9cjOPSqYHYmeWMk1wXe', 'CLIENT customers:list customers:read settings:read'),
-       ('llm-service', '$2a$10$4/8k4VN17iFXP4PD840vVOV.RvKwWQ.pFP9cjOPSqYHYmeWMk1wXe', 'CLIENT customers:list customers:read settings:read');
+VALUES ('mailflow-api', '$2a$10$4/8k4VN17iFXP4PD840vVOV.RvKwWQ.pFP9cjOPSqYHYmeWMk1wXe', 'CLIENT'),
+       ('mailbox-service', '$2a$10$4/8k4VN17iFXP4PD840vVOV.RvKwWQ.pFP9cjOPSqYHYmeWMk1wXe', 'CLIENT users:list customers:read message_categories:list blacklist:list'),
+       ('rag-service', '$2a$10$4/8k4VN17iFXP4PD840vVOV.RvKwWQ.pFP9cjOPSqYHYmeWMk1wXe', 'CLIENT rag_urls:write rag_urls:list customers:list customers:write customers:read'),
+       ('llm-service', '$2a$10$4/8k4VN17iFXP4PD840vVOV.RvKwWQ.pFP9cjOPSqYHYmeWMk1wXe', 'CLIENT customers:read message_log:write');
 
 
-INSERT INTO settings (user_id, customer_id, is_execution_enabled, is_auto_reply_enabled, is_response_rating_enabled, crawl_frequency_in_hours, mailbox_password_hash, mailbox_password_encrypted, imap_host, smtp_host, imap_port, smtp_port)
-VALUES (1, 1,true, false, true, 168, '41yeeikOtfki4nlr4piOQ1QVD8+ZeJFk8gGeTzHNFHw=', 'nxFNCTbBVAbIrQfJ2vSlDf261/MbLRyM8cclSjqNaz5sPT+kXl7PkheKR2A9Qd7i', 'imap.ionos.de', 'smtp.ionos.de', 993, 465),
-       (2, 2,true, false, true, 168, 'lCh3te1DelaKsFWzM7N58Ib8i9D7lB6Xr9HBQUoL57M=', 'z5RN8Uv5mdoAbmUn+dgLeEqzEHQsRed8tJaN87VIWj3ph32V0SJ8Vd+32haVU3nv', 'imap.ionos.de', 'smtp.ionos.de', 993, 465);
+INSERT INTO settings (user_id, customer_id, execution_enabled, auto_reply_enabled, response_rating_enabled, mailbox_password_hash, mailbox_password_encrypted, imap_host, smtp_host, imap_port, smtp_port)
+VALUES (1, 1,true, false, true,  '41yeeikOtfki4nlr4piOQ1QVD8+ZeJFk8gGeTzHNFHw=', 'nxFNCTbBVAbIrQfJ2vSlDf261/MbLRyM8cclSjqNaz5sPT+kXl7PkheKR2A9Qd7i', 'imap.ionos.de', 'smtp.ionos.de', 993, 465),
+       (2, 2,true, false, true,  'lCh3te1DelaKsFWzM7N58Ib8i9D7lB6Xr9HBQUoL57M=', 'z5RN8Uv5mdoAbmUn+dgLeEqzEHQsRed8tJaN87VIWj3ph32V0SJ8Vd+32haVU3nv', 'imap.ionos.de', 'smtp.ionos.de', 993, 465);
 
-INSERT INTO rag_urls (customer_id, url, is_last_crawl_successful)
-VALUES (1, 'https://www.flow-suite.de', NULL),
-       (2, 'https://www.flow-suite.de', NULL);
+INSERT INTO rag_urls (customer_id, url, last_crawl_successful, description)
+VALUES (1, 'https://www.flow-suite.de', NULL, 'Flow Suite Website'),
+       (2, 'https://products.pulspower.com/en/cp5-121.html', NULL, 'product: cp5-121'),
+       (2, 'https://products.pulspower.com/en/cp5-241.html', NULL, 'product: cp5-241'),
+       (2, 'https://products.pulspower.com/en/cp5-241-c1.html', NULL, 'product: cp5-241-c1'),
+       (2, 'https://products.pulspower.com/en/cp10-241-etc.html', NULL, 'product: cp10-241-etc'),
+       (2, 'https://products.pulspower.com/en/fpt500-241-001-102.html', NULL, 'product: fpt500-241-001-102'),
+       (2, 'https://products.pulspower.com/en/cp5-121.html', NULL, 'product: cp5-121'),
+       (2, 'https://www.pulspower.com/support/downloads/company-certificates/', NULL, 'Company certificates');
+
+
 
 INSERT INTO blacklist (user_id, blacklisted_email_address_hash, blacklisted_email_address_encrypted)
 VALUES (1, 'PCwU0vnyGsBYrljsDMd3Kf5Lq/fhqG7VLMc/aCKR+fU=', 'ks5Bk+l9E29nDULdti6ihyz8ZFfqwvc8wfxiRL2d0HSvtVOkPJZ8g3zDnnFhJQ=='),
        (1, 'sOCDd3BNjIapxAdppHUn6OcqwPkmkw6XVjVwR0acfJ8=', 'qLwsA99/GkXAT56obP1sLJBg9sB5yGHWCxCsBmQjN3hs3lm86kXFaxNjAMMQx8mHtKsy'),
        (2, 'PCwU0vnyGsBYrljsDMd3Kf5Lq/fhqG7VLMc/aCKR+fU=', 'ks5Bk+l9E29nDULdti6ihyz8ZFfqwvc8wfxiRL2d0HSvtVOkPJZ8g3zDnnFhJQ==');
 
-INSERT INTO message_categories (customer_id, category, is_reply, is_function_call, description)
-VALUES (2, 'Produkt Frage', true, false, 'Allgemeine Fragen zum Produkt'),
-       (2, 'Buchungsanfrage', true, true, 'Buchungsanfragen für ein Hotelzimmer'),
-       (2, 'Support', false, false, 'Generelle Support Anfrage');
-
-INSERT INTO message_log (user_id, customer_id, is_replied, category, language, from_email_address_encrypted,subject, received_at, processed_at, processing_time_in_seconds,llm_used, input_tokens, output_tokens, total_tokens, token, token_expires_at)
+INSERT INTO message_categories (customer_id, category, reply, function_call, description)
+VALUES
+    (1, 'Produkt Frage', true, false, 'Allgemeine Fragen zum Produkt'),
+    (1, 'Buchungsanfrage', true, true, 'Buchungsanfragen für ein Hotelzimmer'),
+    (1, 'Support', false, false, 'Generelle Support Anfrage'),
+    (1, 'Default', true, false, 'This is the default/fallback category for actionable emails that do not fit into any other defined category. If an email does not match any other category, it will be assigned here. This category is useful for handling edge cases and ensuring no email is left uncategorised.'),
+    (1, 'No Reply', false, false, 'This category is for emails that do not require a response and are not actionable. This includes newsletters, promotional offers, automated notifications, and any other informational or unimportant emails that should not be replied to. Security-related emails such as one-time codes and password reset requests should NOT be categorized here, as they are actionable and important.'),
+    (2, 'Produkt Frage', true, false, 'Allgemeine Fragen zum Produkt'),
+    (2, 'Buchungsanfrage', true, true, 'Buchungsanfragen für ein Hotelzimmer'),
+    (2, 'Support', false, false, 'Generelle Support Anfrage'),
+    (2, 'Default', true, false, 'This is the default/fallback category for actionable emails that do not fit into any other defined category. If an email does not match any other category, it will be assigned here. This category is useful for handling edge cases and ensuring no email is left uncategorised.'),
+    (2, 'No Reply', false, false, 'This category is for emails that do not require a response and are not actionable. This includes newsletters, promotional offers, automated notifications, and any other informational or unimportant emails that should not be replied to. Security-related emails such as one-time codes and password reset requests should NOT be categorized here, as they are actionable and important.');INSERT INTO message_log (user_id, customer_id, replied, function_call, category, language, from_email_address_encrypted,subject, received_at, processed_at, processing_time_in_seconds,categorisation_llm_used, categorisation_input_tokens, categorisation_output_tokens, categorisation_total_tokens, llm_used, input_tokens, output_tokens, total_tokens, token, token_expires_at)
 VALUES
 -- 2024
-(2, 2, true, 'Produkt Frage', 'Deutsch', 'user@example.com', 'Test', '2024-03-25T09:00:00+01:00', '2024-03-25T09:00:00+01:00', 40, 'gpt-4', 1600, 1200, 2800, 'token1', NOW() + INTERVAL '30 minutes'),
+(2, 2, true, false, 'Produkt Frage', 'Deutsch', 'user@example.com', 'Test', '2024-03-25T09:00:00+01:00', '2024-03-25T09:00:00+01:00', 40, 'gpt-4', 1600, 1200, 2800, 'gpt-4', 1600, 1200, 2800, 'token1', NOW() + INTERVAL '30 minutes'),
 -- Week of March 25–31
-(1, 1, true, 'Produkt Frage', 'Deutsch', 'user@example.com', 'Test', '2025-03-25T09:00:00+01:00', '2025-03-25T09:00:00+01:00', 40, 'gpt-4', 1600, 1200, 2800, 'token2', NOW() + INTERVAL '30 minutes'),
-(2, 2, true, 'Buchungsanfrage', 'Deutsch', 'user@example.com', 'Test', '2025-03-27T14:30:00+01:00', '2025-03-27T14:30:00+01:00', 38, 'gpt-4', 1580, 1190, 2770, 'token3', NOW() + INTERVAL '30 minutes'),
-(2, 2, false, 'Support', 'Deutsch', 'user@example.com', 'Test', '2025-03-29T10:45:00+01:00', '2025-03-29T10:45:00+01:00', 35, 'gpt-4', 1550, 1150, 2700, 'token4', NOW() + INTERVAL '30 minutes'),
+(1, 1, true, false, 'Produkt Frage', 'Deutsch', 'user@example.com', 'Test', '2025-03-25T09:00:00+01:00', '2025-03-25T09:00:00+01:00', 40, 'gpt-4', 1600, 1200, 2800, 'gpt-4', 1600, 1200, 2800, 'token2', NOW() + INTERVAL '30 minutes'),
+(2, 2, true, true, 'Buchungsanfrage', 'Deutsch', 'user@example.com', 'Test', '2025-03-27T14:30:00+01:00', '2025-03-27T14:30:00+01:00', 38, 'gpt-4', 1580, 1190, 2770, 'gpt-4', 1600, 1200, 2800, 'token3', NOW() + INTERVAL '30 minutes'),
+(2, 2, false, true, 'Support', 'Deutsch', 'user@example.com', 'Test', '2025-03-29T10:45:00+01:00', '2025-03-29T10:45:00+01:00', 35, 'gpt-4', 1550, 1150, 2700, 'gpt-4', 1600, 1200, 2800,'token4', NOW() + INTERVAL '30 minutes'),
 
 -- Week of April 1–7
-(2, 2, true, 'Produkt Frage', 'Deutsch', 'user@example.com', 'Test', '2025-04-01T08:00:00+02:00', '2025-04-01T08:00:00+02:00', 42, 'gpt-4', 1620, 1220, 2840, 'token5', NOW() + INTERVAL '30 minutes'),
-(2, 2, true, 'Buchungsanfrage', 'Deutsch', 'user@example.com', 'Test', '2025-04-01T15:15:00+02:00', '2025-04-01T15:15:00+02:00', 39, 'gpt-4', 1590, 1190, 2780, 'token6', NOW() + INTERVAL '30 minutes'),
-(2, 2, false, 'Support', 'Deutsch', 'user@example.com', 'Test', '2025-04-03T11:30:00+02:00', '2025-04-03T11:30:00+02:00', 44, 'gpt-4', 1630, 1240, 2870, 'token7', NOW() + INTERVAL '30 minutes'),
+(2, 2, true, false, 'Produkt Frage', 'Deutsch', 'user@example.com', 'Test', '2025-04-01T08:00:00+02:00', '2025-04-01T08:00:00+02:00', 42, 'gpt-4', 1620, 1220, 2840, 'gpt-4', 1600, 1200, 2800,'token5', NOW() + INTERVAL '30 minutes'),
+(2, 2, true, true, 'Buchungsanfrage', 'Deutsch', 'user@example.com', 'Test', '2025-04-01T15:15:00+02:00', '2025-04-01T15:15:00+02:00', 39, 'gpt-4', 1590, 1190, 2780, 'gpt-4', 1600, 1200, 2800,'token6', NOW() + INTERVAL '30 minutes'),
+(2, 2, false, true, 'Support', 'Deutsch', 'user@example.com', 'Test', '2025-04-03T11:30:00+02:00', '2025-04-03T11:30:00+02:00', 44, 'gpt-4', 1630, 1240, 2870, 'gpt-4', 1600, 1200, 2800,'token7', NOW() + INTERVAL '30 minutes'),
 
 -- Week of April 8–14
-(2, 2, true, 'Produkt Frage', 'Deutsch', 'user@example.com', 'Test', '2025-04-08T10:00:00+02:00', '2025-04-08T10:00:00+02:00', 37, 'gpt-4', 1570, 1170, 2740, 'token8', NOW() + INTERVAL '30 minutes'),
-(2, 2, true, 'Buchungsanfrage', 'Deutsch', 'user@example.com', 'Test', '2025-04-09T13:45:00+02:00', '2025-04-09T13:45:00+02:00', 46, 'gpt-4', 1650, 1250, 2900, 'token9', NOW() + INTERVAL '30 minutes'),
-(2, 2, false, 'Support', 'Deutsch', 'user@example.com', 'Test', '2025-04-10T09:30:00+02:00', '2025-04-10T09:30:00+02:00', 40, 'gpt-4', 1600, 1200, 2800, 'token10', NOW() + INTERVAL '30 minutes'),
+(2, 2, true, false, 'Produkt Frage', 'Deutsch', 'user@example.com', 'Test', '2025-04-08T10:00:00+02:00', '2025-04-08T10:00:00+02:00', 37, 'gpt-4', 1570, 1170, 2740, 'gpt-4', 1600, 1200, 2800,'token8', NOW() + INTERVAL '30 minutes'),
+(2, 2, true, true, 'Buchungsanfrage', 'Deutsch', 'user@example.com', 'Test', '2025-04-09T13:45:00+02:00', '2025-04-09T13:45:00+02:00', 46, 'gpt-4', 1650, 1250, 2900, 'gpt-4', 1600, 1200, 2800,'token9', NOW() + INTERVAL '30 minutes'),
+(2, 2, false, true, 'Support', 'Deutsch', 'user@example.com', 'Test', '2025-04-10T09:30:00+02:00', '2025-04-10T09:30:00+02:00', 40, 'gpt-4', 1600, 1200, 2800, 'gpt-4', 1600, 1200, 2800,'token10', NOW() + INTERVAL '30 minutes'),
 
 -- Week of April 15–21
-(2, 2, true, 'Produkt Frage', 'Deutsch', 'user@example.com', 'Test', '2025-04-15T09:00:00+02:00', '2025-04-15T09:00:00+02:00', 41, 'gpt-4', 1590, 1190, 2780, 'token11', NOW() + INTERVAL '30 minutes'),
-(2, 2, true, 'Produkt Frage', 'Deutsch', 'user@example.com', 'Test', '2025-04-15T17:15:00+02:00', '2025-04-15T17:15:00+02:00', 39, 'gpt-4', 1580, 1180, 2760, 'token12', NOW() + INTERVAL '30 minutes'),
-(2, 2, true, 'Buchungsanfrage', 'Deutsch', 'user@example.com', 'Test', '2025-04-17T14:30:00+02:00', '2025-04-17T14:30:00+02:00', 43, 'gpt-4', 1610, 1210, 2820, 'token13', NOW() + INTERVAL '30 minutes'),
-(2, 2, false, 'Support', 'Deutsch', 'user@example.com', 'Test', '2025-04-19T11:45:00+02:00', '2025-04-19T11:45:00+02:00', 36, 'gpt-4', 1560, 1160, 2720, 'token14', NOW() + INTERVAL '30 minutes'),
+(2, 2, true, false, 'Produkt Frage', 'Deutsch', 'user@example.com', 'Test', '2025-04-15T09:00:00+02:00', '2025-04-15T09:00:00+02:00', 41, 'gpt-4', 1590, 1190, 2780, 'gpt-4', 1600, 1200, 2800,'token11', NOW() + INTERVAL '30 minutes'),
+(2, 2, true, false, 'Produkt Frage', 'Deutsch', 'user@example.com', 'Test', '2025-04-15T17:15:00+02:00', '2025-04-15T17:15:00+02:00', 39, 'gpt-4', 1580, 1180, 2760, 'gpt-4', 1600, 1200, 2800,'token12', NOW() + INTERVAL '30 minutes'),
+(2, 2, true, true, 'Buchungsanfrage', 'Deutsch', 'user@example.com', 'Test', '2025-04-17T14:30:00+02:00', '2025-04-17T14:30:00+02:00', 43, 'gpt-4', 1610, 1210, 2820, 'gpt-4', 1600, 1200, 2800,'token13', NOW() + INTERVAL '30 minutes'),
+(2, 2, false, true, 'Support', 'Deutsch', 'user@example.com', 'Test', '2025-04-19T11:45:00+02:00', '2025-04-19T11:45:00+02:00', 36, 'gpt-4', 1560, 1160, 2720, 'gpt-4', 1600, 1200, 2800,'token14', NOW() + INTERVAL '30 minutes'),
 
 -- April 22
-(2, 2, true, 'Produkt Frage', 'Deutsch', 'user@example.com', 'Test', '2025-04-22T08:30:00+02:00', '2025-04-22T08:30:00+02:00', 42, 'gpt-4', 1620, 1220, 2840, 'token15', NOW() + INTERVAL '30 minutes'),
-(2, 2, true, 'Produkt Frage', 'Deutsch', 'user@example.com', 'Test', '2025-04-22T16:30:00+02:00', '2025-04-22T16:30:00+02:00', 45, 'gpt-4', 1640, 1240, 2880, 'token16', NOW() + INTERVAL '30 minutes'),
-(2, 2, true, 'Buchungsanfrage', 'Deutsch', 'user@example.com', 'Test', '2025-04-22T09:00:00+02:00', '2025-04-22T09:00:00+02:00', 41, 'gpt-4', 1600, 1200, 2800, 'token17', NOW() + INTERVAL '30 minutes'),
-(2, 2, true, 'Buchungsanfrage', 'Deutsch', 'user@example.com', 'Test', '2025-04-22T17:00:00+02:00', '2025-04-22T17:00:00+02:00', 40, 'gpt-4', 1600, 1200, 2800, 'token18', NOW() + INTERVAL '30 minutes'),
-(2, 2, false, 'Support', 'Deutsch', 'user@example.com', 'Test', '2025-04-22T10:00:00+02:00', '2025-04-22T10:00:00+02:00', 44, 'gpt-4', 1630, 1230, 2860, 'token19', NOW() + INTERVAL '30 minutes'),
-(2, 2, false, 'Support', 'Deutsch', 'user@example.com', 'Test', '2025-04-22T18:00:00+02:00', '2025-04-22T18:00:00+02:00', 46, 'gpt-4', 1650, 1250, 2900, 'token20', NOW() + INTERVAL '30 minutes');
+(2, 2, true, false, 'Produkt Frage', 'Deutsch', 'user@example.com', 'Test', '2025-04-22T08:30:00+02:00', '2025-04-22T08:30:00+02:00', 42, 'gpt-4', 1620, 1220, 2840, 'gpt-4', 1600, 1200, 2800,'token15', NOW() + INTERVAL '30 minutes'),
+(2, 2, true, false,'Produkt Frage', 'Deutsch', 'user@example.com', 'Test', '2025-04-22T16:30:00+02:00', '2025-04-22T16:30:00+02:00', 45, 'gpt-4', 1640, 1240, 2880, 'gpt-4', 1600, 1200, 2800,'token16', NOW() + INTERVAL '30 minutes'),
+(2, 2, true, true,'Buchungsanfrage', 'Deutsch', 'user@example.com', 'Test', '2025-04-22T09:00:00+02:00', '2025-04-22T09:00:00+02:00', 41, 'gpt-4', 1600, 1200, 2800, 'gpt-4', 1600, 1200, 2800,'token17', NOW() + INTERVAL '30 minutes'),
+(2, 2, true, true,'Buchungsanfrage', 'Deutsch', 'user@example.com', 'Test', '2025-04-22T17:00:00+02:00', '2025-04-22T17:00:00+02:00', 40, 'gpt-4', 1600, 1200, 2800, 'gpt-4', 1600, 1200, 2800,'token18', NOW() + INTERVAL '30 minutes'),
+(2, 2, false, true,'Support', 'Deutsch', 'user@example.com', 'Test', '2025-04-22T10:00:00+02:00', '2025-04-22T10:00:00+02:00', 44, 'gpt-4', 1630, 1230, 2860, 'gpt-4', 1600, 1200, 2800,'token19', NOW() + INTERVAL '30 minutes'),
+(2, 2, false, true,'Support', 'Deutsch', 'user@example.com', 'Test', '2025-04-22T18:00:00+02:00', '2025-04-22T18:00:00+02:00', 46, 'gpt-4', 1650, 1250, 2900, 'gpt-4', 1600, 1200, 2800,'token20', NOW() + INTERVAL '30 minutes'),
 
-INSERT INTO response_ratings (message_log_id, customer_id, user_id, is_satisfied, rating, feedback)
+-- Day before yesterday
+(2, 2, true, false,'Produkt Frage', 'Deutsch', 'user@example.com', 'Test', NOW() - INTERVAL '48 hours 120 minutes', NOW() - INTERVAL '48 hours 119 minutes', 60, 'gpt-4', 1620, 1220, 2840, 'gpt-4', 1600, 1200, 2800,'token21', NOW() + INTERVAL '30 minutes'),
+(2, 2, true, false,'Produkt Frage', 'Deutsch', 'user@example.com', 'Test', NOW() - INTERVAL '48 hours 110 minutes', NOW() - INTERVAL '48 hours 109 minutes 40 seconds', 20, 'gpt-4', 1640, 1240, 2880, 'gpt-4', 1600, 1200, 2800,'token22', NOW() + INTERVAL '30 minutes'),
+
+-- Yesterday
+(2, 2, true, true,'Produkt Frage', 'Deutsch', 'user@example.com', 'Test', NOW() - INTERVAL '24 hours 120 minutes', NOW() - INTERVAL '24 hours 119 minutes', 60, 'gpt-4', 1620, 1220, 2840, 'gpt-4', 1600, 1200, 2800,'token23', NOW() + INTERVAL '30 minutes'),
+(2, 2, true, true,'Produkt Frage', 'Deutsch', 'user@example.com', 'Test', NOW() - INTERVAL '24 hours 110 minutes', NOW() - INTERVAL '24 hours 109 minutes 40 seconds', 20, 'gpt-4', 1640, 1240, 2880, 'gpt-4', 1600, 1200, 2800,'token24', NOW() + INTERVAL '30 minutes'),
+(2, 2, true, true,'Buchungsanfrage', 'Deutsch', 'user@example.com', 'Test', NOW() - INTERVAL '24 hours 90 minutes', NOW() - INTERVAL '24 hours 89 minutes 30 seconds', 30, 'gpt-4', 1600, 1200, 2800, 'gpt-4', 1600, 1200, 2800,'token25', NOW() + INTERVAL '30 minutes'),
+
+-- Today
+(2, 2, true, false,'Produkt Frage', 'Deutsch', 'user@example.com', 'Test', NOW() - INTERVAL '120 minutes', NOW() - INTERVAL '119 minutes', 60, 'gpt-4', 1620, 1220, 2840, 'gpt-4', 1600, 1200, 2800,'token26', NOW() + INTERVAL '30 minutes'),
+(2, 2, true, false, 'Produkt Frage', 'Deutsch', 'user@example.com', 'Test', NOW() - INTERVAL '110 minutes', NOW() - INTERVAL '109 minutes 40 seconds', 20, 'gpt-4', 1640, 1240, 2880, 'gpt-4', 1600, 1200, 2800,'token27', NOW() + INTERVAL '30 minutes'),
+(2, 2, true, false, 'Buchungsanfrage', 'Deutsch', 'user@example.com', 'Test', NOW() - INTERVAL '90 minutes', NOW() - INTERVAL '89 minutes 30 seconds', 30, 'gpt-4', 1600, 1200, 2800, 'gpt-4', 1600, 1200, 2800,'token28', NOW() + INTERVAL '30 minutes'),
+(2, 2, true, false, 'Buchungsanfrage', 'Deutsch', 'user@example.com', 'Test', NOW() - INTERVAL '89 minutes', NOW() - INTERVAL '88 minutes 20 seconds', 40, 'gpt-4', 1600, 1200, 2800, 'gpt-4', 1600, 1200, 2800,'token29', NOW() + INTERVAL '30 minutes'),
+(2, 2, false, false, 'Support', 'Deutsch', 'user@example.com', 'Test', NOW() - INTERVAL '30 minutes', NOW() - INTERVAL '29 minutes 40 seconds', 20, 'gpt-4', 1630, 1230, 2860, 'gpt-4', 1600, 1200, 2800,'token30', NOW() + INTERVAL '30 minutes');
+
+
+INSERT INTO response_ratings (message_log_id, customer_id, user_id, satisfied, rating, feedback)
 VALUES (1, 2, 2, true, 4, 'Good'),
        (2, 2, 2, false, 2, 'Bad'),
        (7, 2, 2, false, 1, 'Very Bad');
 
-INSERT INTO response_ratings (message_log_id, customer_id, user_id, is_satisfied, rating)
+INSERT INTO response_ratings (message_log_id, customer_id, user_id, satisfied, rating)
 VALUES
        (3, 2, 2, false, 3),
        (4, 2, 2, true, 5),

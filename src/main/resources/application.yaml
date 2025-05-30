@@ -39,3 +39,7 @@ google:
     secret-key: ${GOOGLE_RECAPTCHA_SECRET_KEY}
     verify-url: https://www.google.com/recaptcha/api/siteverify
     threshold: 0.5
+
+client:
+  name: ${CLIENT_NAME}
+  secret: ${CLIENT_SECRET}

@@ -38,7 +38,7 @@ class RagUrlTest extends BaseServiceTest {
                 .id(1L)
                 .customerId(testUser.getCustomerId())
                 .url("https://example.com")
-                .isLastCrawlSuccessful(true)
+                .lastCrawlSuccessful(true)
                 .build();
     }
 

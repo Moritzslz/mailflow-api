@@ -13,6 +13,9 @@ import java.util.List;
 public class MessageCategoryService {
 
     private static final String DEFAULT_CATEGORY = "Default";
+    private static final String NO_REPLY_CATEGORY = "No Reply";
+    private static final int MAX_CATEGORIES_PER_CUSTOMER = 10;
+    private static final int MIN_DESCRIPTION_LENGTH = 100;
 
     private final MessageCategoryRepository messageCategoryRepository;
 
@@ -38,22 +41,51 @@ public class MessageCategoryService {
             throw new EntityAlreadyExistsException(MessageCategory.class.getSimpleName());
         }
 
+        if (messageCategoryRepository.countByCustomerId(customerId)
+                >= MAX_CATEGORIES_PER_CUSTOMER) {
+            throw new MessageCategoryLimitException(MAX_CATEGORIES_PER_CUSTOMER);
+        }
+
+        if (messageCategory.getDescription().length() < MIN_DESCRIPTION_LENGTH) {
+            throw new MessageCategoryDescriptionException(MIN_DESCRIPTION_LENGTH);
+        }
+
         return messageCategoryRepository.save(messageCategory);
     }
 
-    public void createDefaultMessageCategory(long customerId) {
+    public void createDefaultMessageCategories(long customerId) {
         MessageCategory defaultMessageCategory =
                 MessageCategory.builder()
                         .customerId(customerId)
                         .category(DEFAULT_CATEGORY)
-                        .isReply(true)
-                        .isFunctionCall(false)
+                        .reply(true)
+                        .functionCall(false)
                         .description(
-                                "This is the default/fallback category for messages that do not fit"
-                                        + " into any other defined category.")
+                                "This is the default/fallback category for actionable emails that"
+                                    + " do not fit into any other defined category. If an email"
+                                    + " does not match any other category, it will be assigned"
+                                    + " here. This category is useful for handling edge cases and"
+                                    + " ensuring no email is left uncategorised.")
+                        .build();
+
+        MessageCategory noReplyMessageCategory =
+                MessageCategory.builder()
+                        .customerId(customerId)
+                        .category(NO_REPLY_CATEGORY)
+                        .reply(false)
+                        .functionCall(false)
+                        .description(
+                                "This category is for emails that do not require a response and are"
+                                    + " not actionable. This includes newsletters, promotional"
+                                    + " offers, automated notifications, and any other"
+                                    + " informational or unimportant emails that should not be"
+                                    + " replied to. Security-related emails such as one-time codes"
+                                    + " and password reset requests should NOT be categorized here,"
+                                    + " as they are actionable and important.")
                         .build();
 
         messageCategoryRepository.save(defaultMessageCategory);
+        messageCategoryRepository.save(noReplyMessageCategory);
     }
 
     MessageCategory getMessageCategory(long customerId, long id, Jwt jwt) {
@@ -101,6 +133,10 @@ public class MessageCategoryService {
             throw new IdorException();
         }
 
+        if (updatedMessageCategory.getDescription().length() < MIN_DESCRIPTION_LENGTH) {
+            throw new MessageCategoryDescriptionException(MIN_DESCRIPTION_LENGTH);
+        }
+
         return messageCategoryRepository.save(updatedMessageCategory);
     }
 
@@ -121,6 +157,10 @@ public class MessageCategoryService {
 
         if (messageCategory.getCategory().equalsIgnoreCase(DEFAULT_CATEGORY)) {
             throw new DeleteConflictException("Unable to delete default category.");
+        }
+
+        if (messageCategory.getCategory().equalsIgnoreCase(NO_REPLY_CATEGORY)) {
+            throw new DeleteConflictException("Unable to delete no reply category.");
         }
 
         messageCategoryRepository.delete(messageCategory);

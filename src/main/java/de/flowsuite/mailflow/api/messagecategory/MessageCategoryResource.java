@@ -4,23 +4,36 @@ import de.flowsuite.mailflow.common.entity.MessageCategory;
 
 import jakarta.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/customers")
 class MessageCategoryResource {
 
-    private final MessageCategoryService messageCategoryService;
+    private static final Logger LOG = LoggerFactory.getLogger(MessageCategoryResource.class);
+    private static final String NOTIFY_MESSAGE_CATEGORIES_URI =
+            "/notifications/customers/{customerId}/message-categories";
 
-    MessageCategoryResource(MessageCategoryService messageCategoryService) {
+    private final MessageCategoryService messageCategoryService;
+    private final RestClient mailboxServiceRestClient;
+
+    MessageCategoryResource(
+            MessageCategoryService messageCategoryService,
+            @Qualifier("mailboxServiceRestClient") RestClient mailboxServiceRestClient) {
         this.messageCategoryService = messageCategoryService;
+        this.mailboxServiceRestClient = mailboxServiceRestClient;
     }
 
     @PostMapping("/{customerId}/message-categories")
@@ -40,6 +53,8 @@ class MessageCategoryResource {
                                 createdMessageCategory.getCustomerId(),
                                 createdMessageCategory.getId())
                         .toUri();
+
+        CompletableFuture.runAsync(() -> notifyMailboxService(customerId, jwt));
 
         return ResponseEntity.created(location).body(createdMessageCategory);
     }
@@ -64,8 +79,10 @@ class MessageCategoryResource {
             @PathVariable long id,
             @RequestBody @Valid MessageCategory messageCategory,
             @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(
-                messageCategoryService.updateMessageCategory(customerId, id, messageCategory, jwt));
+        MessageCategory updatedMessageCategory =
+                messageCategoryService.updateMessageCategory(customerId, id, messageCategory, jwt);
+        CompletableFuture.runAsync(() -> notifyMailboxService(customerId, jwt));
+        return ResponseEntity.ok(updatedMessageCategory);
     }
 
     @DeleteMapping("/{customerId}/message-categories/{id}")
@@ -74,6 +91,21 @@ class MessageCategoryResource {
             @PathVariable long id,
             @AuthenticationPrincipal Jwt jwt) {
         messageCategoryService.deleteMessageCategory(customerId, id, jwt);
+        CompletableFuture.runAsync(() -> notifyMailboxService(customerId, jwt));
         return ResponseEntity.noContent().build();
+    }
+
+    private void notifyMailboxService(long customerId, Jwt jwt) {
+        LOG.debug("Notifying mailbox service of blacklist change");
+
+        List<MessageCategory> messageCategories =
+                messageCategoryService.listMessageCategories(customerId, jwt);
+
+        mailboxServiceRestClient
+                .put()
+                .uri(NOTIFY_MESSAGE_CATEGORIES_URI, customerId)
+                .body(messageCategories)
+                .retrieve()
+                .toBodilessEntity();
     }
 }

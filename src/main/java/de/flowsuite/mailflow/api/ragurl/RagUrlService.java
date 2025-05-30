@@ -61,7 +61,46 @@ class RagUrlService {
         return ragUrlRepository.findByCustomerId(customerId);
     }
 
-    void deleteRagUrl(long customerId, long id, Jwt jwt) {
+    RagUrl updateRagUrl(long customerId, long id, RagUrl updatedRagUrl, Jwt jwt) {
+        AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
+
+        if (!updatedRagUrl.getCustomerId().equals(customerId)
+                || !updatedRagUrl.getId().equals(id)) {
+            throw new IdConflictException();
+        }
+
+        RagUrl ragUrl =
+                ragUrlRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () -> new EntityNotFoundException(RagUrl.class.getSimpleName()));
+
+        if (!ragUrl.getCustomerId().equals(customerId)) {
+            throw new IdorException();
+        }
+
+        return ragUrlRepository.save(updatedRagUrl);
+    }
+
+    RagUrl updateRagUrlCrawlStatus(long customerId, long id, boolean lastCrawlSuccessful, Jwt jwt) {
+        AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
+
+        RagUrl ragUrl =
+                ragUrlRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () -> new EntityNotFoundException(RagUrl.class.getSimpleName()));
+
+        if (!ragUrl.getCustomerId().equals(customerId)) {
+            throw new IdorException();
+        }
+
+        ragUrl.setLastCrawlSuccessful(lastCrawlSuccessful);
+
+        return ragUrlRepository.save(ragUrl);
+    }
+
+    RagUrl deleteRagUrl(long customerId, long id, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
 
         RagUrl ragUrl =
@@ -75,5 +114,7 @@ class RagUrlService {
         }
 
         ragUrlRepository.delete(ragUrl);
+
+        return ragUrl;
     }
 }

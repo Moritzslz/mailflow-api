@@ -192,7 +192,7 @@ class UserServiceTest extends BaseServiceTest {
 
     @Test
     void testEnableUser_alreadyEnabled() {
-        testUser.setIsAccountEnabled(true);
+        testUser.setAccountEnabled(true);
 
         when(userRepository.findByVerificationToken(anyString())).thenReturn(Optional.of(testUser));
 
@@ -312,7 +312,7 @@ class UserServiceTest extends BaseServiceTest {
     void testGetUser_success() {
         mockJwtWithUserAndCustomerClaims(testUser);
         when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-        User user = userService.getUser(testUser.getCustomerId(), testUser.getId(), jwtMock);
+        User user = userService.getUser(testUser.getCustomerId(), testUser.getId(), false, jwtMock);
 
         testUser.setFirstName(DECRYPTED_VALUE);
         testUser.setLastName(DECRYPTED_VALUE);
@@ -326,7 +326,9 @@ class UserServiceTest extends BaseServiceTest {
         when(userRepository.findById(testUser.getId())).thenReturn(Optional.empty());
         assertThrows(
                 UsernameNotFoundException.class,
-                () -> userService.getUser(testUser.getCustomerId(), testUser.getId(), jwtMock));
+                () ->
+                        userService.getUser(
+                                testUser.getCustomerId(), testUser.getId(), false, jwtMock));
     }
 
     @Test
@@ -334,10 +336,14 @@ class UserServiceTest extends BaseServiceTest {
         mockJwtWithUserAndCustomerClaims(testUser);
         assertThrows(
                 IdorException.class,
-                () -> userService.getUser(testUser.getCustomerId() + 1, testUser.getId(), jwtMock));
+                () ->
+                        userService.getUser(
+                                testUser.getCustomerId() + 1, testUser.getId(), false, jwtMock));
         assertThrows(
                 IdorException.class,
-                () -> userService.getUser(testUser.getCustomerId(), testUser.getId() + 1, jwtMock));
+                () ->
+                        userService.getUser(
+                                testUser.getCustomerId(), testUser.getId() + 1, false, jwtMock));
         verify(userRepository, never()).findById(anyLong());
     }
 
@@ -369,7 +375,7 @@ class UserServiceTest extends BaseServiceTest {
         assertEquals(ENCRYPTED_VALUE, updatedUser.getLastName());
         assertNull(updatedUser.getPhoneNumber());
         assertEquals(updateUserRequest.position(), updatedUser.getPosition());
-        assertFalse(updatedUser.getIsSubscribedToNewsletter());
+        assertFalse(updatedUser.getSubscribedToNewsletter());
     }
 
     @Test
@@ -423,10 +429,14 @@ class UserServiceTest extends BaseServiceTest {
 
         assertThrows(
                 IdorException.class,
-                () -> userService.getUser(testUser.getCustomerId() + 1, testUser.getId(), jwtMock));
+                () ->
+                        userService.getUser(
+                                testUser.getCustomerId() + 1, testUser.getId(), false, jwtMock));
         assertThrows(
                 IdorException.class,
-                () -> userService.getUser(testUser.getCustomerId(), testUser.getId() + 1, jwtMock));
+                () ->
+                        userService.getUser(
+                                testUser.getCustomerId(), testUser.getId() + 1, false, jwtMock));
 
         verify(userRepository, never()).save(any(User.class));
     }

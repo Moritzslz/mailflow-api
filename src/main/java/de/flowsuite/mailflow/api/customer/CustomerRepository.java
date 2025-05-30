@@ -15,4 +15,6 @@ interface CustomerRepository extends CrudRepository<Customer, Long> {
     boolean existsByRegistrationToken(String registrationToken);
 
     Optional<Customer> findByRegistrationToken(String registrationToken);
+
+    boolean existsByIdAndTestVersionTrue(long id);
 }
