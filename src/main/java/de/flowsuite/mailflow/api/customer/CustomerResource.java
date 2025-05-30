@@ -91,7 +91,9 @@ class CustomerResource {
 
     @PutMapping("/{id}/crawl-status")
     ResponseEntity<Customer> updateCustomerCrawlStatus(
-            @PathVariable long id, @RequestBody @Valid UpdateCustomerCrawlStatusRequest request, @AuthenticationPrincipal Jwt jwt) {
+            @PathVariable long id,
+            @RequestBody @Valid UpdateCustomerCrawlStatusRequest request,
+            @AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity.ok(customerService.updateCustomerCrawlStatus(id, request, jwt));
     }
 

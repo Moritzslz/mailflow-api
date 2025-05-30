@@ -230,8 +230,7 @@ public class CustomerService {
         return customerRepository.save(customer);
     }
 
-    Customer updateCustomerCrawlStatus(
-            long id, UpdateCustomerCrawlStatusRequest request, Jwt jwt) {
+    Customer updateCustomerCrawlStatus(long id, UpdateCustomerCrawlStatusRequest request, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(id, jwt);
 
         if (!request.id().equals(id)) {
@@ -245,13 +244,11 @@ public class CustomerService {
                                 () -> new EntityNotFoundException(Customer.class.getSimpleName()));
 
         if (customer.getLastCrawlAt() != null
-                && request.lastCrawlAt()
-                .isBefore(customer.getLastCrawlAt())) {
+                && request.lastCrawlAt().isBefore(customer.getLastCrawlAt())) {
             throw new UpdateConflictException();
         }
         if (customer.getNextCrawlAt() != null
-                && request.nextCrawlAt()
-                .isBefore(customer.getNextCrawlAt())) {
+                && request.nextCrawlAt().isBefore(customer.getNextCrawlAt())) {
             throw new UpdateConflictException();
         }
 

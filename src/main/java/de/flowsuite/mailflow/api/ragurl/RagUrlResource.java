@@ -24,13 +24,15 @@ import java.util.concurrent.CompletableFuture;
 class RagUrlResource {
 
     private final Logger LOG = LoggerFactory.getLogger(RagUrlResource.class);
-    private static final String NOTIFY_RAG_URLS_URI = "/notifications/customers/{customerId}/rag-urls/{id}";
+    private static final String NOTIFY_RAG_URLS_URI =
+            "/notifications/customers/{customerId}/rag-urls/{id}";
 
     private final RagUrlService ragUrlService;
     private final RestClient ragServiceRestClient;
 
-    RagUrlResource(RagUrlService ragUrlService,
-                   @Qualifier("mailboxServiceRestClient") RestClient ragServiceRestClient) {
+    RagUrlResource(
+            RagUrlService ragUrlService,
+            @Qualifier("mailboxServiceRestClient") RestClient ragServiceRestClient) {
         this.ragUrlService = ragUrlService;
         this.ragServiceRestClient = ragServiceRestClient;
     }
@@ -85,7 +87,8 @@ class RagUrlResource {
             @PathVariable long id,
             @RequestBody boolean lastCrawlSuccessful,
             @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(ragUrlService.updateRagUrlCrawlStatus(customerId, id, lastCrawlSuccessful, jwt));
+        return ResponseEntity.ok(
+                ragUrlService.updateRagUrlCrawlStatus(customerId, id, lastCrawlSuccessful, jwt));
     }
 
     @DeleteMapping("/{customerId}/rag-urls/{id}")
