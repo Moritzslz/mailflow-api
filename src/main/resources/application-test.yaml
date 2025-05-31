@@ -1,12 +1,8 @@
 spring:
-  application:
-    name: mailflow-api
-  profiles:
-    active: ${ACTIVE_PROFILE:test}
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
     driver-class-name: org.postgresql.Driver
   jpa:
     open-in-view: false
@@ -16,7 +12,7 @@ spring:
     host: smtp.ionos.de
     port: 465
     username: info@flow-suite.de
-    password: ${MAIL_PASSWORD}
+    password: mocked
     properties:
       mail:
         debug: true
@@ -36,10 +32,10 @@ server:
 google:
   recaptcha:
     http-header: reCAPTCHA
-    secret-key: ${GOOGLE_RECAPTCHA_SECRET_KEY}
+    secret-key: mocked
     verify-url: https://www.google.com/recaptcha/api/siteverify
     threshold: 0.5
 
 client:
-  name: ${CLIENT_NAME}
-  secret: ${CLIENT_SECRET}
+  name: mocked
+  secret: mocked
