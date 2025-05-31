@@ -13,7 +13,6 @@ import com.nimbusds.jose.proc.SecurityContext;
 import de.flowsuite.mailflow.api.client.ClientService;
 import de.flowsuite.mailflow.api.user.UserService;
 import de.flowsuite.mailflow.common.constant.Authorities;
-import de.flowsuite.mailflow.common.exception.MissingEnvVarException;
 import de.flowsuite.mailflow.common.util.RsaUtil;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -177,7 +176,10 @@ class SecurityConfig {
     @Bean
     JwtEncoder jwtEncoder() {
         if (RsaUtil.privateKey == null) {
-            throw new MissingEnvVarException("RSA private key");
+            throw new RuntimeException("No private key found for jwt encoder");
+        }
+        if (RsaUtil.publicKey == null) {
+            throw new RuntimeException("No public key found for jwt encoder");
         }
         JWK jwk = new RSAKey.Builder(RsaUtil.publicKey).privateKey(RsaUtil.privateKey).build();
         JWKSource<SecurityContext> jwkSource = new ImmutableJWKSet<>(new JWKSet(jwk));
