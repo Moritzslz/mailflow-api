@@ -312,10 +312,12 @@ class UserServiceTest extends BaseServiceTest {
     void testGetUser_success() {
         mockJwtWithUserAndCustomerClaims(testUser);
         when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-        User user = userService.getUser(testUser.getCustomerId(), testUser.getId(), false, jwtMock);
+        User user = userService.getUser(testUser.getCustomerId(), testUser.getId(), jwtMock);
 
         testUser.setFirstName(DECRYPTED_VALUE);
         testUser.setLastName(DECRYPTED_VALUE);
+        testUser.setEmailAddress(DECRYPTED_VALUE);
+        testUser.setPhoneNumber(DECRYPTED_VALUE);
 
         assertEquals(testUser, user);
     }
@@ -328,7 +330,7 @@ class UserServiceTest extends BaseServiceTest {
                 UsernameNotFoundException.class,
                 () ->
                         userService.getUser(
-                                testUser.getCustomerId(), testUser.getId(), false, jwtMock));
+                                testUser.getCustomerId(), testUser.getId(), jwtMock));
     }
 
     @Test
@@ -338,12 +340,12 @@ class UserServiceTest extends BaseServiceTest {
                 IdorException.class,
                 () ->
                         userService.getUser(
-                                testUser.getCustomerId() + 1, testUser.getId(), false, jwtMock));
+                                testUser.getCustomerId() + 1, testUser.getId(), jwtMock));
         assertThrows(
                 IdorException.class,
                 () ->
                         userService.getUser(
-                                testUser.getCustomerId(), testUser.getId() + 1, false, jwtMock));
+                                testUser.getCustomerId(), testUser.getId() + 1, jwtMock));
         verify(userRepository, never()).findById(anyLong());
     }
 
@@ -431,12 +433,12 @@ class UserServiceTest extends BaseServiceTest {
                 IdorException.class,
                 () ->
                         userService.getUser(
-                                testUser.getCustomerId() + 1, testUser.getId(), false, jwtMock));
+                                testUser.getCustomerId() + 1, testUser.getId(), jwtMock));
         assertThrows(
                 IdorException.class,
                 () ->
                         userService.getUser(
-                                testUser.getCustomerId(), testUser.getId() + 1, false, jwtMock));
+                                testUser.getCustomerId(), testUser.getId() + 1, jwtMock));
 
         verify(userRepository, never()).save(any(User.class));
     }
