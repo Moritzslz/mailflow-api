@@ -328,9 +328,7 @@ class UserServiceTest extends BaseServiceTest {
         when(userRepository.findById(testUser.getId())).thenReturn(Optional.empty());
         assertThrows(
                 UsernameNotFoundException.class,
-                () ->
-                        userService.getUser(
-                                testUser.getCustomerId(), testUser.getId(), jwtMock));
+                () -> userService.getUser(testUser.getCustomerId(), testUser.getId(), jwtMock));
     }
 
     @Test
@@ -338,14 +336,10 @@ class UserServiceTest extends BaseServiceTest {
         mockJwtWithUserAndCustomerClaims(testUser);
         assertThrows(
                 IdorException.class,
-                () ->
-                        userService.getUser(
-                                testUser.getCustomerId() + 1, testUser.getId(), jwtMock));
+                () -> userService.getUser(testUser.getCustomerId() + 1, testUser.getId(), jwtMock));
         assertThrows(
                 IdorException.class,
-                () ->
-                        userService.getUser(
-                                testUser.getCustomerId(), testUser.getId() + 1, jwtMock));
+                () -> userService.getUser(testUser.getCustomerId(), testUser.getId() + 1, jwtMock));
         verify(userRepository, never()).findById(anyLong());
     }
 
@@ -431,14 +425,10 @@ class UserServiceTest extends BaseServiceTest {
 
         assertThrows(
                 IdorException.class,
-                () ->
-                        userService.getUser(
-                                testUser.getCustomerId() + 1, testUser.getId(), jwtMock));
+                () -> userService.getUser(testUser.getCustomerId() + 1, testUser.getId(), jwtMock));
         assertThrows(
                 IdorException.class,
-                () ->
-                        userService.getUser(
-                                testUser.getCustomerId(), testUser.getId() + 1, jwtMock));
+                () -> userService.getUser(testUser.getCustomerId(), testUser.getId() + 1, jwtMock));
 
         verify(userRepository, never()).save(any(User.class));
     }
