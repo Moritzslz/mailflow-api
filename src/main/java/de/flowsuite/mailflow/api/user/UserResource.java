@@ -75,15 +75,7 @@ class UserResource {
             @PathVariable long customerId,
             @PathVariable long id,
             @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(userService.getUser(customerId, id, false, jwt));
-    }
-
-    @GetMapping("/{customerId}/users/{id}/decrypted")
-    ResponseEntity<User> getUserDecrypted(
-            @PathVariable long customerId,
-            @PathVariable long id,
-            @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(userService.getUser(customerId, id, true, jwt));
+        return ResponseEntity.ok(userService.getUser(customerId, id, jwt));
     }
 
     @PutMapping("/{customerId}/users/{id}")

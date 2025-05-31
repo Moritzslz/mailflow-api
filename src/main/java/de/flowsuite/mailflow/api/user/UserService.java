@@ -225,19 +225,16 @@ public class UserService implements UserDetailsService {
         return userRepository.findAllByCustomerId(customerId);
     }
 
-    User getUser(long customerId, long id, boolean decrypted, Jwt jwt) {
+    User getUser(long customerId, long id, Jwt jwt) {
         AuthorisationUtil.validateAccessToCustomer(customerId, jwt);
         AuthorisationUtil.validateAccessToUser(id, jwt);
 
         User user = getById(id);
         user.setFirstName(AesUtil.decrypt(user.getFirstName()));
         user.setLastName(AesUtil.decrypt(user.getLastName()));
-
-        if (decrypted) {
-            user.setEmailAddress(AesUtil.decrypt(user.getEmailAddress()));
-            if (user.getPhoneNumber() != null) {
-                user.setPhoneNumber(AesUtil.decrypt(user.getPhoneNumber()));
-            }
+        user.setEmailAddress(AesUtil.decrypt(user.getEmailAddress()));
+        if (user.getPhoneNumber() != null) {
+            user.setPhoneNumber(AesUtil.decrypt(user.getPhoneNumber()));
         }
 
         return user;

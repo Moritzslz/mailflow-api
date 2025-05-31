@@ -5,6 +5,7 @@ import static de.flowsuite.mailflow.common.util.AuthorisationUtil.CLAIM_SCOPE;
 import static de.flowsuite.mailflow.common.util.Util.BERLIN_ZONE;
 
 import de.flowsuite.mailflow.api.user.UserService;
+import de.flowsuite.mailflow.common.constant.Authorities;
 import de.flowsuite.mailflow.common.entity.Client;
 import de.flowsuite.mailflow.common.entity.User;
 import de.flowsuite.mailflow.common.exception.AuthenticationFailedException;
@@ -31,7 +32,9 @@ class AuthenticationService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AuthenticationService.class);
     private static final String JWT_ISSUER_LOCATION = "self";
+    private static final String CLAIM_ROLE = "role";
     private static final String CLAIM_TYPE = "type";
+    private static final String CLAIM_TYPE_ACCESS = "access";
     private static final String CLAIM_TYPE_REFRESH = "refresh";
     private static final int JWT_TTL_HOURS = 1;
     private static final int JWT_TTL_DAYS = 2;
@@ -51,7 +54,7 @@ class AuthenticationService {
         this.userService = userService;
     }
 
-    String generateAccessToken(String subject, String scope, long customerId) {
+    String generateAccessToken(String subject, String role, String scope, long customerId) {
         ZonedDateTime now = ZonedDateTime.now(BERLIN_ZONE);
         JwtClaimsSet claims =
                 JwtClaimsSet.builder()
@@ -59,8 +62,10 @@ class AuthenticationService {
                         .issuedAt(now.toInstant())
                         .expiresAt(now.plusHours(JWT_TTL_HOURS).toInstant())
                         .subject(subject)
+                        .claim(CLAIM_ROLE, role)
                         .claim(CLAIM_SCOPE, scope)
                         .claim(CLAIM_CUSTOMER_ID, customerId)
+                        .claim(CLAIM_TYPE, CLAIM_TYPE_ACCESS)
                         .build();
 
         LOG.debug("Access Token Claims: {}", claims);
@@ -126,7 +131,7 @@ class AuthenticationService {
                         .map(GrantedAuthority::getAuthority)
                         .collect(Collectors.joining(" "));
         String accessToken =
-                generateAccessToken(String.valueOf(user.getId()), scope, user.getCustomerId());
+                generateAccessToken(String.valueOf(user.getId()), user.getRole(), scope, user.getCustomerId());
 
         userService.updateLastLoginAt(user);
 
@@ -138,7 +143,7 @@ class AuthenticationService {
                 client.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
                         .collect(Collectors.joining(" "));
-        String accessToken = generateAccessToken(client.getClientName(), scope, -1);
+        String accessToken = generateAccessToken(client.getClientName(), Authorities.CLIENT.getAuthority(), scope, -1);
         return new AuthenticationResource.ClientTokenResponse(accessToken);
     }
 }
