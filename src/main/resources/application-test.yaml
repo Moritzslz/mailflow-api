@@ -39,3 +39,15 @@ google:
 client:
   name: mocked
   secret: mocked
+
+mailflow:
+  frontend:
+    url: mocked
+  api:
+    base-url: mocked
+  mailbox-service:
+    base-url: mocked
+  llm-service:
+    base-url: mocked
+  rag-service:
+    base-url: mocked
