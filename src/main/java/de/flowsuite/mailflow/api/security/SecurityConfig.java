@@ -170,6 +170,9 @@ class SecurityConfig {
 
     @Bean
     JwtDecoder jwtDecoder() {
+        if (RsaUtil.publicKey == null) {
+            throw new RuntimeException("No public key found for jwt encoder");
+        }
         return NimbusJwtDecoder.withPublicKey(RsaUtil.publicKey).build();
     }
 
