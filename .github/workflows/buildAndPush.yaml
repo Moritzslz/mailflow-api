@@ -8,6 +8,8 @@ on:
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
   AWS_ECR_REPOSITORY_URI: ${{ secrets.AWS_ECR_REPOSITORY_URI }}
+  RSA_PUBLIC_KEY: ${{ secrets.RSA_PUBLIC_KEY }}
+  RSA_PRIVATE_KEY: ${{ secrets.RSA_PRIVATE_KEY }}
 
 jobs:
   build-and-push:
