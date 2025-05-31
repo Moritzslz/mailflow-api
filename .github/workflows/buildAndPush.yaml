@@ -10,6 +10,8 @@ env:
   AWS_ECR_REPOSITORY_URI: ${{ secrets.AWS_ECR_REPOSITORY_URI }}
   RSA_PUBLIC_KEY: ${{ secrets.RSA_PUBLIC_KEY }}
   RSA_PRIVATE_KEY: ${{ secrets.RSA_PRIVATE_KEY }}
+  AES_B64_SECRET_KEY: ${{ secrets.AES_B64_SECRET_KEY }}
+  HMAC_B64_SECRET_KEY: ${{ secrets.HMAC_B64_SECRET_KEY }}
 
 jobs:
   build-and-push:
