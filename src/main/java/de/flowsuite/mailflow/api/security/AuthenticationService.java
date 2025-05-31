@@ -131,7 +131,8 @@ class AuthenticationService {
                         .map(GrantedAuthority::getAuthority)
                         .collect(Collectors.joining(" "));
         String accessToken =
-                generateAccessToken(String.valueOf(user.getId()), user.getRole(), scope, user.getCustomerId());
+                generateAccessToken(
+                        String.valueOf(user.getId()), user.getRole(), scope, user.getCustomerId());
 
         userService.updateLastLoginAt(user);
 
@@ -143,7 +144,9 @@ class AuthenticationService {
                 client.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
                         .collect(Collectors.joining(" "));
-        String accessToken = generateAccessToken(client.getClientName(), Authorities.CLIENT.getAuthority(), scope, -1);
+        String accessToken =
+                generateAccessToken(
+                        client.getClientName(), Authorities.CLIENT.getAuthority(), scope, -1);
         return new AuthenticationResource.ClientTokenResponse(accessToken);
     }
 }
