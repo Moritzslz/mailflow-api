@@ -20,6 +20,7 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -169,6 +170,7 @@ class SecurityConfig {
     }
 
     @Bean
+    @Profile("!test")
     JwtDecoder jwtDecoder() {
         if (RsaUtil.publicKey == null) {
             throw new RuntimeException("No public key found for jwt encoder");
@@ -177,6 +179,7 @@ class SecurityConfig {
     }
 
     @Bean
+    @Profile("!test")
     JwtEncoder jwtEncoder() {
         if (RsaUtil.privateKey == null) {
             throw new RuntimeException("No private key found for jwt encoder");

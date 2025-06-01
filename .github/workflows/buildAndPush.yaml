@@ -35,9 +35,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ env.AWS_ECR_REPOSITORY_URI }}-mailflow-api:latest
-          build-args: |
-            AES_B64_SECRET_KEY=${{ secrets.AES_B64_SECRET_KEY }}
-            RSA_PRIVATE_KEY=${{ secrets.RSA_PRIVATE_KEY }}
-            RSA_PUBLIC_KEY=${{ secrets.RSA_PUBLIC_KEY }}
-            HMAC_B64_SECRET_KEY=${{ secrets.HMAC_B64_SECRET_KEY }}
+          tags: ${{ env.AWS_ECR_REPOSITORY_URI }}:mailflow-api-latest
