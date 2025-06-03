@@ -32,7 +32,7 @@ class RagUrlResource {
 
     RagUrlResource(
             RagUrlService ragUrlService,
-            @Qualifier("mailboxServiceRestClient") RestClient ragServiceRestClient) {
+            @Qualifier("ragServiceRestClient") RestClient ragServiceRestClient) {
         this.ragUrlService = ragUrlService;
         this.ragServiceRestClient = ragServiceRestClient;
     }
@@ -51,7 +51,7 @@ class RagUrlResource {
                         .buildAndExpand(createdRagUrl.getCustomerId(), createdRagUrl.getId())
                         .toUri();
 
-        CompletableFuture.runAsync(() -> notifyRagService(HttpMethod.POST, createdRagUrl, jwt));
+        CompletableFuture.runAsync(() -> notifyRagService(HttpMethod.POST, createdRagUrl));
 
         return ResponseEntity.created(location).body(createdRagUrl);
     }
@@ -77,7 +77,7 @@ class RagUrlResource {
             @RequestBody @Valid RagUrl ragUrl,
             @AuthenticationPrincipal Jwt jwt) {
         RagUrl updatedRagUrl = ragUrlService.updateRagUrl(customerId, id, ragUrl, jwt);
-        CompletableFuture.runAsync(() -> notifyRagService(HttpMethod.PUT, updatedRagUrl, jwt));
+        CompletableFuture.runAsync(() -> notifyRagService(HttpMethod.PUT, updatedRagUrl));
         return ResponseEntity.ok(ragUrl);
     }
 
@@ -97,11 +97,11 @@ class RagUrlResource {
             @PathVariable long id,
             @AuthenticationPrincipal Jwt jwt) {
         RagUrl deletedRagUrl = ragUrlService.deleteRagUrl(customerId, id, jwt);
-        CompletableFuture.runAsync(() -> notifyRagService(HttpMethod.DELETE, deletedRagUrl, jwt));
+        CompletableFuture.runAsync(() -> notifyRagService(HttpMethod.DELETE, deletedRagUrl));
         return ResponseEntity.noContent().build();
     }
 
-    private void notifyRagService(HttpMethod method, RagUrl ragUrl, Jwt jwt) {
+    private void notifyRagService(HttpMethod method, RagUrl ragUrl) {
         LOG.debug("Notifying rag service of rag url change");
 
         ragServiceRestClient
