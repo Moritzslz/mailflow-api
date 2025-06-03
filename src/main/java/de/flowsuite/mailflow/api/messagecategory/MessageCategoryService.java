@@ -81,7 +81,8 @@ public class MessageCategoryService {
                                     + " informational or unimportant emails that should not be"
                                     + " replied to. Security-related emails such as one-time codes"
                                     + " and password reset requests should NOT be categorized here,"
-                                    + " as they are actionable and important.")
+                                    + " as they are actionable and important. Security-related"
+                                    + " emails belong to the default category.")
                         .build();
 
         messageCategoryRepository.save(defaultMessageCategory);
