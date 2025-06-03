@@ -55,6 +55,7 @@ class SettingsTest extends BaseServiceTest {
                 .executionEnabled(true)
                 .autoReplyEnabled(false)
                 .responseRatingEnabled(true)
+                .moveToManualReviewEnabled(true)
                 .mailboxPasswordHash(HASHED_VALUE)
                 .mailboxPassword(ENCRYPTED_VALUE)
                 .imapHost(DEFAULT_IMAP_HOST)
@@ -213,11 +214,15 @@ class SettingsTest extends BaseServiceTest {
     void testUpdateSettings_success() {
         when(settingsRepository.findById(testSettings.getUserId()))
                 .thenReturn(Optional.of(testSettings));
+        when(customerService.getCustomer(testUser.getCustomerId(), jwtMock))
+                .thenReturn(
+                        Customer.builder().id(testUser.getCustomerId()).testVersion(false).build());
 
         SettingsResource.UpdateSettingsRequest updateSettingsRequest =
                 new SettingsResource.UpdateSettingsRequest(
                         testUser.getId(),
                         testUser.getCustomerId(),
+                        true,
                         true,
                         true,
                         true,
@@ -256,6 +261,7 @@ class SettingsTest extends BaseServiceTest {
                         true,
                         true,
                         true,
+                        true,
                         UPDATED_IMAP_HOST,
                         UPDATED_SMTP_HOST,
                         DEFAULT_IMAP_PORT,
@@ -265,6 +271,7 @@ class SettingsTest extends BaseServiceTest {
                 new SettingsResource.UpdateSettingsRequest(
                         testUser.getId(),
                         testUser.getCustomerId() + 2,
+                        true,
                         true,
                         true,
                         true,
@@ -305,6 +312,7 @@ class SettingsTest extends BaseServiceTest {
                         true,
                         true,
                         true,
+                        true,
                         UPDATED_IMAP_HOST,
                         UPDATED_SMTP_HOST,
                         DEFAULT_IMAP_PORT,
@@ -328,6 +336,7 @@ class SettingsTest extends BaseServiceTest {
                 new SettingsResource.UpdateSettingsRequest(
                         testUser.getId(),
                         testUser.getCustomerId(),
+                        true,
                         true,
                         true,
                         true,

@@ -116,6 +116,7 @@ class SettingsResource {
             boolean executionEnabled,
             boolean autoReplyEnabled,
             boolean responseRatingEnabled,
+            boolean moveToManualReviewEnabled,
             String imapHost,
             String smtpHost,
             Integer imapPort,

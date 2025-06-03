@@ -33,15 +33,15 @@ class CustomerResource {
 
     private final CustomerService customerService;
     private final RestClient llmServiceRestClient;
-    private final RestClient apiRestClient;
+    private final RestClient mailboxServiceRestClient;
 
     CustomerResource(
             CustomerService customerService,
             @Qualifier("llmServiceRestClient") RestClient llmServiceRestClient,
-            @Qualifier("apiRestClient") RestClient apiRestClient) {
+            @Qualifier("mailboxServiceRestClient") RestClient mailboxServiceRestClient) {
         this.customerService = customerService;
         this.llmServiceRestClient = llmServiceRestClient;
-        this.apiRestClient = apiRestClient;
+        this.mailboxServiceRestClient = mailboxServiceRestClient;
     }
 
     @PostMapping
@@ -111,7 +111,7 @@ class CustomerResource {
     private void notifyMailboxService(Customer customer) {
         LOG.debug("Notifying mailbox service of customer test version change");
 
-        apiRestClient
+        mailboxServiceRestClient
                 .put()
                 .uri(NOTIFY_CUSTOMERS_URI, customer.getId())
                 .body(customer)

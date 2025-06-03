@@ -44,6 +44,7 @@ class SettingsService {
         settings.setExecutionEnabled(true);
         settings.setAutoReplyEnabled(false);
         settings.setResponseRatingEnabled(true);
+        settings.setMoveToManualReviewEnabled(true);
         settings.setMailboxPasswordHash(HmacUtil.hash(request.mailboxPassword()));
         settings.setMailboxPassword(AesUtil.encrypt(request.mailboxPassword()));
         settings.setImapHost(customer.getDefaultImapHost());
@@ -81,10 +82,16 @@ class SettingsService {
         settings.setExecutionEnabled(request.executionEnabled());
         settings.setAutoReplyEnabled(request.autoReplyEnabled());
         settings.setResponseRatingEnabled(request.responseRatingEnabled());
-        settings.setImapHost(request.imapHost());
-        settings.setSmtpHost(request.smtpHost());
-        settings.setImapPort(request.imapPort());
-        settings.setSmtpPort(request.smtpPort());
+        settings.setMoveToManualReviewEnabled(request.moveToManualReviewEnabled());
+
+        Customer customer = customerService.getCustomer(customerId, jwt);
+
+        if (!customer.isTestVersion()) {
+            settings.setImapHost(request.imapHost());
+            settings.setSmtpHost(request.smtpHost());
+            settings.setImapPort(request.imapPort());
+            settings.setSmtpPort(request.smtpPort());
+        }
 
         Util.validateMailboxSettings(
                 request.imapHost(), request.smtpHost(), request.imapPort(), request.smtpPort());
