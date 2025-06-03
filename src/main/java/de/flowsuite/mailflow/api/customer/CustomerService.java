@@ -252,6 +252,9 @@ public class CustomerService {
             throw new UpdateConflictException();
         }
 
+        customer.setLastCrawlAt(request.lastCrawlAt());
+        customer.setNextCrawlAt(request.nextCrawlAt());
+
         return customerRepository.save(customer);
     }
 }
