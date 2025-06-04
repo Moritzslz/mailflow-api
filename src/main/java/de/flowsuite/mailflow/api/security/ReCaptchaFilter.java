@@ -36,10 +36,7 @@ class ReCaptchaFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         try {
             String reCaptchaToken = request.getHeader(reCaptchaHttpHeader);
-            // TODO secure
-            if (!reCaptchaToken.equals("admin")) {
-                reCaptchaService.verifyToken(reCaptchaToken);
-            }
+            reCaptchaService.verifyToken(reCaptchaToken);
             filterChain.doFilter(request, response);
         } catch (InvalidReCaptchaTokenException
                 | MissingReCaptchaTokenException
