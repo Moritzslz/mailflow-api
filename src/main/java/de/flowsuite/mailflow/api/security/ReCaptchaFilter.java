@@ -2,7 +2,7 @@ package de.flowsuite.mailflow.api.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import de.flowsuite.mailflow.common.GlobalExceptionHandler;
+import de.flowsuite.mailflow.common.GlobalExceptionManager;
 import de.flowsuite.mailflow.common.exception.InvalidReCaptchaTokenException;
 import de.flowsuite.mailflow.common.exception.MissingReCaptchaTokenException;
 import de.flowsuite.mailflow.common.exception.ReCaptchaResponseException;
@@ -54,7 +54,7 @@ class ReCaptchaFilter extends OncePerRequestFilter {
         }
 
         Map<String, Object> body =
-                GlobalExceptionHandler.buildErrorResponseBody(
+                GlobalExceptionManager.buildErrorResponseBody(
                         httpStatus, ex.getMessage(), request.getRequestURI());
 
         response.setContentType("application/json");
