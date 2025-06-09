@@ -74,11 +74,15 @@ class SecurityConfig {
     // spotless:off
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        /*
+        This is being automatically taken care of by AWS AppRunner, which enforces https
+
         boolean isProd = Arrays.asList(environment.getActiveProfiles()).contains("prod");
 
         if (isProd) {
-            http.requiresChannel(channel -> channel.anyRequest().requiresSecure());
+           http.requiresChannel(channel -> channel.anyRequest().requiresSecure());
         }
+         */
 
         return http.authorizeHttpRequests(auth -> auth
                         // Auth Resource
