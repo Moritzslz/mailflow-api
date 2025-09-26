@@ -64,39 +64,49 @@ This will spin up the database:
 
 Customer = Tenant
 
-- `/api/v1/auth/token` Issues JWTs
-- `/api/v1/customers/{customerId}/users/{userId}/blacklist` Manages blacklisted email adresses that are automatically excluded from processing by mailflow for the users email account
-- `/api/v1/clients` Manages connected clients (=mircoservices)
-- `/api/v1/customers/` Manages tenants (CRUD and more)
-- `/api/v1/customers/{customerId}/message-categories` (CRUD) Manages a tenants message categories which are then used for classification
-- `/api/v1/customers/{customerId}/users/{userId}/message-log` Manages database log of every processes email
-- `/api/v1/customers/{customerId}/rag-urls` Manages the RAG Urls configured on a customer level for the RAG context that will be crawled and used by mailflow to based email answers on
-- `/api/v1/customers/{customerId}/users/{userId}/response-ratings` This feature creates a link for each email allowing the receipients to rate their satisfaction with the response
-- `/api/v1/customers/{customerId}/users/{userId}/settings` Configures mailflow
-- `/api/v1/customers/{customerId}/users/` CRUD with double opt in an more for users
+- `/api/v1/auth/token`
+-    Issues JWTs
+- `/api/v1/customers/{customerId}/users/{userId}/blacklist`
+-    Manages blacklisted email adresses that are automatically excluded from processing by mailflow for the users email account
+- `/api/v1/clients`
+-    Manages connected clients (=mircoservices)
+- `/api/v1/customers/`
+-    Manages tenants (CRUD and more)
+- `/api/v1/customers/{customerId}/message-categories`
+-    (CRUD) Manages a tenants message categories which are then used for classification
+- `/api/v1/customers/{customerId}/users/{userId}/message-log`
+-    Manages database log of every processes email
+- `/api/v1/customers/{customerId}/rag-urls`
+-    Manages the RAG Urls configured on a customer level for the RAG context that will be crawled and used by mailflow to based email answers on
+- `/api/v1/customers/{customerId}/users/{userId}/response-ratings`
+-    This feature creates a link for each email allowing the receipients to rate their satisfaction with the response
+- `/api/v1/customers/{customerId}/users/{userId}/settings`
+-    Configures mailflow
+- `/api/v1/customers/{customerId}/users/`
+-    CRUD with double opt in an more for users
 
 ### Environment Variables / Configuration
 Example configuration variables you likely need:
 Key	Description
-ACTIVE_PROFILE=dev;
-AES_B64_SECRET_KEY=someKey; Please create a B64 encoded AES key
-CLIENT_NAME=mailflow-api;
-CLIENT_SECRET=secret;
-DB_PASSWORD=root;
-DB_URL=jdbc:postgresql://localhost:5432/test_db;
-DB_USERNAME=admin;
-GOOGLE_RECAPTCHA_SECRET_KEY=someKey;
-HMAC_B64_SECRET_KEY=someKey; Please create a B64 encoded HMAC key
-MAIL_PASSWORD=somePassword;   The password to the mail account which is specified in the `spring.mail.username` application property
-RSA_PRIVATE_KEY=-----BEGIN PRIVATE KEY----- someKeySequence -----END PRIVATE KEY----- ; Please create a RSA keypair
-RSA_PUBLIC_KEY=-----BEGIN PUBLIC KEY----- someKeySequence -----END PUBLIC KEY----- Please create a RSA keypair
+- ACTIVE_PROFILE=dev;
+- AES_B64_SECRET_KEY=someKey; Please create a B64 encoded AES key
+- CLIENT_NAME=mailflow-api;
+- CLIENT_SECRET=secret;
+- DB_PASSWORD=root;
+- DB_URL=jdbc:postgresql://localhost:5432/test_db;
+- DB_USERNAME=admin;
+- GOOGLE_RECAPTCHA_SECRET_KEY=someKey;
+- HMAC_B64_SECRET_KEY=someKey; Please create a B64 encoded HMAC key
+- MAIL_PASSWORD=somePassword;   The password to the mail account which is specified in the `spring.mail.username` application property
+- RSA_PRIVATE_KEY=-----BEGIN PRIVATE KEY----- someKeySequence -----END PRIVATE KEY----- ; Please create a RSA keypair
+- RSA_PUBLIC_KEY=-----BEGIN PUBLIC KEY----- someKeySequence -----END PUBLIC KEY----- Please create a RSA keypair
 
 Include a sample application.yml.example or .env.example file in the repo to help new developers.
 
 ### Testing
 Unit tests for service, controller, and repository layers
 Integration tests (e.g. spinning up an in-memory DB or test containers)
-Use ./gradlew test to run all tests
+Use ./gradlew test to run all tests (should work without env vars)
 Deployment
 Build an executable JAR:
 ./gradlew clean bootJar
