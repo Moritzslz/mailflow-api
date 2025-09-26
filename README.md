@@ -23,7 +23,10 @@ The project uses a modular layout. Key modules include:
 - `mailflow-common`: Shared utilities, DTOs, domain models, etc.  
 - `src/` (main application): API controllers, services, data access, etc.  
 - Docker / `docker-compose.yaml` for infrastructure orchestration  
-- `init.sql`: Initial schema / seed SQL file  
+- `init.sql`: Initial schema / seed SQL file
+
+<img width="1169" height="827" alt="MailFlow Architecture Diagram" src="https://github.com/user-attachments/assets/f9ae996b-8bfa-4d16-b65c-d46207afb282" />
+
 
 ## Getting Started
 
