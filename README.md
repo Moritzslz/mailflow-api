@@ -52,6 +52,8 @@ The project uses a modular layout. Key modules include:
 
 ### Running (Locally / Docker)
 
+### [Postman Collection](https://app.getpostman.com/join-team?invite_code=21f8ac5d0e967131c6a9cf795897ff54811c386a6cb1bb24eadb221781835d14&target_code=f0930bdbfd16b2f4d599919b20446392)
+
 #### Using Docker / Docker Compose
 ```bash
 docker-compose up --build
